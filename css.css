@@ -111,6 +111,21 @@
         color: #fdfaf5;
     }
 
+
+
+
+
+    .real-logo {
+    width: 85px;
+    height: 85px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #fff;
+    padding: 6px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border: 3px solid #b38a5a; /* café brown */
+}
+
     /* Road Design Element */
     .road-design {
         width: 100%;

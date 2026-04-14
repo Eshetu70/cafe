@@ -8,13 +8,21 @@
 </head>
 <body>
   <header>
-    <nav>
-      <div class="brand">Community Kitchen Café</div>
+    <nav class="container">
+      <div class="brand">
+        <img src="images/Community Kitchen Cafe logo design (1).png" alt="Community Kitchen Café Logo" class="brand-logo" />
+        <div class="brand-text">
+          <span class="brand-name">Community Kitchen Café</span>
+          <span class="brand-sub">Food with a Purpose</span>
+        </div>
+      </div>
+
       <div class="nav-actions">
         <button class="btn" onclick="showView('shop')">Menu</button>
         <button class="btn" onclick="openOrders()">My Orders</button>
         <button class="btn" onclick="openCart()">Cart (<span id="cartCount">0</span>)</button>
-        <button class="btn" id="adminBtn" onclick="openAdmin()">Admin</button>
+        <button class="btn hidden" id="adminBtn" onclick="openAdmin()">Admin</button>
+<button class="btn" id="adminAccessBtn" onclick="openAdmin()">Admin Access</button>
         <button class="btn primary" onclick="openAccount()" id="authBtn">Login</button>
       </div>
     </nav>
@@ -23,9 +31,14 @@
   <section class="container hero" id="shopView">
     <div class="hero-box">
       <h1>Food with a Purpose</h1>
-      <p>Browse the latest Community Kitchen Café menu, place your order online, and track your food status under your account.</p>
+      <p>
+        Browse the latest Community Kitchen Café menu, place your order online,
+        and track your food status under your account.
+      </p>
       <div class="actions">
-        <button class="btn primary" onclick="window.scrollTo({top:document.getElementById('menuGrid').offsetTop-70,behavior:'smooth'})">Order Now</button>
+        <button class="btn primary" onclick="window.scrollTo({top:document.getElementById('menuGrid').offsetTop-70,behavior:'smooth'})">
+          Order Now
+        </button>
         <button class="btn" onclick="openAdmin()">Owner Admin Access</button>
       </div>
     </div>
@@ -55,10 +68,16 @@
     </div>
   </section>
 
-  <section class="container hidden" id="adminView">
-    <div class="panel">
+ <section class="container hidden" id="adminView">
+  <div class="panel">
+    
+    <div class="actions" style="justify-content:space-between;align-items:center;">
       <h2>Admin Dashboard</h2>
-      <p class="small">Upload menu items, edit/delete them, and update customer order statuses.</p>
+      <button class="btn danger" onclick="logoutAdmin()">Logout</button>
+    </div>
+
+    <p class="small">Upload menu items, edit/delete them, and update customer order statuses.</p>
+
       <div class="row">
         <div>
           <h3 style="margin-bottom:10px">Add / Edit Menu Item</h3>
@@ -66,6 +85,7 @@
             <input type="hidden" id="menuId" />
             <input id="menuName" placeholder="Item name" required />
             <textarea id="menuDesc" placeholder="Description"></textarea>
+
             <select id="menuCategory">
               <option value="breakfast">Breakfast</option>
               <option value="lunch">Lunch</option>
@@ -73,83 +93,81 @@
               <option value="drink">Drink</option>
               <option value="dessert">Dessert</option>
             </select>
+
             <input id="menuPrice" type="number" min="0" step="0.01" placeholder="Price" required />
+
             <select id="menuAvailable">
               <option value="true">Available</option>
               <option value="false">Unavailable</option>
             </select>
+
             <input id="menuImage" type="file" accept="image/*" />
+
             <div class="actions">
               <button type="submit" class="btn primary">Save Menu Item</button>
               <button type="button" class="btn" onclick="resetMenuForm()">Reset</button>
             </div>
+
             <div id="menuMsg" class="small"></div>
           </form>
+
+          <h3 style="margin-top:22px;margin-bottom:10px">Existing Menu Items</h3>
+          <div id="adminMenuListWrap"></div>
         </div>
+
         <div>
           <h3 style="margin-bottom:10px">Customer Orders</h3>
           <div id="adminOrders" class="list"></div>
         </div>
       </div>
     </div>
-
-   
-
   </section>
 
   <div id="modalRoot"></div>
 
-   <footer class="footer">
-  <div class="footer-content">
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-grid">
+        <div class="footer-section">
+          <div class="footer-logo">
+            <img src="images/Community Kitchen Cafe logo design (1).png" alt="Community Kitchen Café Logo" class="footer-logo-img" />
+          </div>
+          <h2 class="footer-title">Community Kitchen Café</h2>
+          <p class="footer-desc">
+            Serving fresh meals with purpose. Supporting the community through food,
+            training, and opportunity.
+          </p>
+        </div>
 
-    <div class="footer-grid">
+        <div class="footer-section">
+          <h3>Quick Links</h3>
+          <a href="#" onclick="showView('shop')">Home</a>
+          <a href="#" onclick="showView('shop')">Menu</a>
+          <a href="#" onclick="openCart()">Order Online</a>
+          <a href="#">About Us</a>
+        </div>
 
-      <!-- Brand -->
-      <div class="footer-section">
-        <div class="footer-logo"></div>
-        <h2 class="footer-title">Community Kitchen Café</h2>
-        <p class="footer-desc">
-          Serving fresh meals with purpose. Supporting the community through food, training, and opportunity.
-        </p>
+        <div class="footer-section">
+          <h3>Our Services</h3>
+          <a href="#">Breakfast</a>
+          <a href="#">Lunch</a>
+          <a href="#">Catering</a>
+          <a href="#">Events</a>
+        </div>
+
+        <div class="footer-section">
+          <h3>Contact</h3>
+          <p>📍 Charlotte, NC</p>
+          <p>📞 (980) 123-4567</p>
+          <p>📧 communitykitchen@gmail.com</p>
+        </div>
       </div>
 
-      <!-- Links -->
-      <div class="footer-section">
-        <h3>Quick Links</h3>
-        <a href="#">Home</a>
-        <a href="#">Menu</a>
-        <a href="#">Order Online</a>
-        <a href="#">About Us</a>
+      <div class="footer-bottom">
+        © 2026 Community Kitchen Café. All rights reserved.
       </div>
-
-      <!-- Services -->
-      <div class="footer-section">
-        <h3>Our Services</h3>
-        <a href="#">Breakfast</a>
-        <a href="#">Lunch</a>
-        <a href="#">Catering</a>
-        <a href="#">Events</a>
-      </div>
-
-      <!-- Contact -->
-      <div class="footer-section">
-        <h3>Contact</h3>
-        <p>📍 Charlotte, NC</p>
-        <p>📞 (980) 123-4567</p>
-        <p>📧 communitykitchen@gmail.com</p>
-      </div>
-
     </div>
-
-   
-
-    <!-- Bottom -->
-    <div class="footer-bottom">
-      © 2026 Community Kitchen Café. All rights reserved.
-    </div>
-
-  </div>
-</footer>
+  </footer>
 
   <script>
     const API_BASE = "https://cafe-4nv2.onrender.com";
@@ -162,109 +180,156 @@
 
     const $ = (id) => document.getElementById(id);
 
-    function saveCart(){
+    function saveCart() {
       localStorage.setItem("ckc_cart", JSON.stringify(CART));
-      $("cartCount").textContent = CART.reduce((s,i)=>s+i.qty,0);
+      $("cartCount").textContent = CART.reduce((s, i) => s + i.qty, 0);
     }
 
-    function getToken(){ return localStorage.getItem(TOKEN_KEY) || ""; }
-    function getUser(){ try { return JSON.parse(localStorage.getItem(USER_KEY) || "null"); } catch { return null; } }
-    function getAdminKey(){ return localStorage.getItem(ADMIN_KEY_STORAGE) || ""; }
+    function getToken() {
+      return localStorage.getItem(TOKEN_KEY) || "";
+    }
 
-    function setUserSession(token, user){
+    function getUser() {
+      try {
+        return JSON.parse(localStorage.getItem(USER_KEY) || "null");
+      } catch {
+        return null;
+      }
+    }
+
+    function getAdminKey() {
+      return localStorage.getItem(ADMIN_KEY_STORAGE) || "";
+    }
+
+    function setUserSession(token, user) {
       localStorage.setItem(TOKEN_KEY, token);
       localStorage.setItem(USER_KEY, JSON.stringify(user));
       updateAuthUI();
     }
 
-    function logout(){
+    function logout() {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
       updateAuthUI();
-      showView('shop');
+      showView("shop");
     }
 
-    function updateAuthUI(){
+    function updateAuthUI() {
       const user = getUser();
       $("authBtn").textContent = user ? `${user.fullName} (Logout)` : "Login";
       $("authBtn").onclick = user ? logout : openAccount;
     }
 
-    function showView(view){
+    function showView(view) {
       $("shopView").classList.add("hidden");
       $("ordersView").classList.add("hidden");
       $("adminView").classList.add("hidden");
-      if(view === 'shop') $("shopView").classList.remove("hidden");
-      if(view === 'orders') $("ordersView").classList.remove("hidden");
-      if(view === 'admin') $("adminView").classList.remove("hidden");
+
+      if (view === "shop") $("shopView").classList.remove("hidden");
+      if (view === "orders") $("ordersView").classList.remove("hidden");
+      if (view === "admin") $("adminView").classList.remove("hidden");
     }
 
-    async function fetchJSON(url, options = {}){
+    async function fetchJSON(url, options = {}) {
       const res = await fetch(url, options);
       const text = await res.text();
       let json = {};
-      try { json = text ? JSON.parse(text) : {}; } catch {}
-      if(!res.ok) throw new Error(json.error || json.details || text || 'Request failed');
+      try {
+        json = text ? JSON.parse(text) : {};
+      } catch {}
+      if (!res.ok) throw new Error(json.error || json.details || text || "Request failed");
       return json;
     }
 
-    async function loadMenu(){
-      const json = await fetchJSON(API_BASE + '/api/menu');
+    async function loadMenu() {
+      const json = await fetchJSON(API_BASE + "/api/menu");
       MENU = Array.isArray(json.items) ? json.items : [];
       renderMenu();
     }
 
-    function renderMenu(){
+    function renderMenu() {
       const q = $("searchBox").value.trim().toLowerCase();
       const cat = $("categoryFilter").value;
-      let data = [...MENU];
-      if(cat !== 'all') data = data.filter(i => i.category === cat);
-      if(q) data = data.filter(i => [i.name, i.description, i.category].join(' ').toLowerCase().includes(q));
 
-      $("menuGrid").innerHTML = data.map(item => `
-        <div class="card">
-          <img src="${item.image || 'https://via.placeholder.com/600x400?text=Menu+Item'}" alt="${escapeHtml(item.name)}" />
-          <div class="card-body">
-            <div class="meta">${escapeHtml(item.category)} ${item.available === false ? '• Unavailable' : ''}</div>
-            <h3>${escapeHtml(item.name)}</h3>
-            <div class="desc">${escapeHtml(item.description || '')}</div>
-            <div class="price">$${Number(item.price || 0).toFixed(2)}</div>
-            <div class="actions">
-              <button class="btn primary" ${item.available === false ? 'disabled' : ''} onclick='addToCart(${JSON.stringify(item).replace(/'/g,"&#39;")})'>Add to Cart</button>
+      let data = [...MENU];
+      if (cat !== "all") data = data.filter((i) => i.category === cat);
+      if (q) {
+        data = data.filter((i) =>
+          [i.name, i.description, i.category].join(" ").toLowerCase().includes(q)
+        );
+      }
+
+      $("menuGrid").innerHTML =
+        data.map((item) => `
+          <div class="card">
+            <img
+              src="${item.image || "https://via.placeholder.com/600x450?text=Menu+Item"}"
+              alt="${escapeHtml(item.name)}"
+            />
+            <div class="card-body">
+              <div class="meta">
+                ${escapeHtml(item.category)} ${item.available === false ? "• Unavailable" : ""}
+              </div>
+              <h3>${escapeHtml(item.name)}</h3>
+              <div class="desc">${escapeHtml(item.description || "")}</div>
+              <div class="price">$${Number(item.price || 0).toFixed(2)}</div>
+              <div class="actions">
+                <button
+                  class="btn primary"
+                  ${item.available === false ? "disabled" : ""}
+                  onclick='addToCart(${JSON.stringify(item).replace(/'/g, "&#39;")})'
+                >
+                  Add to Cart
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      `).join('') || `<div class="item">No menu items found.</div>`;
+        `).join("") || `<div class="item">No menu items found.</div>`;
     }
 
-    function addToCart(item){
-      const found = CART.find(x => x._id === item._id);
-      if(found) found.qty += 1;
-      else CART.push({ _id:item._id, menuItemId:item._id, name:item.name, price:Number(item.price||0), image:item.image||'', qty:1 });
+    function addToCart(item) {
+      const found = CART.find((x) => x._id === item._id);
+      if (found) found.qty += 1;
+      else {
+        CART.push({
+          _id: item._id,
+          menuItemId: item._id,
+          name: item.name,
+          price: Number(item.price || 0),
+          image: item.image || "",
+          qty: 1
+        });
+      }
       saveCart();
-      alert('Added to cart');
+      alert("Added to cart");
     }
 
-    function escapeHtml(str){
-      return String(str || '')
-        .replaceAll('&','&amp;')
-        .replaceAll('<','&lt;')
-        .replaceAll('>','&gt;')
-        .replaceAll('"','&quot;')
-        .replaceAll("'",'&#039;');
+    function escapeHtml(str) {
+      return String(str || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
     }
 
-    function setModal(html){
+    function setModal(html) {
       $("modalRoot").innerHTML = html;
     }
 
-    function closeModal(){ setModal(''); }
+    function closeModal() {
+      setModal("");
+    }
 
-    function openAccount(){
+    function openAccount() {
       setModal(`
         <div class="modal-wrap" onclick="if(event.target===this)closeModal()">
           <div class="modal">
-            <div class="actions" style="justify-content:space-between;margin-bottom:10px"><h3>Account</h3><button class="btn" onclick="closeModal()">Close</button></div>
+            <div class="actions" style="justify-content:space-between;margin-bottom:10px">
+              <h3>Account</h3>
+              <button class="btn" onclick="closeModal()">Close</button>
+            </div>
+
             <div class="row">
               <form class="stack" onsubmit="register(event)">
                 <h4>Create Account</h4>
@@ -273,6 +338,7 @@
                 <input id="regPassword" type="password" placeholder="Password" required />
                 <button class="btn primary" type="submit">Register</button>
               </form>
+
               <form class="stack" onsubmit="login(event)">
                 <h4>Login</h4>
                 <input id="loginEmail" type="email" placeholder="Email" required />
@@ -285,87 +351,137 @@
       `);
     }
 
-    async function register(e){
+    async function register(e) {
       e.preventDefault();
-      const json = await fetchJSON(API_BASE + '/api/auth/register', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ fullName: $('regName').value.trim(), email: $('regEmail').value.trim(), password: $('regPassword').value })
+      const json = await fetchJSON(API_BASE + "/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: $("regName").value.trim(),
+          email: $("regEmail").value.trim(),
+          password: $("regPassword").value
+        })
       });
+
       setUserSession(json.token, json.user);
       closeModal();
-      alert('Account created');
+      alert("Account created");
     }
 
-    async function login(e){
+    async function login(e) {
       e.preventDefault();
-      const json = await fetchJSON(API_BASE + '/api/auth/login', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ email: $('loginEmail').value.trim(), password: $('loginPassword').value })
+      const json = await fetchJSON(API_BASE + "/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: $("loginEmail").value.trim(),
+          password: $("loginPassword").value
+        })
       });
+
       setUserSession(json.token, json.user);
       closeModal();
-      alert('Logged in');
+      alert("Logged in");
     }
 
-    function openCart(){
-      const total = CART.reduce((s,i)=>s+(i.price*i.qty),0);
+    function openCart() {
+      const total = CART.reduce((s, i) => s + i.price * i.qty, 0);
+
       setModal(`
         <div class="modal-wrap" onclick="if(event.target===this)closeModal()">
           <div class="modal">
-            <div class="actions" style="justify-content:space-between;margin-bottom:10px"><h3>Cart</h3><button class="btn" onclick="closeModal()">Close</button></div>
-            <div class="list">
-              ${CART.length ? CART.map((i,idx)=>`
-                <div class="item">
-                  <div class="item-top">
-                    <div>
-                      <b>${escapeHtml(i.name)}</b>
-                      <div class="small">$${Number(i.price).toFixed(2)}</div>
-                    </div>
-                    <div class="qty">
-                      <button onclick="changeQty(${idx},-1)">-</button>
-                      <span>${i.qty}</span>
-                      <button onclick="changeQty(${idx},1)">+</button>
-                      <button class="btn danger" onclick="removeCartItem(${idx})">Remove</button>
-                    </div>
-                  </div>
-                </div>
-              `).join('') : '<div class="item">Your cart is empty.</div>'}
+            <div class="actions" style="justify-content:space-between;margin-bottom:10px">
+              <h3>Cart</h3>
+              <button class="btn" onclick="closeModal()">Close</button>
             </div>
+
+            <div class="list">
+              ${
+                CART.length
+                  ? CART.map((i, idx) => `
+                      <div class="item">
+                        <div class="item-top">
+                          <div>
+                            <b>${escapeHtml(i.name)}</b>
+                            <div class="small">$${Number(i.price).toFixed(2)}</div>
+                          </div>
+                          <div class="qty">
+                            <button onclick="changeQty(${idx},-1)">-</button>
+                            <span>${i.qty}</span>
+                            <button onclick="changeQty(${idx},1)">+</button>
+                            <button class="btn danger" onclick="removeCartItem(${idx})">Remove</button>
+                          </div>
+                        </div>
+                      </div>
+                    `).join("")
+                  : '<div class="item">Your cart is empty.</div>'
+              }
+            </div>
+
             <div style="margin-top:14px;font-weight:700">Total: $${total.toFixed(2)}</div>
             <div class="actions" style="margin-top:14px">
-              <button class="btn primary" onclick="openCheckout()" ${CART.length ? '' : 'disabled'}>Checkout</button>
+              <button class="btn primary" onclick="openCheckout()" ${CART.length ? "" : "disabled"}>
+                Checkout
+              </button>
             </div>
           </div>
         </div>
       `);
     }
 
-    function changeQty(idx, delta){
+    function changeQty(idx, delta) {
       CART[idx].qty += delta;
-      if(CART[idx].qty <= 0) CART.splice(idx,1);
+      if (CART[idx].qty <= 0) CART.splice(idx, 1);
       saveCart();
       openCart();
     }
 
-    function removeCartItem(idx){
-      CART.splice(idx,1);
+    function removeCartItem(idx) {
+      CART.splice(idx, 1);
       saveCart();
       openCart();
     }
 
-    function openCheckout(){
-      if(!getToken()) return alert('Please login first.');
+
+    function setAdminSession(key){
+  localStorage.setItem(ADMIN_KEY_STORAGE, key);
+  updateAdminUI(true);
+}
+
+function clearAdminSession(){
+  localStorage.removeItem(ADMIN_KEY_STORAGE);
+  updateAdminUI(false);
+}
+
+function updateAdminUI(isAdmin = !!getAdminKey()){
+  const adminBtn = document.getElementById('adminBtn');
+  const adminAccessBtn = document.getElementById('adminAccessBtn');
+
+  if(adminBtn) adminBtn.classList.toggle('hidden', !isAdmin);
+  if(adminAccessBtn) adminAccessBtn.classList.toggle('hidden', isAdmin);
+}
+
+    function openCheckout() {
+      if (!getToken()) return alert("Please login first.");
+
       setModal(`
         <div class="modal-wrap" onclick="if(event.target===this)closeModal()">
           <div class="modal">
-            <div class="actions" style="justify-content:space-between;margin-bottom:10px"><h3>Checkout</h3><button class="btn" onclick="closeModal()">Close</button></div>
+            <div class="actions" style="justify-content:space-between;margin-bottom:10px">
+              <h3>Checkout</h3>
+              <button class="btn" onclick="closeModal()">Close</button>
+            </div>
+
             <form class="stack" onsubmit="submitOrder(event)">
-              <input id="checkoutName" placeholder="Full name" required value="${escapeHtml(getUser()?.fullName || '')}" />
+              <input id="checkoutName" placeholder="Full name" required value="${escapeHtml(getUser()?.fullName || "")}" />
               <input id="checkoutPhone" placeholder="Phone number" required />
-              <input id="checkoutEmail" type="email" placeholder="Email" value="${escapeHtml(getUser()?.email || '')}" />
+              <input id="checkoutEmail" type="email" placeholder="Email" value="${escapeHtml(getUser()?.email || "")}" />
               <input id="checkoutPickupTime" placeholder="Pickup time (optional)" />
               <textarea id="checkoutNotes" placeholder="Notes (optional)"></textarea>
-              <select id="checkoutPayment"><option value="cash">Cash</option><option value="card">Card</option></select>
+              <select id="checkoutPayment">
+                <option value="cash">Cash</option>
+                <option value="card">Card</option>
+              </select>
               <button class="btn primary" type="submit">Place Order</button>
             </form>
           </div>
@@ -373,216 +489,291 @@
       `);
     }
 
-    async function submitOrder(e){
+    async function submitOrder(e) {
       e.preventDefault();
-      const json = await fetchJSON(API_BASE + '/api/orders', {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json', Authorization:`Bearer ${getToken()}` },
+
+      const json = await fetchJSON(API_BASE + "/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`
+        },
         body: JSON.stringify({
           items: CART,
-          customer:{
-            fullName: $('checkoutName').value.trim(),
-            phone: $('checkoutPhone').value.trim(),
-            email: $('checkoutEmail').value.trim(),
-            pickupTime: $('checkoutPickupTime').value.trim(),
-            notes: $('checkoutNotes').value.trim(),
+          customer: {
+            fullName: $("checkoutName").value.trim(),
+            phone: $("checkoutPhone").value.trim(),
+            email: $("checkoutEmail").value.trim(),
+            pickupTime: $("checkoutPickupTime").value.trim(),
+            notes: $("checkoutNotes").value.trim()
           },
-          payment:{ method: $('checkoutPayment').value }
+          payment: {
+            method: $("checkoutPayment").value
+          }
         })
       });
+
       CART = [];
       saveCart();
       closeModal();
-      alert('Order placed: ' + json.order.orderId);
+      alert("Order placed: " + json.order.orderId);
       openOrders();
     }
 
-    async function openOrders(){
-      if(!getToken()) return alert('Please login first.');
-      showView('orders');
-      const json = await fetchJSON(API_BASE + '/api/orders/my', { headers:{ Authorization:`Bearer ${getToken()}` } });
-      const orders = json.orders || [];
-      $('ordersList').innerHTML = orders.length ? orders.map(o => `
-        <div class="item">
-          <div class="item-top">
-            <div>
-              <b>${escapeHtml(o.orderId)}</b>
-              <div class="small">${new Date(o.createdAt).toLocaleString()}</div>
-            </div>
-            <div>
-              <div>Status: <b>${escapeHtml(o.status)}</b></div>
-              <div>Payment: <b>${escapeHtml(o.payment?.status || 'pending')}</b></div>
-              <div>Total: <b>$${Number(o.total||0).toFixed(2)}</b></div>
-            </div>
-          </div>
-          <div class="list">
-            ${(o.items||[]).map(it => `<div class="item"><b>${escapeHtml(it.name)}</b> × ${it.qty} — $${Number(it.price).toFixed(2)}</div>`).join('')}
-          </div>
-        </div>
-      `).join('') : '<div class="item">No orders yet.</div>';
-    }
+    async function openOrders() {
+      if (!getToken()) return alert("Please login first.");
 
-    async function openAdmin(){
-      let key = getAdminKey();
-      if(!key){
-        key = prompt('Enter admin key');
-        if(!key) return;
-        localStorage.setItem(ADMIN_KEY_STORAGE, key.trim());
-      }
-
-      try{
-        await fetchJSON(API_BASE + '/api/admin/ping', { headers:{ 'x-admin-key': getAdminKey() } });
-      }catch(err){
-        localStorage.removeItem(ADMIN_KEY_STORAGE);
-        return alert('Admin key invalid');
-      }
-
-      showView('admin');
-      await loadAdminOrders();
-    }
-
-    async function loadAdminOrders(){
-      const json = await fetchJSON(API_BASE + '/api/admin/orders', { headers:{ 'x-admin-key': getAdminKey() } });
-      const orders = json.orders || [];
-      $('adminOrders').innerHTML = orders.length ? orders.map(o => `
-        <div class="item">
-          <div class="item-top">
-            <div>
-              <b>${escapeHtml(o.orderId)}</b>
-              <div class="small">${escapeHtml(o.customer?.fullName || '')} • ${escapeHtml(o.customer?.email || '')}</div>
-            </div>
-            <div class="small">$${Number(o.total || 0).toFixed(2)}</div>
-          </div>
-          <div class="row" style="margin-top:10px">
-            <select id="status_${o._id}">
-              ${['placed','confirmed','preparing','ready','completed','cancelled'].map(s => `<option value="${s}" ${o.status===s?'selected':''}>${s}</option>`).join('')}
-            </select>
-            <select id="pay_${o._id}">
-              ${['pending','paid','failed'].map(s => `<option value="${s}" ${o.payment?.status===s?'selected':''}>${s}</option>`).join('')}
-            </select>
-          </div>
-          <div class="actions" style="margin-top:10px">
-            <button class="btn primary" onclick="updateOrder('${o._id}')">Update Order</button>
-            <button class="btn" onclick="emailCustomer('${o._id}')">Email Customer</button>
-          </div>
-        </div>
-      `).join('') : '<div class="item">No orders yet.</div>';
-    }
-
-    async function updateOrder(id){
-      await fetchJSON(API_BASE + '/api/admin/orders/' + encodeURIComponent(id), {
-        method:'PUT',
-        headers:{ 'Content-Type':'application/json', 'x-admin-key': getAdminKey() },
-        body: JSON.stringify({ status: $('status_' + id).value, paymentStatus: $('pay_' + id).value })
+      showView("orders");
+      const json = await fetchJSON(API_BASE + "/api/orders/my", {
+        headers: {
+          Authorization: `Bearer ${getToken()}`
+        }
       });
-      alert('Order updated');
+
+      const orders = json.orders || [];
+
+      $("ordersList").innerHTML = orders.length
+        ? orders.map((o) => `
+            <div class="item">
+              <div class="item-top">
+                <div>
+                  <b>${escapeHtml(o.orderId)}</b>
+                  <div class="small">${new Date(o.createdAt).toLocaleString()}</div>
+                </div>
+                <div>
+                  <div>Status: <b>${escapeHtml(o.status)}</b></div>
+                  <div>Payment: <b>${escapeHtml(o.payment?.status || "pending")}</b></div>
+                  <div>Total: <b>$${Number(o.total || 0).toFixed(2)}</b></div>
+                </div>
+              </div>
+
+              <div class="list">
+                ${(o.items || []).map((it) => `
+                  <div class="item">
+                    <b>${escapeHtml(it.name)}</b> × ${it.qty} — $${Number(it.price).toFixed(2)}
+                  </div>
+                `).join("")}
+              </div>
+            </div>
+          `).join("")
+        : '<div class="item">No orders yet.</div>';
+    }
+
+   async function openAdmin(){
+  let key = getAdminKey();
+  if(!key){
+    key = prompt('Enter admin key');
+    if(!key) return;
+    localStorage.setItem(ADMIN_KEY_STORAGE, key.trim());
+  }
+
+  try{
+    await fetchJSON(API_BASE + '/api/admin/ping', {
+      headers:{ 'x-admin-key': getAdminKey() }
+    });
+  }catch(err){
+    localStorage.removeItem(ADMIN_KEY_STORAGE);
+    return alert('Admin key invalid');
+  }
+
+  showView('admin');
+  await loadMenu();
+  await loadAdminOrders();
+  await renderAdminMenuHelpers();
+}
+
+
+function logoutAdmin(){
+  clearAdminSession();
+  showView('shop');
+  alert('Admin logged out');
+}
+    async function loadAdminOrders() {
+      const json = await fetchJSON(API_BASE + "/api/admin/orders", {
+        headers: { "x-admin-key": getAdminKey() }
+      });
+
+      const orders = json.orders || [];
+
+      $("adminOrders").innerHTML = orders.length
+        ? orders.map((o) => `
+            <div class="item">
+              <div class="item-top">
+                <div>
+                  <b>${escapeHtml(o.orderId)}</b>
+                  <div class="small">${escapeHtml(o.customer?.fullName || "")} • ${escapeHtml(o.customer?.email || "")}</div>
+                </div>
+                <div class="small">$${Number(o.total || 0).toFixed(2)}</div>
+              </div>
+
+              <div class="row" style="margin-top:10px">
+                <select id="status_${o._id}">
+                  ${["placed","confirmed","preparing","ready","completed","cancelled"].map((s) => `
+                    <option value="${s}" ${o.status === s ? "selected" : ""}>${s}</option>
+                  `).join("")}
+                </select>
+
+                <select id="pay_${o._id}">
+                  ${["pending","paid","failed"].map((s) => `
+                    <option value="${s}" ${o.payment?.status === s ? "selected" : ""}>${s}</option>
+                  `).join("")}
+                </select>
+              </div>
+
+              <div class="actions" style="margin-top:10px">
+                <button class="btn primary" onclick="updateOrder('${o._id}')">Update Order</button>
+                <button class="btn" onclick="emailCustomer('${o._id}')">Email Customer</button>
+              </div>
+            </div>
+          `).join("")
+        : '<div class="item">No orders yet.</div>';
+    }
+
+    async function updateOrder(id) {
+      await fetchJSON(API_BASE + "/api/admin/orders/" + encodeURIComponent(id), {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-key": getAdminKey()
+        },
+        body: JSON.stringify({
+          status: $("status_" + id).value,
+          paymentStatus: $("pay_" + id).value
+        })
+      });
+
+      alert("Order updated");
       loadAdminOrders();
     }
 
-    async function emailCustomer(id){
-      const subject = prompt('Email subject', 'Community Kitchen Café — Order Update');
-      if(subject === null) return;
-      const message = prompt('Email message', 'Your order has been updated.');
-      if(message === null) return;
-      await fetchJSON(API_BASE + '/api/admin/orders/' + encodeURIComponent(id) + '/email', {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json', 'x-admin-key': getAdminKey() },
+    async function emailCustomer(id) {
+      const subject = prompt("Email subject", "Community Kitchen Café — Order Update");
+      if (subject === null) return;
+
+      const message = prompt("Email message", "Your order has been updated.");
+      if (message === null) return;
+
+      await fetchJSON(API_BASE + "/api/admin/orders/" + encodeURIComponent(id) + "/email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-key": getAdminKey()
+        },
         body: JSON.stringify({ subject, message })
       });
-      alert('Email sent');
+
+      alert("Email sent");
     }
 
-    $('menuForm').addEventListener('submit', async (e) => {
+    $("menuForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const id = $('menuId').value;
+
+      const id = $("menuId").value;
       const fd = new FormData();
-      fd.append('name', $('menuName').value.trim());
-      fd.append('description', $('menuDesc').value.trim());
-      fd.append('category', $('menuCategory').value);
-      fd.append('price', $('menuPrice').value);
-      fd.append('available', $('menuAvailable').value);
-      if($('menuImage').files[0]) fd.append('image', $('menuImage').files[0]);
+      fd.append("name", $("menuName").value.trim());
+      fd.append("description", $("menuDesc").value.trim());
+      fd.append("category", $("menuCategory").value);
+      fd.append("price", $("menuPrice").value);
+      fd.append("available", $("menuAvailable").value);
 
-      const method = id ? 'PUT' : 'POST';
-      const url = API_BASE + (id ? '/api/menu/' + encodeURIComponent(id) : '/api/menu');
+      if ($("menuImage").files[0]) {
+        fd.append("image", $("menuImage").files[0]);
+      }
 
-      try{
-        await fetchJSON(url, { method, headers:{ 'x-admin-key': getAdminKey() }, body: fd });
-        $('menuMsg').textContent = 'Saved successfully';
+      const method = id ? "PUT" : "POST";
+      const url = API_BASE + (id ? "/api/menu/" + encodeURIComponent(id) : "/api/menu");
+
+      try {
+        await fetchJSON(url, {
+          method,
+          headers: { "x-admin-key": getAdminKey() },
+          body: fd
+        });
+
+        $("menuMsg").textContent = "Saved successfully";
         resetMenuForm();
         await loadMenu();
-      }catch(err){
-        $('menuMsg').textContent = err.message;
+        await renderAdminMenuHelpers();
+      } catch (err) {
+        $("menuMsg").textContent = err.message;
       }
     });
 
-    function resetMenuForm(){
-      $('menuId').value = '';
-      $('menuName').value = '';
-      $('menuDesc').value = '';
-      $('menuCategory').value = 'breakfast';
-      $('menuPrice').value = '';
-      $('menuAvailable').value = 'true';
-      $('menuImage').value = '';
-      $('menuMsg').textContent = '';
+    function resetMenuForm() {
+      $("menuId").value = "";
+      $("menuName").value = "";
+      $("menuDesc").value = "";
+      $("menuCategory").value = "breakfast";
+      $("menuPrice").value = "";
+      $("menuAvailable").value = "true";
+      $("menuImage").value = "";
+      $("menuMsg").textContent = "";
     }
 
-    function editMenuItem(item){
-      showView('admin');
-      $('menuId').value = item._id;
-      $('menuName').value = item.name || '';
-      $('menuDesc').value = item.description || '';
-      $('menuCategory').value = item.category || 'breakfast';
-      $('menuPrice').value = item.price || '';
-      $('menuAvailable').value = String(item.available !== false);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    function editMenuItem(item) {
+      showView("admin");
+      $("menuId").value = item._id;
+      $("menuName").value = item.name || "";
+      $("menuDesc").value = item.description || "";
+      $("menuCategory").value = item.category || "breakfast";
+      $("menuPrice").value = item.price || "";
+      $("menuAvailable").value = String(item.available !== false);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    async function deleteMenuItem(id){
-      if(!confirm('Delete this menu item?')) return;
-      await fetchJSON(API_BASE + '/api/menu/' + encodeURIComponent(id), {
-        method:'DELETE', headers:{ 'x-admin-key': getAdminKey() }
+    async function deleteMenuItem(id) {
+      if (!confirm("Delete this menu item?")) return;
+
+      await fetchJSON(API_BASE + "/api/menu/" + encodeURIComponent(id), {
+        method: "DELETE",
+        headers: { "x-admin-key": getAdminKey() }
       });
+
       await loadMenu();
-      if(!document.getElementById('adminView').classList.contains('hidden')) loadAdminOrders();
-    }
-
-     async function renderAdminMenuHelpers(){
-      if(document.getElementById('adminView').classList.contains('hidden')) return;
-      const helper = document.createElement('div');
-      helper.className = 'list';
-      helper.innerHTML = MENU.map(item => `
-        <div class="item">
-          <div class="item-top">
-            <div>
-              <b>${escapeHtml(item.name)}</b>
-              <div class="small">${escapeHtml(item.category)} • $${Number(item.price || 0).toFixed(2)}</div>
-            </div>
-            <div class="actions">
-              <button class="btn" onclick='editMenuItem(${JSON.stringify(item).replace(/'/g, "&#39;")})'>Edit</button>
-              <button class="btn danger" onclick="deleteMenuItem('${item._id}')">Delete</button>
-            </div>
-          </div>
-          <div class="small" style="margin-top:8px">${escapeHtml(item.description || '')}</div>
-        </div>
-      `).join('');
-
-      const existing = document.getElementById('adminMenuList');
-      if(existing) existing.remove();
-
-      helper.id = 'adminMenuList';
-      $('menuForm').parentElement.appendChild(helper);
-    }
-
-    const originalLoadMenu = loadMenu;
-    loadMenu = async function(){
-      await originalLoadMenu();
       await renderAdminMenuHelpers();
-    };
+
+      if (!$("adminView").classList.contains("hidden")) {
+        loadAdminOrders();
+      }
+    }
+
+    async function renderAdminMenuHelpers() {
+      if ($("adminView").classList.contains("hidden")) return;
+
+      const helper = document.createElement("div");
+      helper.className = "list";
+
+      helper.innerHTML = MENU.map((item) => `
+        <div class="admin-menu-card">
+          <div class="admin-menu-thumb">
+            <img
+              src="${item.image || "https://via.placeholder.com/600x450?text=Menu+Item"}"
+              alt="${escapeHtml(item.name)}"
+            />
+          </div>
+
+          <div class="admin-menu-info">
+            <b>${escapeHtml(item.name)}</b>
+            <div class="small">${escapeHtml(item.category)} • $${Number(item.price || 0).toFixed(2)}</div>
+            <div class="small" style="margin-top:8px">${escapeHtml(item.description || "")}</div>
+          </div>
+
+          <div class="admin-menu-actions">
+            <button class="btn" onclick='editMenuItem(${JSON.stringify(item).replace(/'/g, "&#39;")})'>Edit</button>
+            <button class="btn danger" onclick="deleteMenuItem('${item._id}')">Delete</button>
+          </div>
+        </div>
+      `).join("");
+
+      const wrap = $("adminMenuListWrap");
+      wrap.innerHTML = "";
+      wrap.appendChild(helper);
+    }
 
     saveCart();
     updateAuthUI();
     loadMenu();
+    updateAdminUI();
   </script>
 </body>
 </html>

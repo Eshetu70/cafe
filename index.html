@@ -9,20 +9,19 @@
 <body>
   <header>
     <nav class="container">
-      <div class="brand">
-        <img src="images/Community Kitchen Cafe logo design (1).png" alt="Community Kitchen Café Logo" class="brand-logo" />
-        <div class="brand-text">
-          <span class="brand-name">Community Kitchen Café</span>
-          <span class="brand-sub">Food with a Purpose</span>
-        </div>
-      </div>
+      <div class="brand" onclick="handleSecretAdminClick()">
+  <img src="images/Community Kitchen Cafe logo design (1).png" alt="Community Kitchen Café Logo" class="brand-logo" />
+  <div class="brand-text">
+    <span class="brand-name">Community Kitchen Café</span>
+    <span class="brand-sub">Food with a Purpose</span>
+  </div>
+</div>
 
       <div class="nav-actions">
         <button class="btn" onclick="showView('shop')">Menu</button>
         <button class="btn" onclick="openOrders()">My Orders</button>
         <button class="btn" onclick="openCart()">Cart (<span id="cartCount">0</span>)</button>
-        <button class="btn hidden" id="adminBtn" onclick="openAdmin()">Admin</button>
-<button class="btn" id="adminAccessBtn" onclick="openAdmin()">Admin Access</button>
+        
         <button class="btn primary" onclick="openAccount()" id="authBtn">Login</button>
       </div>
     </nav>
@@ -39,7 +38,7 @@
         <button class="btn primary" onclick="window.scrollTo({top:document.getElementById('menuGrid').offsetTop-70,behavior:'smooth'})">
           Order Now
         </button>
-        <button class="btn" onclick="openAdmin()">Owner Admin Access</button>
+        <!--<button class="btn" onclick="openAdmin()">Owner Admin Access</button> -->
       </div>
     </div>
 
@@ -770,6 +769,65 @@ function logoutAdmin(){
       wrap.appendChild(helper);
     }
 
+
+
+    let secretAdminClicks = 0;
+let secretAdminTimer = null;
+
+function handleSecretAdminClick(){
+  secretAdminClicks += 1;
+
+  clearTimeout(secretAdminTimer);
+  secretAdminTimer = setTimeout(() => {
+    secretAdminClicks = 0;
+  }, 1500);
+
+  if(secretAdminClicks >= 5){
+    secretAdminClicks = 0;
+    openAdmin();
+  }
+}
+
+async function openAdmin(){
+  let key = getAdminKey();
+
+  if(!key){
+    key = prompt('Enter admin key');
+    if(!key) return;
+  }
+
+  try{
+    await fetchJSON(API_BASE + '/api/admin/ping', {
+      headers:{ 'x-admin-key': key.trim() }
+    });
+
+    localStorage.setItem(ADMIN_KEY_STORAGE, key.trim());
+  }catch(err){
+    localStorage.removeItem(ADMIN_KEY_STORAGE);
+    return alert('Admin key invalid');
+  }
+
+  showView('admin');
+  await loadMenu();
+  await loadAdminOrders();
+  await renderAdminMenuHelpers();
+}
+
+function logoutAdmin(){
+  localStorage.removeItem(ADMIN_KEY_STORAGE);
+  showView('shop');
+  alert('Admin logged out');
+}
+
+
+
+window.addEventListener('load', () => {
+  if(window.location.hash === '#owner-admin'){
+    openAdmin();
+  }
+});
+
+    
     saveCart();
     updateAuthUI();
     loadMenu();

@@ -8,37 +8,39 @@
 </head>
 <body>
   <header>
-    <nav class="container">
-      <div class="brand" onclick="handleSecretAdminClick()">
-  <img src="images/Community Kitchen Cafe logo design (1).png" alt="Community Kitchen Café Logo" class="brand-logo" />
-  <div class="brand-text">
-    <span class="brand-name">Community Kitchen Café</span>
-    <span class="brand-sub">Food with a Purpose</span>
-  </div>
-</div>
-
-      <div class="nav-actions">
-        <button class="btn" onclick="showView('shop')">Menu</button>
-        <button class="btn" onclick="openOrders()">My Orders</button>
-        <button class="btn" onclick="openCart()">Cart (<span id="cartCount">0</span>)</button>
-        
-        <button class="btn primary" onclick="openAccount()" id="authBtn">Login</button>
+  <nav class="container">
+    <div class="brand" onclick="handleSecretAdminClick()">
+      <img src="images/Community Kitchen Cafe logo design (1).png" alt="Community Kitchen Café Logo" class="brand-logo" />
+      <div class="brand-text">
+        <span class="brand-name">Community Kitchen Café</span>
+        <span class="brand-sub">Food with a Purpose</span>
       </div>
-    </nav>
-  </header>
+    </div>
+
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Open menu">
+      ☰
+    </button>
+
+    <div class="nav-actions nav-clean" id="siteNav">
+      <a href="#" class="nav-link" onclick="showView('shop'); closeMobileMenu(); return false;">Menu</a>
+      <a href="#" class="nav-link" onclick="openOrders(); closeMobileMenu(); return false;">My Orders</a>
+      <a href="#" class="nav-link" onclick="openCart(); closeMobileMenu(); return false;">Cart (<span id="cartCount">0</span>)</a>
+      <a href="#" class="nav-link nav-link-accent" onclick="openAccount(); closeMobileMenu(); return false;" id="authBtn">Login</a>
+    </div>
+  </nav>
+</header>
 
   <section class="container hero" id="shopView">
     <div class="hero-box">
       <h1>Food with a Purpose</h1>
       <p>
-        Browse the latest Community Kitchen Café menu, place your order online,
+        Browse the latest Community Kitchen Café menu, order online,
         and track your food status under your account.
       </p>
       <div class="actions">
         <button class="btn primary" onclick="window.scrollTo({top:document.getElementById('menuGrid').offsetTop-70,behavior:'smooth'})">
           Order Now
         </button>
-        <!--<button class="btn" onclick="openAdmin()">Owner Admin Access</button> -->
       </div>
     </div>
 
@@ -67,19 +69,19 @@
     </div>
   </section>
 
- <section class="container hidden" id="adminView">
-  <div class="panel">
-    
-    <div class="actions" style="justify-content:space-between;align-items:center;">
-      <h2>Admin Dashboard</h2>
-      <button class="btn danger" onclick="logoutAdmin()">Logout</button>
-    </div>
+  <section class="container hidden" id="adminView">
+    <div class="panel">
+      <div class="actions" style="justify-content:space-between;align-items:center;">
+        <h2>Admin Dashboard</h2>
+        <button class="btn danger" onclick="logoutAdmin()">Logout</button>
+      </div>
 
-    <p class="small">Upload menu items, edit/delete them, and update customer order statuses.</p>
+      <p class="small">Upload menu items, edit/delete them, add food details and option groups, and update customer order statuses.</p>
 
       <div class="row">
         <div>
           <h3 style="margin-bottom:10px">Add / Edit Menu Item</h3>
+
           <form id="menuForm" class="stack">
             <input type="hidden" id="menuId" />
             <input id="menuName" placeholder="Item name" required />
@@ -99,6 +101,30 @@
               <option value="true">Available</option>
               <option value="false">Unavailable</option>
             </select>
+
+            <textarea id="menuIngredients" placeholder="Ingredients (comma separated)"></textarea>
+            <input id="menuCalories" type="number" min="0" placeholder="Calories" />
+            <textarea id="menuAllergens" placeholder="Allergens (comma separated)"></textarea>
+
+            <div class="row">
+              <input id="menuProtein" placeholder="Protein (e.g. 20g)" />
+              <input id="menuCarbs" placeholder="Carbs (e.g. 35g)" />
+            </div>
+
+            <div class="row">
+              <input id="menuFat" placeholder="Fat (e.g. 12g)" />
+              <input id="menuSodium" placeholder="Sodium (e.g. 680mg)" />
+            </div>
+
+            <textarea id="menuOptionGroups" placeholder='Option groups JSON example:
+[
+  {
+    "name":"Choose your sausage",
+    "type":"radio",
+    "required":true,
+    "options":["Pork Sausage","Turkey Sausage","Chicken Sausage","No Sausage"]
+  }
+]'></textarea>
 
             <input id="menuImage" type="file" accept="image/*" />
 
@@ -200,6 +226,26 @@
       return localStorage.getItem(ADMIN_KEY_STORAGE) || "";
     }
 
+    function escapeHtml(str) {
+      return String(str || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    async function fetchJSON(url, options = {}) {
+      const res = await fetch(url, options);
+      const text = await res.text();
+      let json = {};
+      try {
+        json = text ? JSON.parse(text) : {};
+      } catch {}
+      if (!res.ok) throw new Error(json.error || json.details || text || "Request failed");
+      return json;
+    }
+
     function setUserSession(token, user) {
       localStorage.setItem(TOKEN_KEY, token);
       localStorage.setItem(USER_KEY, JSON.stringify(user));
@@ -214,11 +260,14 @@
     }
 
     function updateAuthUI() {
-      const user = getUser();
-      $("authBtn").textContent = user ? `${user.fullName} (Logout)` : "Login";
-      $("authBtn").onclick = user ? logout : openAccount;
-    }
-
+  const user = getUser();
+  const authEl = $("authBtn");
+  authEl.textContent = user ? `${user.fullName} (Logout)` : "Login";
+  authEl.onclick = (e) => {
+    e.preventDefault();
+    user ? logout() : openAccount();
+  };
+}
     function showView(view) {
       $("shopView").classList.add("hidden");
       $("ordersView").classList.add("hidden");
@@ -229,88 +278,153 @@
       if (view === "admin") $("adminView").classList.remove("hidden");
     }
 
-    async function fetchJSON(url, options = {}) {
-      const res = await fetch(url, options);
-      const text = await res.text();
-      let json = {};
-      try {
-        json = text ? JSON.parse(text) : {};
-      } catch {}
-      if (!res.ok) throw new Error(json.error || json.details || text || "Request failed");
-      return json;
-    }
-
     async function loadMenu() {
       const json = await fetchJSON(API_BASE + "/api/menu");
       MENU = Array.isArray(json.items) ? json.items : [];
       renderMenu();
     }
 
-    function renderMenu() {
-      const q = $("searchBox").value.trim().toLowerCase();
-      const cat = $("categoryFilter").value;
+   function renderMenu() {
+  const q = $("searchBox").value.trim().toLowerCase();
+  const cat = $("categoryFilter").value;
 
-      let data = [...MENU];
-      if (cat !== "all") data = data.filter((i) => i.category === cat);
-      if (q) {
-        data = data.filter((i) =>
-          [i.name, i.description, i.category].join(" ").toLowerCase().includes(q)
-        );
+  let data = [...MENU];
+  if (cat !== "all") data = data.filter((i) => i.category === cat);
+
+  if (q) {
+    data = data.filter((i) =>
+      [i.name, i.description, i.category].join(" ").toLowerCase().includes(q)
+    );
+  }
+
+  $("menuGrid").innerHTML =
+    data.map((item) => `
+      <article class="menu-card-v2">
+        <div class="menu-card-media">
+          <img
+            src="${item.image || "https://via.placeholder.com/900x700?text=Food"}"
+            alt="${escapeHtml(item.name)}"
+          />
+        </div>
+
+        <div class="menu-card-content">
+          <h3 class="menu-card-title">${escapeHtml(item.name)}</h3>
+        </div>
+
+        <div class="menu-card-footer">
+          <button
+            class="menu-action"
+            ${item.available === false ? "disabled" : ""}
+            onclick='openFoodOptions(${JSON.stringify(item).replace(/'/g, "&#39;")})'
+          >
+            <span class="menu-action-icon">🧾</span>
+            <span>Order Now</span>
+          </button>
+
+          <a class="menu-action menu-action-link" href="food-details.html?id=${item._id}">
+            <span class="menu-action-icon">⊕</span>
+            <span>See Details</span>
+          </a>
+        </div>
+      </article>
+    `).join("") || `<div class="item">No menu items found.</div>`;
+}
+
+    function openFoodOptions(item){
+  const groups = Array.isArray(item.optionGroups) ? item.optionGroups : [];
+
+  const groupsHtml = groups.map((group, gi) => `
+    <div class="panel" style="margin-top:14px;">
+      <h4>${escapeHtml(group.name)}</h4>
+      <div class="small" style="margin-bottom:10px;">
+        ${group.required ? "Required" : "Optional"}
+      </div>
+
+      ${(group.options || []).map(opt => `
+        <label style="display:flex;gap:10px;align-items:center;margin-bottom:8px;">
+          <input
+            type="${group.type === "checkbox" ? "checkbox" : "radio"}"
+            name="group_${gi}"
+            value="${escapeHtml(opt)}"
+          />
+          ${escapeHtml(opt)}
+        </label>
+      `).join("")}
+    </div>
+  `).join("");
+
+  setModal(`
+    <div class="modal-wrap" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <div class="actions" style="justify-content:space-between;margin-bottom:10px">
+          <h3>${escapeHtml(item.name)}</h3>
+          <button class="btn" onclick="closeModal()">Close</button>
+        </div>
+
+        <img
+          src="${item.image || "https://via.placeholder.com/700x500?text=Food"}"
+          alt="${escapeHtml(item.name)}"
+          style="width:100%;border-radius:16px;aspect-ratio:4/3;object-fit:cover;margin-bottom:14px;"
+        />
+
+        <div class="desc">${escapeHtml(item.description || "")}</div>
+        <div class="price" style="margin-bottom:10px;">$${Number(item.price || 0).toFixed(2)}</div>
+
+        ${groupsHtml}
+
+        <div class="actions" style="margin-top:16px;">
+          <button class="btn primary" onclick='confirmFoodOrder(${JSON.stringify(item).replace(/'/g, "&#39;")})'>
+            Order Online
+          </button>
+        </div>
+      </div>
+    </div>
+  `);
+}
+    function confirmFoodOrder(item){
+  try {
+    const selected = [];
+
+    (item.optionGroups || []).forEach((group, gi) => {
+      const checked = Array.from(document.querySelectorAll(`[name="group_${gi}"]:checked`))
+        .map(el => el.value);
+
+      if (group.required && checked.length === 0) {
+        throw new Error(`Please choose: ${group.name}`);
       }
 
-      $("menuGrid").innerHTML =
-        data.map((item) => `
-          <div class="card">
-            <img
-              src="${item.image || "https://via.placeholder.com/600x450?text=Menu+Item"}"
-              alt="${escapeHtml(item.name)}"
-            />
-            <div class="card-body">
-              <div class="meta">
-                ${escapeHtml(item.category)} ${item.available === false ? "• Unavailable" : ""}
-              </div>
-              <h3>${escapeHtml(item.name)}</h3>
-              <div class="desc">${escapeHtml(item.description || "")}</div>
-              <div class="price">$${Number(item.price || 0).toFixed(2)}</div>
-              <div class="actions">
-                <button
-                  class="btn primary"
-                  ${item.available === false ? "disabled" : ""}
-                  onclick='addToCart(${JSON.stringify(item).replace(/'/g, "&#39;")})'
-                >
-                  Add to Cart
-                </button>
-              </div>
-            </div>
-          </div>
-        `).join("") || `<div class="item">No menu items found.</div>`;
+      selected.push({
+        name: group.name,
+        values: checked
+      });
+    });
+
+    const found = CART.find(x =>
+      x._id === item._id &&
+      JSON.stringify(x.selectedOptions || []) === JSON.stringify(selected)
+    );
+
+    if (found) {
+      found.qty += 1;
+    } else {
+      CART.push({
+        _id: item._id,
+        menuItemId: item._id,
+        name: item.name,
+        price: Number(item.price || 0),
+        image: item.image || "",
+        qty: 1,
+        selectedOptions: selected
+      });
     }
 
-    function addToCart(item) {
-      const found = CART.find((x) => x._id === item._id);
-      if (found) found.qty += 1;
-      else {
-        CART.push({
-          _id: item._id,
-          menuItemId: item._id,
-          name: item.name,
-          price: Number(item.price || 0),
-          image: item.image || "",
-          qty: 1
-        });
-      }
-      saveCart();
-      alert("Added to cart");
-    }
-
-    function escapeHtml(str) {
-      return String(str || "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
+    saveCart();
+    closeModal();
+    openCart();
+  } catch (err) {
+    alert(err.message);
+  }
+}
 
     function setModal(html) {
       $("modalRoot").innerHTML = html;
@@ -350,48 +464,46 @@
       `);
     }
 
- async function register(e){
-  e.preventDefault();
-  try{
-    const json = await fetchJSON(API_BASE + '/api/auth/register', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        fullName: $('regName').value.trim(),
-        email: $('regEmail').value.trim(),
-        password: $('regPassword').value
-      })
-    });
+    async function register(e) {
+      e.preventDefault();
+      try {
+        const json = await fetchJSON(API_BASE + "/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fullName: $("regName").value.trim(),
+            email: $("regEmail").value.trim(),
+            password: $("regPassword").value
+          })
+        });
 
-    setUserSession(json.token, json.user);
-    closeModal();
-    alert('Account created');
-  }catch(err){
-    alert('Register failed: ' + err.message);
-    console.error('Register failed:', err);
-  }
-}
+        setUserSession(json.token, json.user);
+        closeModal();
+        alert("Account created");
+      } catch (err) {
+        alert("Register failed: " + err.message);
+      }
+    }
 
-async function login(e){
-  e.preventDefault();
-  try{
-    const json = await fetchJSON(API_BASE + '/api/auth/login', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        email: $('loginEmail').value.trim(),
-        password: $('loginPassword').value
-      })
-    });
+    async function login(e) {
+      e.preventDefault();
+      try {
+        const json = await fetchJSON(API_BASE + "/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: $("loginEmail").value.trim(),
+            password: $("loginPassword").value
+          })
+        });
 
-    setUserSession(json.token, json.user);
-    closeModal();
-    alert('Logged in');
-  }catch(err){
-    alert('Login failed: ' + err.message);
-    console.error('Login failed:', err);
-  }
-}
+        setUserSession(json.token, json.user);
+        closeModal();
+        alert("Logged in");
+      } catch (err) {
+        alert("Login failed: " + err.message);
+      }
+    }
 
     function openCart() {
       const total = CART.reduce((s, i) => s + i.price * i.qty, 0);
@@ -413,7 +525,11 @@ async function login(e){
                           <div>
                             <b>${escapeHtml(i.name)}</b>
                             <div class="small">$${Number(i.price).toFixed(2)}</div>
+                            ${(i.selectedOptions || []).map(g => `
+                              <div class="small">${escapeHtml(g.name)}: ${(g.values || []).map(escapeHtml).join(", ") || "None"}</div>
+                            `).join("")}
                           </div>
+
                           <div class="qty">
                             <button onclick="changeQty(${idx},-1)">-</button>
                             <span>${i.qty}</span>
@@ -450,25 +566,6 @@ async function login(e){
       saveCart();
       openCart();
     }
-
-
-    function setAdminSession(key){
-  localStorage.setItem(ADMIN_KEY_STORAGE, key);
-  updateAdminUI(true);
-}
-
-function clearAdminSession(){
-  localStorage.removeItem(ADMIN_KEY_STORAGE);
-  updateAdminUI(false);
-}
-
-function updateAdminUI(isAdmin = !!getAdminKey()){
-  const adminBtn = document.getElementById('adminBtn');
-  const adminAccessBtn = document.getElementById('adminAccessBtn');
-
-  if(adminBtn) adminBtn.classList.toggle('hidden', !isAdmin);
-  if(adminAccessBtn) adminAccessBtn.classList.toggle('hidden', isAdmin);
-}
 
     function openCheckout() {
       if (!getToken()) return alert("Please login first.");
@@ -560,6 +657,9 @@ function updateAdminUI(isAdmin = !!getAdminKey()){
                 ${(o.items || []).map((it) => `
                   <div class="item">
                     <b>${escapeHtml(it.name)}</b> × ${it.qty} — $${Number(it.price).toFixed(2)}
+                    ${(it.selectedOptions || []).map(g => `
+                      <div class="small">${escapeHtml(g.name)}: ${(g.values || []).map(escapeHtml).join(", ") || "None"}</div>
+                    `).join("")}
                   </div>
                 `).join("")}
               </div>
@@ -568,35 +668,41 @@ function updateAdminUI(isAdmin = !!getAdminKey()){
         : '<div class="item">No orders yet.</div>';
     }
 
-   async function openAdmin(){
-  let key = getAdminKey();
-  if(!key){
-    key = prompt('Enter admin key');
-    if(!key) return;
-    localStorage.setItem(ADMIN_KEY_STORAGE, key.trim());
-  }
+    function clearAdminSession() {
+      localStorage.removeItem(ADMIN_KEY_STORAGE);
+    }
 
-  try{
-    await fetchJSON(API_BASE + '/api/admin/ping', {
-      headers:{ 'x-admin-key': getAdminKey() }
-    });
-  }catch(err){
-    localStorage.removeItem(ADMIN_KEY_STORAGE);
-    return alert('Admin key invalid');
-  }
+    async function openAdmin() {
+      let key = getAdminKey();
 
-  showView('admin');
-  await loadMenu();
-  await loadAdminOrders();
-  await renderAdminMenuHelpers();
-}
+      if (!key) {
+        key = prompt("Enter admin key");
+        if (!key) return;
+      }
 
+      try {
+        await fetchJSON(API_BASE + "/api/admin/ping", {
+          headers: { "x-admin-key": key.trim() }
+        });
 
-function logoutAdmin(){
-  clearAdminSession();
-  showView('shop');
-  alert('Admin logged out');
-}
+        localStorage.setItem(ADMIN_KEY_STORAGE, key.trim());
+      } catch (err) {
+        localStorage.removeItem(ADMIN_KEY_STORAGE);
+        return alert("Admin key invalid");
+      }
+
+      showView("admin");
+      await loadMenu();
+      await loadAdminOrders();
+      await renderAdminMenuHelpers();
+    }
+
+    function logoutAdmin() {
+      clearAdminSession();
+      showView("shop");
+      alert("Admin logged out");
+    }
+
     async function loadAdminOrders() {
       const json = await fetchJSON(API_BASE + "/api/admin/orders", {
         headers: { "x-admin-key": getAdminKey() }
@@ -679,11 +785,20 @@ function logoutAdmin(){
 
       const id = $("menuId").value;
       const fd = new FormData();
+
       fd.append("name", $("menuName").value.trim());
       fd.append("description", $("menuDesc").value.trim());
       fd.append("category", $("menuCategory").value);
       fd.append("price", $("menuPrice").value);
       fd.append("available", $("menuAvailable").value);
+      fd.append("ingredients", $("menuIngredients").value.trim());
+      fd.append("calories", $("menuCalories").value.trim());
+      fd.append("allergens", $("menuAllergens").value.trim());
+      fd.append("protein", $("menuProtein").value.trim());
+      fd.append("carbs", $("menuCarbs").value.trim());
+      fd.append("fat", $("menuFat").value.trim());
+      fd.append("sodium", $("menuSodium").value.trim());
+      fd.append("optionGroups", $("menuOptionGroups").value.trim());
 
       if ($("menuImage").files[0]) {
         fd.append("image", $("menuImage").files[0]);
@@ -715,6 +830,14 @@ function logoutAdmin(){
       $("menuCategory").value = "breakfast";
       $("menuPrice").value = "";
       $("menuAvailable").value = "true";
+      $("menuIngredients").value = "";
+      $("menuCalories").value = "";
+      $("menuAllergens").value = "";
+      $("menuProtein").value = "";
+      $("menuCarbs").value = "";
+      $("menuFat").value = "";
+      $("menuSodium").value = "";
+      $("menuOptionGroups").value = "";
       $("menuImage").value = "";
       $("menuMsg").textContent = "";
     }
@@ -727,6 +850,14 @@ function logoutAdmin(){
       $("menuCategory").value = item.category || "breakfast";
       $("menuPrice").value = item.price || "";
       $("menuAvailable").value = String(item.available !== false);
+      $("menuIngredients").value = (item.ingredients || []).join(", ");
+      $("menuCalories").value = item.calories || "";
+      $("menuAllergens").value = (item.allergens || []).join(", ");
+      $("menuProtein").value = item.nutrition?.protein || "";
+      $("menuCarbs").value = item.nutrition?.carbs || "";
+      $("menuFat").value = item.nutrition?.fat || "";
+      $("menuSodium").value = item.nutrition?.sodium || "";
+      $("menuOptionGroups").value = item.optionGroups ? JSON.stringify(item.optionGroups, null, 2) : "";
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
@@ -779,69 +910,43 @@ function logoutAdmin(){
       wrap.appendChild(helper);
     }
 
-
-
     let secretAdminClicks = 0;
-let secretAdminTimer = null;
+    let secretAdminTimer = null;
 
-function handleSecretAdminClick(){
-  secretAdminClicks += 1;
+    function handleSecretAdminClick() {
+      secretAdminClicks += 1;
 
-  clearTimeout(secretAdminTimer);
-  secretAdminTimer = setTimeout(() => {
-    secretAdminClicks = 0;
-  }, 1500);
+      clearTimeout(secretAdminTimer);
+      secretAdminTimer = setTimeout(() => {
+        secretAdminClicks = 0;
+      }, 1500);
 
-  if(secretAdminClicks >= 5){
-    secretAdminClicks = 0;
-    openAdmin();
-  }
-}
+      if (secretAdminClicks >= 5) {
+        secretAdminClicks = 0;
+        openAdmin();
+      }
+    }
 
-async function openAdmin(){
-  let key = getAdminKey();
-
-  if(!key){
-    key = prompt('Enter admin key');
-    if(!key) return;
-  }
-
-  try{
-    await fetchJSON(API_BASE + '/api/admin/ping', {
-      headers:{ 'x-admin-key': key.trim() }
+    window.addEventListener("load", () => {
+      if (window.location.hash === "#owner-admin") {
+        openAdmin();
+      }
     });
 
-    localStorage.setItem(ADMIN_KEY_STORAGE, key.trim());
-  }catch(err){
-    localStorage.removeItem(ADMIN_KEY_STORAGE);
-    return alert('Admin key invalid');
-  }
 
-  showView('admin');
-  await loadMenu();
-  await loadAdminOrders();
-  await renderAdminMenuHelpers();
+
+
+
+    function toggleMobileMenu(){
+  document.getElementById("siteNav").classList.toggle("open");
 }
 
-function logoutAdmin(){
-  localStorage.removeItem(ADMIN_KEY_STORAGE);
-  showView('shop');
-  alert('Admin logged out');
+function closeMobileMenu(){
+  document.getElementById("siteNav").classList.remove("open");
 }
-
-
-
-window.addEventListener('load', () => {
-  if(window.location.hash === '#owner-admin'){
-    openAdmin();
-  }
-});
-
-    
     saveCart();
     updateAuthUI();
     loadMenu();
-    updateAdminUI();
   </script>
 </body>
 </html>

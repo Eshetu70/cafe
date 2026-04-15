@@ -34,7 +34,6 @@ const {
 
 const JWT_SECRET = String(JWT_SECRET_RAW || "").replace(/\s+/g, "").trim();
 
-
 if (!MONGODB_URI) {
   console.error("❌ Missing MONGODB_URI");
   process.exit(1);
@@ -130,6 +129,26 @@ const menuItemSchema = new mongoose.Schema(
     price: { type: Number, required: true },
     image: { type: String, default: "" },
     available: { type: Boolean, default: true },
+
+    ingredients: [{ type: String }],
+    calories: { type: Number, default: 0 },
+    allergens: [{ type: String }],
+
+    nutrition: {
+      protein: { type: String, default: "" },
+      carbs: { type: String, default: "" },
+      fat: { type: String, default: "" },
+      sodium: { type: String, default: "" },
+    },
+
+    optionGroups: [
+      {
+        name: { type: String, default: "" },
+        type: { type: String, enum: ["radio", "checkbox"], default: "radio" },
+        required: { type: Boolean, default: false },
+        options: [{ type: String }],
+      },
+    ],
   },
   { timestamps: true }
 );
@@ -145,6 +164,12 @@ const orderSchema = new mongoose.Schema(
         price: { type: Number, required: true },
         qty: { type: Number, required: true },
         image: { type: String, default: "" },
+        selectedOptions: [
+          {
+            name: { type: String, default: "" },
+            values: [{ type: String }],
+          },
+        ],
       },
     ],
     total: { type: Number, required: true },
@@ -174,7 +199,10 @@ const Order = mongoose.model("CafeOrder", orderSchema, "cafe_orders");
 
 function baseUrlFromReq(req) {
   if (PUBLIC_BASE_URL) return String(PUBLIC_BASE_URL).replace(/\/+$/, "");
-  const proto = (req.headers["x-forwarded-proto"] || req.protocol || "http").toString().split(",")[0].trim();
+  const proto = (req.headers["x-forwarded-proto"] || req.protocol || "http")
+    .toString()
+    .split(",")[0]
+    .trim();
   const host = req.get("host");
   return `${proto}://${host}`;
 }
@@ -202,7 +230,9 @@ function escapeHtml(str) {
 
 function requireAdmin(req, res, next) {
   const key = req.headers["x-admin-key"];
-  if (!key || key !== ADMIN_API_KEY) return res.status(401).json({ error: "Unauthorized (admin key required)" });
+  if (!key || key !== ADMIN_API_KEY) {
+    return res.status(401).json({ error: "Unauthorized (admin key required)" });
+  }
   next();
 }
 
@@ -304,6 +334,33 @@ function sendEmailInBackground(fn) {
   });
 }
 
+function parseCsvList(value) {
+  return String(value || "")
+    .split(",")
+    .map((x) => x.trim())
+    .filter(Boolean);
+}
+
+function parseOptionGroups(raw) {
+  try {
+    const parsed = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed
+      .map((group) => ({
+        name: String(group?.name || "").trim(),
+        type: group?.type === "checkbox" ? "checkbox" : "radio",
+        required: Boolean(group?.required),
+        options: Array.isArray(group?.options)
+          ? group.options.map((x) => String(x).trim()).filter(Boolean)
+          : [],
+      }))
+      .filter((group) => group.name && group.options.length > 0);
+  } catch {
+    return [];
+  }
+}
+
 app.get("/", (req, res) => {
   res.json({ ok: true, app: "Community Kitchen Café API", time: new Date().toISOString() });
 });
@@ -325,17 +382,36 @@ app.get("/api/admin/ping", requireAdmin, (req, res) => {
 app.post("/api/auth/register", async (req, res) => {
   try {
     const { fullName, email, password } = req.body || {};
-    if (!fullName || !email || !password) return res.status(400).json({ error: "fullName, email, password required" });
+    if (!fullName || !email || !password) {
+      return res.status(400).json({ error: "fullName, email, password required" });
+    }
 
     const cleanEmail = String(email).trim().toLowerCase();
     const exists = await User.findOne({ email: cleanEmail }).lean();
     if (exists) return res.status(409).json({ error: "Email already registered" });
 
     const passwordHash = await bcrypt.hash(String(password), 10);
-    const user = await User.create({ fullName: String(fullName).trim(), email: cleanEmail, passwordHash });
-    const token = jwt.sign({ userId: String(user._id), email: user.email }, JWT_SECRET, { expiresIn: "30d" });
+    const user = await User.create({
+      fullName: String(fullName).trim(),
+      email: cleanEmail,
+      passwordHash,
+    });
 
-    res.json({ ok: true, token, user: { id: String(user._id), fullName: user.fullName, email: user.email } });
+    const token = jwt.sign(
+      { userId: String(user._id), email: user.email },
+      JWT_SECRET,
+      { expiresIn: "30d" }
+    );
+
+    res.json({
+      ok: true,
+      token,
+      user: {
+        id: String(user._id),
+        fullName: user.fullName,
+        email: user.email,
+      },
+    });
   } catch (e) {
     res.status(500).json({ error: "Register failed", details: e.message });
   }
@@ -344,7 +420,9 @@ app.post("/api/auth/register", async (req, res) => {
 app.post("/api/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body || {};
-    if (!email || !password) return res.status(400).json({ error: "email and password required" });
+    if (!email || !password) {
+      return res.status(400).json({ error: "email and password required" });
+    }
 
     const user = await User.findOne({ email: String(email).trim().toLowerCase() });
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
@@ -352,8 +430,21 @@ app.post("/api/auth/login", async (req, res) => {
     const ok = await bcrypt.compare(String(password), user.passwordHash);
     if (!ok) return res.status(401).json({ error: "Invalid credentials" });
 
-    const token = jwt.sign({ userId: String(user._id), email: user.email }, JWT_SECRET, { expiresIn: "30d" });
-    res.json({ ok: true, token, user: { id: String(user._id), fullName: user.fullName, email: user.email } });
+    const token = jwt.sign(
+      { userId: String(user._id), email: user.email },
+      JWT_SECRET,
+      { expiresIn: "30d" }
+    );
+
+    res.json({
+      ok: true,
+      token,
+      user: {
+        id: String(user._id),
+        fullName: user.fullName,
+        email: user.email,
+      },
+    });
   } catch (e) {
     res.status(500).json({ error: "Login failed", details: e.message });
   }
@@ -363,7 +454,9 @@ app.get("/api/menu", async (req, res) => {
   try {
     const { category, q } = req.query || {};
     const filter = {};
+
     if (category && category !== "all") filter.category = String(category).toLowerCase();
+
     if (q) {
       const rx = new RegExp(String(q).trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
       filter.$or = [{ name: rx }, { description: rx }, { category: rx }];
@@ -390,6 +483,19 @@ app.post("/api/menu", requireAdmin, upload.single("image"), async (req, res) => 
       price: Number(price),
       image,
       available: String(available) !== "false",
+
+      ingredients: parseCsvList(req.body.ingredients),
+      calories: Number(req.body.calories || 0),
+      allergens: parseCsvList(req.body.allergens),
+
+      nutrition: {
+        protein: String(req.body.protein || "").trim(),
+        carbs: String(req.body.carbs || "").trim(),
+        fat: String(req.body.fat || "").trim(),
+        sodium: String(req.body.sodium || "").trim(),
+      },
+
+      optionGroups: parseOptionGroups(req.body.optionGroups),
     });
 
     res.json({ ok: true, item });
@@ -412,6 +518,20 @@ app.put("/api/menu/:id", requireAdmin, upload.single("image"), async (req, res) 
     found.category = String(category).trim().toLowerCase();
     found.price = Number(price);
     found.available = String(available) !== "false";
+
+    found.ingredients = parseCsvList(req.body.ingredients);
+    found.calories = Number(req.body.calories || 0);
+    found.allergens = parseCsvList(req.body.allergens);
+
+    found.nutrition = {
+      protein: String(req.body.protein || "").trim(),
+      carbs: String(req.body.carbs || "").trim(),
+      fat: String(req.body.fat || "").trim(),
+      sodium: String(req.body.sodium || "").trim(),
+    };
+
+    found.optionGroups = parseOptionGroups(req.body.optionGroups);
+
     if (req.file) found.image = toAbsoluteUrl(req, `/uploads/${req.file.filename}`);
 
     await found.save();
@@ -434,8 +554,12 @@ app.delete("/api/menu/:id", requireAdmin, async (req, res) => {
 app.post("/api/orders", requireAuth, async (req, res) => {
   try {
     const { items, customer, payment } = req.body || {};
-    if (!Array.isArray(items) || items.length === 0) return res.status(400).json({ error: "Order items required" });
-    if (!customer?.fullName || !customer?.phone) return res.status(400).json({ error: "Customer fullName and phone required" });
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: "Order items required" });
+    }
+    if (!customer?.fullName || !customer?.phone) {
+      return res.status(400).json({ error: "Customer fullName and phone required" });
+    }
 
     const normalizedItems = items.map((it) => ({
       menuItemId: String(it.menuItemId || it._id || ""),
@@ -443,9 +567,18 @@ app.post("/api/orders", requireAuth, async (req, res) => {
       price: Number(it.price || 0),
       qty: Number(it.qty || 1),
       image: String(it.image || ""),
+      selectedOptions: Array.isArray(it.selectedOptions)
+        ? it.selectedOptions.map((group) => ({
+            name: String(group?.name || "").trim(),
+            values: Array.isArray(group?.values)
+              ? group.values.map((x) => String(x).trim()).filter(Boolean)
+              : [],
+          }))
+        : [],
     }));
 
     const total = normalizedItems.reduce((sum, it) => sum + it.price * it.qty, 0);
+
     const order = await Order.create({
       orderId: makeOrderId(),
       userId: req.user.userId,
@@ -475,6 +608,7 @@ app.post("/api/orders", requireAuth, async (req, res) => {
           status: order.status,
           paymentStatus: order.payment.status,
         });
+
         await sendCustomerEmail({
           to: order.customer.email,
           subject: `Community Kitchen Café — Order Received (${order.orderId})`,
@@ -526,6 +660,7 @@ app.put("/api/admin/orders/:id", requireAdmin, async (req, res) => {
           status: order.status,
           paymentStatus: order.payment.status,
         });
+
         await sendCustomerEmail({
           to: order.customer.email,
           subject: `Community Kitchen Café — Order Update (${order.orderId})`,

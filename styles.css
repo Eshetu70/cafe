@@ -1461,3 +1461,40 @@ header nav {
 }
 
 
+
+
+/* =========================================================
+   FIX MOBILE MENU CLICK / ACTIVE LINKS
+   Paste at bottom of styles.css
+========================================================= */
+
+@media (max-width: 768px) {
+  #siteNav {
+    pointer-events: auto !important;
+    z-index: 6000 !important;
+  }
+
+  #siteNav.open {
+    pointer-events: auto !important;
+  }
+
+  #siteNav .nav-link {
+    position: relative;
+    z-index: 6002 !important;
+    pointer-events: auto !important;
+    cursor: pointer;
+  }
+
+  .mobile-menu-btn {
+    z-index: 7000 !important;
+    pointer-events: auto !important;
+  }
+
+  body::after {
+    z-index: 5500 !important;
+  }
+
+  body:has(#siteNav.open)::after {
+    pointer-events: none !important;
+  }
+}

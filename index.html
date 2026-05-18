@@ -1268,28 +1268,49 @@
 
 
 
-  function toggleMobileMenu(){
+ function toggleMobileMenu(){
   const nav = document.getElementById("siteNav");
   const btn = document.querySelector(".mobile-menu-btn");
+
+  if (!nav) return;
 
   nav.classList.toggle("open");
 
   const isOpen = nav.classList.contains("open");
-  btn.classList.toggle("active", isOpen);
-  btn.innerHTML = isOpen ? "×" : "☰";
+
+  if (btn) {
+    btn.classList.toggle("active", isOpen);
+    btn.innerHTML = isOpen ? "×" : "☰";
+    btn.setAttribute("aria-label", isOpen ? "Close menu" : "Open menu");
+  }
 }
 
 function closeMobileMenu(){
   const nav = document.getElementById("siteNav");
   const btn = document.querySelector(".mobile-menu-btn");
 
-  nav.classList.remove("open");
+  if (nav) nav.classList.remove("open");
 
   if (btn) {
     btn.classList.remove("active");
     btn.innerHTML = "☰";
+    btn.setAttribute("aria-label", "Open menu");
   }
 }
+
+document.addEventListener("click", function(e){
+  const nav = document.getElementById("siteNav");
+  const btn = document.querySelector(".mobile-menu-btn");
+
+  if (!nav || !btn) return;
+
+  const clickedInsideMenu = nav.contains(e.target);
+  const clickedButton = btn.contains(e.target);
+
+  if (nav.classList.contains("open") && !clickedInsideMenu && !clickedButton) {
+    closeMobileMenu();
+  }
+});
     saveCart();
     updateAuthUI();
     loadMenu();

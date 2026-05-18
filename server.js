@@ -2,13 +2,12 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
-const path = require("path");
-const fs = require("fs");
 const mongoose = require("mongoose");
 const multer = require("multer");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
+const { ObjectId } = require("mongodb");
 
 const app = express();
 app.set("trust proxy", 1);
@@ -85,24 +84,21 @@ app.use(
 );
 app.options(/.*/, cors());
 
-const UPLOAD_DIR = path.join(__dirname, "uploads");
-if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-
-app.use(
-  "/uploads",
-  express.static(UPLOAD_DIR, {
-    maxAge: "7d",
-    setHeaders: (res) => {
-      res.setHeader("Access-Control-Allow-Origin", "*");
-      res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
-      res.setHeader("Cache-Control", "public, max-age=604800");
-    },
-  })
-);
+// ✅ IMPORTANT FIX:
+// Do NOT save uploaded images to Render local /uploads folder.
+// Render local disk can be cleared after restart/redeploy, so images disappear.
+// This version stores images permanently inside MongoDB using GridFS.
+let imageBucket;
 
 mongoose
   .connect(MONGODB_URI, { serverSelectionTimeoutMS: 10000 })
-  .then(() => console.log("✅ MongoDB connected"))
+  .then(() => {
+    imageBucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
+      bucketName: "cafe_images",
+    });
+    console.log("✅ MongoDB connected");
+    console.log("✅ MongoDB GridFS image storage ready");
+  })
   .catch((err) => {
     console.error("❌ MongoDB error:", err.message);
     process.exit(1);
@@ -249,22 +245,87 @@ function requireAuth(req, res, next) {
   }
 }
 
-const storage = multer.diskStorage({
-  destination: (_, __, cb) => cb(null, UPLOAD_DIR),
-  filename: (_, file, cb) => {
-    const ext = path.extname(file.originalname || "").toLowerCase() || ".jpg";
-    const safeExt = [".png", ".jpg", ".jpeg", ".webp"].includes(ext) ? ext : ".jpg";
-    cb(null, `${Date.now()}-${Math.random().toString(16).slice(2)}${safeExt}`);
-  },
-});
-
+// ✅ Store uploaded image in memory first, then save the file into MongoDB GridFS.
+// No local disk folder is used.
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 6 * 1024 * 1024 },
   fileFilter: (_, file, cb) => {
     const ok = ["image/png", "image/jpeg", "image/jpg", "image/webp"].includes(file.mimetype);
     cb(ok ? null : new Error("Only image files allowed (png/jpg/webp)"), ok);
   },
+});
+
+function getSafeImageExt(file) {
+  const original = String(file?.originalname || "").toLowerCase();
+  if (original.endsWith(".png")) return ".png";
+  if (original.endsWith(".webp")) return ".webp";
+  if (original.endsWith(".jpeg")) return ".jpeg";
+  return ".jpg";
+}
+
+async function saveImageToMongo(req, file) {
+  if (!file) return "";
+  if (!imageBucket) throw new Error("Image storage is not ready yet");
+
+  const filename = `${Date.now()}-${Math.random().toString(16).slice(2)}${getSafeImageExt(file)}`;
+
+  const fileId = await new Promise((resolve, reject) => {
+    const uploadStream = imageBucket.openUploadStream(filename, {
+      contentType: file.mimetype,
+      metadata: {
+        originalName: file.originalname || filename,
+        uploadedAt: new Date(),
+      },
+    });
+
+    uploadStream.on("error", reject);
+    uploadStream.on("finish", () => resolve(uploadStream.id));
+    uploadStream.end(file.buffer);
+  });
+
+  return toAbsoluteUrl(req, `/api/images/${fileId.toString()}`);
+}
+
+async function deleteImageFromMongoByUrl(imageUrl) {
+  try {
+    const match = String(imageUrl || "").match(/\/api\/images\/([a-fA-F0-9]{24})/);
+    if (!match || !imageBucket) return;
+    await imageBucket.delete(new ObjectId(match[1]));
+  } catch (e) {
+    console.warn("⚠️ Could not delete old image from MongoDB:", e.message);
+  }
+}
+
+app.get("/api/images/:id", async (req, res) => {
+  try {
+    if (!imageBucket) return res.status(503).json({ error: "Image storage not ready" });
+    if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ error: "Invalid image id" });
+
+    const fileId = new ObjectId(req.params.id);
+    const files = await mongoose.connection.db
+      .collection("cafe_images.files")
+      .find({ _id: fileId })
+      .limit(1)
+      .toArray();
+
+    if (!files.length) return res.status(404).json({ error: "Image not found" });
+
+    const file = files[0];
+    res.setHeader("Content-Type", file.contentType || "image/jpeg");
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+
+    const downloadStream = imageBucket.openDownloadStream(fileId);
+    downloadStream.on("error", () => {
+      if (!res.headersSent) res.status(404).json({ error: "Image not found" });
+      else res.end();
+    });
+    downloadStream.pipe(res);
+  } catch (e) {
+    res.status(500).json({ error: "Failed to load image", details: e.message });
+  }
 });
 
 function getMailFrom() {
@@ -474,7 +535,7 @@ app.post("/api/menu", requireAdmin, upload.single("image"), async (req, res) => 
     const { name, description = "", category = "lunch", price, available = "true" } = req.body || {};
     if (!name || !price) return res.status(400).json({ error: "name and price required" });
 
-    const image = req.file ? toAbsoluteUrl(req, `/uploads/${req.file.filename}`) : "";
+    const image = req.file ? await saveImageToMongo(req, req.file) : "";
 
     const item = await MenuItem.create({
       name: String(name).trim(),
@@ -532,7 +593,10 @@ app.put("/api/menu/:id", requireAdmin, upload.single("image"), async (req, res) 
 
     found.optionGroups = parseOptionGroups(req.body.optionGroups);
 
-    if (req.file) found.image = toAbsoluteUrl(req, `/uploads/${req.file.filename}`);
+    if (req.file) {
+      await deleteImageFromMongoByUrl(found.image);
+      found.image = await saveImageToMongo(req, req.file);
+    }
 
     await found.save();
     res.json({ ok: true, item: found });
@@ -545,6 +609,7 @@ app.delete("/api/menu/:id", requireAdmin, async (req, res) => {
   try {
     const deleted = await MenuItem.findByIdAndDelete(req.params.id);
     if (!deleted) return res.status(404).json({ error: "Menu item not found" });
+    await deleteImageFromMongoByUrl(deleted.image);
     res.json({ ok: true, deleted: true });
   } catch (e) {
     res.status(500).json({ error: "Delete menu item failed", details: e.message });

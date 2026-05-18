@@ -23,6 +23,205 @@
 
 <!-- Browser Theme Color -->
 <meta name="theme-color" content="#8B4513">
+
+
+<style>
+  /* Professional restaurant hero + reliable image UI */
+  :root{
+    --ckc-brown:#6f3f1f;
+    --ckc-caramel:#c17a36;
+    --ckc-cream:#fff7ed;
+    --ckc-dark:#1f130b;
+    --ckc-muted:#6b5b4c;
+  }
+
+  .hero{
+    padding-top: 34px;
+  }
+
+  .hero-box.pro-restaurant-hero{
+    position: relative;
+    overflow: hidden;
+    min-height: 520px;
+    display: grid;
+    grid-template-columns: minmax(0,1.1fr) minmax(320px,.9fr);
+    align-items: center;
+    gap: 34px;
+    padding: 48px;
+    border-radius: 34px;
+    color: #fff;
+    background:
+      linear-gradient(90deg, rgba(31,19,11,.92), rgba(85,48,23,.82), rgba(31,19,11,.35)),
+      url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+    box-shadow: 0 24px 70px rgba(47,28,13,.24);
+  }
+
+  .hero-eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 14px;
+    border:1px solid rgba(255,255,255,.26);
+    border-radius:999px;
+    background:rgba(255,255,255,.12);
+    backdrop-filter: blur(8px);
+    font-size:.88rem;
+    font-weight:700;
+    letter-spacing:.02em;
+    margin-bottom:18px;
+  }
+
+  .hero-title{
+    max-width:760px;
+    font-size: clamp(2.6rem, 6vw, 5.8rem);
+    line-height:.93;
+    letter-spacing:-.06em;
+    margin:0 0 18px;
+    font-weight:900;
+  }
+
+  .hero-title span{
+    color:#ffd99b;
+  }
+
+  .hero-subtitle{
+    max-width:620px;
+    color:rgba(255,255,255,.88);
+    font-size: clamp(1.05rem, 2vw, 1.28rem);
+    line-height:1.7;
+    margin:0 0 26px;
+  }
+
+  .hero-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    align-items:center;
+    margin-bottom:28px;
+  }
+
+  .hero-actions .btn{
+    min-height:48px;
+    border-radius:999px;
+    padding:0 22px;
+  }
+
+  .hero-secondary{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    text-decoration:none;
+    border:1px solid rgba(255,255,255,.28);
+    background:rgba(255,255,255,.12);
+  }
+
+  .hero-trust-row{
+    display:grid;
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    gap:12px;
+    max-width:650px;
+  }
+
+  .hero-trust-card{
+    padding:16px;
+    border-radius:20px;
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.18);
+    backdrop-filter: blur(10px);
+  }
+
+  .hero-trust-card strong{
+    display:block;
+    font-size:1.28rem;
+    margin-bottom:3px;
+  }
+
+  .hero-trust-card small{
+    color:rgba(255,255,255,.78);
+    line-height:1.35;
+  }
+
+  .hero-feature-card{
+    justify-self:end;
+    width:min(100%, 390px);
+    border-radius:30px;
+    background:rgba(255,248,238,.96);
+    color:var(--ckc-dark);
+    padding:16px;
+    box-shadow:0 26px 70px rgba(0,0,0,.32);
+    border:1px solid rgba(255,255,255,.5);
+  }
+
+  .hero-feature-card img{
+    width:100%;
+    aspect-ratio:4/3;
+    object-fit:cover;
+    border-radius:22px;
+    display:block;
+    background:#f3e6d7;
+  }
+
+  .hero-feature-body{
+    padding:16px 8px 8px;
+  }
+
+  .hero-feature-body h3{
+    margin:0 0 6px;
+    font-size:1.35rem;
+  }
+
+  .hero-feature-body p{
+    margin:0 0 14px;
+    color:var(--ckc-muted);
+    line-height:1.55;
+  }
+
+  .hero-badge-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+
+  .hero-badge-row span{
+    padding:7px 10px;
+    border-radius:999px;
+    background:#fff0dc;
+    color:#794719;
+    font-size:.82rem;
+    font-weight:800;
+  }
+
+  img.menu-img-loading{
+    background:#f4eadf;
+  }
+
+  .menu-card-media img,
+  .admin-menu-thumb img,
+  .modal img{
+    background:#f4eadf;
+  }
+
+  @media (max-width: 860px){
+    .hero-box.pro-restaurant-hero{
+      grid-template-columns:1fr;
+      padding:30px 22px;
+      min-height:auto;
+      border-radius:26px;
+    }
+    .hero-feature-card{
+      justify-self:stretch;
+      width:100%;
+    }
+    .hero-trust-row{
+      grid-template-columns:1fr;
+    }
+    .hero-title{
+      letter-spacing:-.04em;
+    }
+  }
+</style>
+
 </head>
 <body>
   <header>
@@ -49,16 +248,44 @@
 </header>
 
   <section class="container hero" id="shopView">
-    <div class="hero-box">
-      <h1>Food with a Purpose</h1>
-      <p>
-        Browse the latest Community Kitchen Café menu, order online,
-        and track your food status under your account.
-      </p>
-      <div class="actions">
-        <button class="btn primary" onclick="window.scrollTo({top:document.getElementById('menuGrid').offsetTop-70,behavior:'smooth'})">
-          Order Now
-        </button>
+    <div class="hero-box pro-restaurant-hero">
+      <div class="hero-copy">
+        <div class="hero-eyebrow">🍽️ Fresh • Local • Made with Purpose</div>
+        <h1 class="hero-title">Community food that feels like <span>home.</span></h1>
+        <p class="hero-subtitle">
+          Order fresh breakfast, lunch, drinks, desserts, and catering from Community Kitchen Café.
+          Simple online ordering, easy pickup, and meals prepared with care.
+        </p>
+
+        <div class="hero-actions">
+          <button class="btn primary" onclick="window.scrollTo({top:document.getElementById('menuGrid').offsetTop-70,behavior:'smooth'})">
+            Order Online
+          </button>
+          <a class="btn hero-secondary" href="https://www.google.com/maps?q=811+N+Charlotte+Ave+Monroe+NC+28110" target="_blank">
+            Get Directions
+          </a>
+        </div>
+
+        <div class="hero-trust-row">
+          <div class="hero-trust-card"><strong>7AM–3PM</strong><small>Fresh daytime café meals</small></div>
+          <div class="hero-trust-card"><strong>Online</strong><small>Order and track status</small></div>
+          <div class="hero-trust-card"><strong>Catering</strong><small>Food for groups and events</small></div>
+        </div>
+      </div>
+
+      <div class="hero-feature-card">
+        <img src="https://images.unsplash.com/photo-1543353071-10c8ba85a904?auto=format&fit=crop&w=900&q=70"
+             alt="Fresh café meal"
+             loading="eager"
+             decoding="async"
+             onerror="handleImageError(this)">
+        <div class="hero-feature-body">
+          <h3>Today’s Fresh Menu</h3>
+          <p>Browse customer favorites and add items to your cart in seconds.</p>
+          <div class="hero-badge-row">
+            <span>Breakfast</span><span>Lunch</span><span>Drinks</span><span>Dessert</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -297,6 +524,26 @@
         .replaceAll("'", "&#039;");
     }
 
+    function getImageUrl(image) {
+      const fallback = "https://images.unsplash.com/photo-1543353071-10c8ba85a904?auto=format&fit=crop&w=900&q=70";
+      if (!image) return fallback;
+
+      const clean = String(image).trim();
+      if (!clean) return fallback;
+
+      // Works with Cloudinary/Firebase/S3 absolute URLs.
+      if (/^https?:\/\//i.test(clean)) return clean;
+
+      // Works if backend returns /uploads/file.jpg or uploads/file.jpg.
+      const path = clean.startsWith("/") ? clean : "/" + clean;
+      return API_BASE + path;
+    }
+
+    function handleImageError(img) {
+      img.onerror = null;
+      img.src = "https://images.unsplash.com/photo-1543353071-10c8ba85a904?auto=format&fit=crop&w=900&q=70";
+    }
+
     async function fetchJSON(url, options = {}) {
       const res = await fetch(url, options);
       const text = await res.text();
@@ -341,8 +588,18 @@
     }
 
     async function loadMenu() {
-      const json = await fetchJSON(API_BASE + "/api/menu");
-      MENU = Array.isArray(json.items) ? json.items : [];
+      try {
+        const json = await fetchJSON(API_BASE + "/api/menu");
+        MENU = Array.isArray(json.items) ? json.items : [];
+        localStorage.setItem("ckc_menu_cache", JSON.stringify(MENU));
+      } catch (err) {
+        try {
+          MENU = JSON.parse(localStorage.getItem("ckc_menu_cache") || "[]");
+        } catch {
+          MENU = [];
+        }
+        console.warn("Menu loaded from cache because network failed:", err.message);
+      }
       renderMenu();
     }
 
@@ -364,8 +621,12 @@
       <article class="menu-card-v2">
         <div class="menu-card-media">
           <img
-            src="${item.image || "https://via.placeholder.com/900x700?text=Food"}"
+            src="${getImageUrl(item.image)}"
             alt="${escapeHtml(item.name)}"
+            loading="lazy"
+            decoding="async"
+            referrerpolicy="no-referrer"
+            onerror="handleImageError(this)"
           />
         </div>
 
@@ -424,8 +685,12 @@
         </div>
 
         <img
-          src="${item.image || "https://via.placeholder.com/700x500?text=Food"}"
+          src="${getImageUrl(item.image)}"
           alt="${escapeHtml(item.name)}"
+          loading="lazy"
+          decoding="async"
+          referrerpolicy="no-referrer"
+          onerror="handleImageError(this)"
           style="width:100%;border-radius:16px;aspect-ratio:4/3;object-fit:cover;margin-bottom:14px;"
         />
 
@@ -949,8 +1214,12 @@
         <div class="admin-menu-card">
           <div class="admin-menu-thumb">
             <img
-              src="${item.image || "https://via.placeholder.com/600x450?text=Menu+Item"}"
+              src="${getImageUrl(item.image)}"
               alt="${escapeHtml(item.name)}"
+              loading="lazy"
+              decoding="async"
+              referrerpolicy="no-referrer"
+              onerror="handleImageError(this)"
             />
           </div>
 

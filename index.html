@@ -1268,12 +1268,27 @@
 
 
 
-    function toggleMobileMenu(){
-  document.getElementById("siteNav").classList.toggle("open");
+  function toggleMobileMenu(){
+  const nav = document.getElementById("siteNav");
+  const btn = document.querySelector(".mobile-menu-btn");
+
+  nav.classList.toggle("open");
+
+  const isOpen = nav.classList.contains("open");
+  btn.classList.toggle("active", isOpen);
+  btn.innerHTML = isOpen ? "×" : "☰";
 }
 
 function closeMobileMenu(){
-  document.getElementById("siteNav").classList.remove("open");
+  const nav = document.getElementById("siteNav");
+  const btn = document.querySelector(".mobile-menu-btn");
+
+  nav.classList.remove("open");
+
+  if (btn) {
+    btn.classList.remove("active");
+    btn.innerHTML = "☰";
+  }
 }
     saveCart();
     updateAuthUI();

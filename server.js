@@ -29,15 +29,17 @@ const {
   OWNER_EMAIL,
   PUBLIC_BASE_URL,
   GITHUB_PAGES_ORIGIN,
+  FRONTEND_ORIGIN,
 } = process.env;
 
 const JWT_SECRET = String(JWT_SECRET_RAW || "").replace(/\s+/g, "").trim();
+const ADMIN_KEY = String(ADMIN_API_KEY || "").trim();
 
 if (!MONGODB_URI) {
   console.error("❌ Missing MONGODB_URI");
   process.exit(1);
 }
-if (!ADMIN_API_KEY) {
+if (!ADMIN_KEY) {
   console.error("❌ Missing ADMIN_API_KEY");
   process.exit(1);
 }
@@ -54,36 +56,55 @@ const allowedOrigins = [
   "http://127.0.0.1:5500",
   "http://localhost:3000",
   "http://127.0.0.1:3000",
-  "https://communitykitchencafe.com", 
   "https://eshetu70.github.io",
-].filter(Boolean);
-
-if (GITHUB_PAGES_ORIGIN) allowedOrigins.push(String(GITHUB_PAGES_ORIGIN).trim());
+  "https://communitykitchencafe.com",
+  "https://www.communitykitchencafe.com",
+  GITHUB_PAGES_ORIGIN,
+  FRONTEND_ORIGIN,
+]
+  .map((origin) => String(origin || "").trim().replace(/\/+$/, ""))
+  .filter(Boolean);
 
 function isAllowed(origin) {
   if (!origin) return true;
+
   try {
-    const u = new URL(origin);
-    if (allowedOrigins.includes(origin)) return true;
+    const cleanOrigin = String(origin).trim().replace(/\/+$/, "");
+    const u = new URL(cleanOrigin);
+
+    if (allowedOrigins.includes(cleanOrigin)) return true;
+
+    // GitHub Pages old frontend
     if (u.protocol === "https:" && u.hostname === "eshetu70.github.io") return true;
+
+    // New GoDaddy/custom domain frontend
+    if (
+      u.protocol === "https:" &&
+      (u.hostname === "communitykitchencafe.com" ||
+        u.hostname === "www.communitykitchencafe.com")
+    ) {
+      return true;
+    }
+
     return false;
   } catch {
     return false;
   }
 }
 
-app.use(
-  cors({
-    origin: (origin, cb) => {
-      if (!origin) return cb(null, true);
-      if (isAllowed(origin)) return cb(null, true);
-      return cb(new Error("CORS blocked: " + origin));
-    },
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "x-admin-key"],
-  })
-);
-app.options(/.*/, cors());
+const corsOptions = {
+  origin: (origin, cb) => {
+    if (isAllowed(origin)) return cb(null, true);
+    return cb(new Error("CORS blocked: " + origin));
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "x-admin-key"],
+  credentials: true,
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
 
 // ✅ IMPORTANT FIX:
 // Do NOT save uploaded images to Render local /uploads folder.
@@ -226,8 +247,8 @@ function escapeHtml(str) {
 }
 
 function requireAdmin(req, res, next) {
-  const key = req.headers["x-admin-key"];
-  if (!key || key !== ADMIN_API_KEY) {
+  const key = String(req.headers["x-admin-key"] || "").trim();
+  if (!key || key !== ADMIN_KEY) {
     return res.status(401).json({ error: "Unauthorized (admin key required)" });
   }
   next();

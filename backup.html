@@ -1,0 +1,1319 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Community Kitchen Café</title>
+  <link rel="stylesheet" href="styles.css" />
+
+
+
+  <!-- Full Favicon Code - Add inside your <head> section -->
+
+<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+
+<!-- Apple / iPhone Icon -->
+<link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+
+<!-- Android / Chrome Icons -->
+<link rel="icon" type="image/png" sizes="192x192" href="images/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="images/android-chrome-512x512.png">
+
+<!-- Browser Theme Color -->
+<meta name="theme-color" content="#8B4513">
+
+
+<style>
+  /* Professional restaurant hero + reliable image UI */
+  :root{
+    --ckc-brown:#6f3f1f;
+    --ckc-caramel:#c17a36;
+    --ckc-cream:#fff7ed;
+    --ckc-dark:#1f130b;
+    --ckc-muted:#6b5b4c;
+  }
+
+  .hero{
+    padding-top: 34px;
+  }
+
+  .hero-box.pro-restaurant-hero{
+    position: relative;
+    overflow: hidden;
+    min-height: 520px;
+    display: grid;
+    grid-template-columns: minmax(0,1.1fr) minmax(320px,.9fr);
+    align-items: center;
+    gap: 34px;
+    padding: 48px;
+    border-radius: 34px;
+    color: #fff;
+    background:
+      linear-gradient(90deg, rgba(31,19,11,.92), rgba(85,48,23,.82), rgba(31,19,11,.35)),
+      url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+    box-shadow: 0 24px 70px rgba(47,28,13,.24);
+  }
+
+  .hero-eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 14px;
+    border:1px solid rgba(255,255,255,.26);
+    border-radius:999px;
+    background:rgba(255,255,255,.12);
+    backdrop-filter: blur(8px);
+    font-size:.88rem;
+    font-weight:700;
+    letter-spacing:.02em;
+    margin-bottom:18px;
+  }
+
+  .hero-title{
+    max-width:760px;
+    font-size: clamp(2.6rem, 6vw, 5.8rem);
+    line-height:.93;
+    letter-spacing:-.06em;
+    margin:0 0 18px;
+    font-weight:900;
+  }
+
+  .hero-title span{
+    color:#ffd99b;
+  }
+
+  .hero-subtitle{
+    max-width:620px;
+    color:rgba(255,255,255,.88);
+    font-size: clamp(1.05rem, 2vw, 1.28rem);
+    line-height:1.7;
+    margin:0 0 26px;
+  }
+
+  .hero-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    align-items:center;
+    margin-bottom:28px;
+  }
+
+  .hero-actions .btn{
+    min-height:48px;
+    border-radius:999px;
+    padding:0 22px;
+  }
+
+  .hero-secondary{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    text-decoration:none;
+    border:1px solid rgba(255,255,255,.28);
+    background:rgba(255,255,255,.12);
+  }
+
+  .hero-trust-row{
+    display:grid;
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    gap:12px;
+    max-width:650px;
+  }
+
+  .hero-trust-card{
+    padding:16px;
+    border-radius:20px;
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.18);
+    backdrop-filter: blur(10px);
+  }
+
+  .hero-trust-card strong{
+    display:block;
+    font-size:1.28rem;
+    margin-bottom:3px;
+  }
+
+  .hero-trust-card small{
+    color:rgba(255,255,255,.78);
+    line-height:1.35;
+  }
+
+  .hero-feature-card{
+    justify-self:end;
+    width:min(100%, 390px);
+    border-radius:30px;
+    background:rgba(255,248,238,.96);
+    color:var(--ckc-dark);
+    padding:16px;
+    box-shadow:0 26px 70px rgba(0,0,0,.32);
+    border:1px solid rgba(255,255,255,.5);
+  }
+
+  .hero-feature-card img{
+    width:100%;
+    aspect-ratio:4/3;
+    object-fit:cover;
+    border-radius:22px;
+    display:block;
+    background:#f3e6d7;
+  }
+
+  .hero-feature-body{
+    padding:16px 8px 8px;
+  }
+
+  .hero-feature-body h3{
+    margin:0 0 6px;
+    font-size:1.35rem;
+  }
+
+  .hero-feature-body p{
+    margin:0 0 14px;
+    color:var(--ckc-muted);
+    line-height:1.55;
+  }
+
+  .hero-badge-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+
+  .hero-badge-row span{
+    padding:7px 10px;
+    border-radius:999px;
+    background:#fff0dc;
+    color:#794719;
+    font-size:.82rem;
+    font-weight:800;
+  }
+
+  img.menu-img-loading{
+    background:#f4eadf;
+  }
+
+  .menu-card-media img,
+  .admin-menu-thumb img,
+  .modal img{
+    background:#f4eadf;
+  }
+
+  @media (max-width: 860px){
+    .hero-box.pro-restaurant-hero{
+      grid-template-columns:1fr;
+      padding:30px 22px;
+      min-height:auto;
+      border-radius:26px;
+    }
+    .hero-feature-card{
+      justify-self:stretch;
+      width:100%;
+    }
+    .hero-trust-row{
+      grid-template-columns:1fr;
+    }
+    .hero-title{
+      letter-spacing:-.04em;
+    }
+  }
+</style>
+
+</head>
+<body>
+  <header>
+  <nav class="container">
+    <div class="brand" onclick="handleSecretAdminClick()">
+      <img src="images/Community Kitchen Cafe logo design (1).png" alt="Community Kitchen Café Logo" class="brand-logo" />
+      <div class="brand-text">
+        <span class="brand-name">Community Kitchen Café</span>
+        <span class="brand-sub">Food with a Purpose</span>
+      </div>
+    </div>
+
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Open menu">
+      ☰
+    </button>
+
+    <div class="nav-actions nav-clean" id="siteNav">
+      <a href="#" class="nav-link" onclick="showView('shop'); closeMobileMenu(); return false;">Menu</a>
+      <a href="#" class="nav-link" onclick="openOrders(); closeMobileMenu(); return false;">My Orders</a>
+      <a href="#" class="nav-link" onclick="openCart(); closeMobileMenu(); return false;">Cart (<span id="cartCount">0</span>)</a>
+      <a href="#" class="nav-link nav-link-accent" onclick="openAccount(); closeMobileMenu(); return false;" id="authBtn">Login</a>
+    </div>
+  </nav>
+</header>
+
+  <section class="container hero" id="shopView">
+    <div class="hero-box pro-restaurant-hero">
+      <div class="hero-copy">
+        <div class="hero-eyebrow">🍽️ Fresh • Local • Made with Purpose</div>
+        <h1 class="hero-title">Community food that feels like <span>home.</span></h1>
+        <p class="hero-subtitle">
+          Order fresh breakfast, lunch, drinks, desserts, and catering from Community Kitchen Café.
+          Simple online ordering, easy pickup, and meals prepared with care.
+        </p>
+
+        <div class="hero-actions">
+          <button class="btn primary" onclick="window.scrollTo({top:document.getElementById('menuGrid').offsetTop-70,behavior:'smooth'})">
+            Order Online
+          </button>
+          <a class="btn hero-secondary" href="https://www.google.com/maps?q=811+N+Charlotte+Ave+Monroe+NC+28110" target="_blank">
+            Get Directions
+          </a>
+        </div>
+
+        <div class="hero-trust-row">
+          <div class="hero-trust-card"><strong>7AM–3PM</strong><small>Fresh daytime café meals</small></div>
+          <div class="hero-trust-card"><strong>Online</strong><small>Order and track status</small></div>
+          <div class="hero-trust-card"><strong>Catering</strong><small>Food for groups and events</small></div>
+        </div>
+      </div>
+
+      <div class="hero-feature-card">
+        <img src="https://images.unsplash.com/photo-1543353071-10c8ba85a904?auto=format&fit=crop&w=900&q=70"
+             alt="Fresh café meal"
+             loading="eager"
+             decoding="async"
+             onerror="handleImageError(this)">
+        <div class="hero-feature-body">
+          <h3>Today’s Fresh Menu</h3>
+          <p>Browse customer favorites and add items to your cart in seconds.</p>
+          <div class="hero-badge-row">
+            <span>Breakfast</span><span>Lunch</span><span>Drinks</span><span>Dessert</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="filters">
+      <div class="filters-row">
+        <input id="searchBox" placeholder="Search menu item..." oninput="renderMenu()" />
+        <select id="categoryFilter" onchange="renderMenu()">
+          <option value="all">All Categories</option>
+          <option value="breakfast">Breakfast</option>
+          <option value="lunch">Lunch</option>
+          <option value="catering">Catering</option>
+          <option value="drink">Drinks</option>
+          <option value="dessert">Dessert</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid" id="menuGrid"></div>
+  </section>
+
+  <section class="container hidden" id="ordersView">
+    <div class="panel">
+      <h2>My Orders</h2>
+      <p class="small">Login required to see your order history and updated status.</p>
+      <div id="ordersList" class="list"></div>
+    </div>
+  </section>
+
+  <section class="container hidden" id="adminView">
+    <div class="panel">
+      <div class="actions" style="justify-content:space-between;align-items:center;">
+        <h2>Admin Dashboard</h2>
+        <button class="btn danger" onclick="logoutAdmin()">Logout</button>
+      </div>
+
+      <p class="small">Upload menu items, edit/delete them, add food details and option groups, and update customer order statuses.</p>
+
+      <div class="row">
+        <div>
+          <h3 style="margin-bottom:10px">Add / Edit Menu Item</h3>
+
+          <form id="menuForm" class="stack">
+            <input type="hidden" id="menuId" />
+            <input id="menuName" placeholder="Item name" required />
+            <textarea id="menuDesc" placeholder="Description"></textarea>
+
+            <select id="menuCategory">
+              <option value="breakfast">Breakfast</option>
+              <option value="lunch">Lunch</option>
+              <option value="catering">Catering</option>
+              <option value="drink">Drink</option>
+              <option value="dessert">Dessert</option>
+            </select>
+
+            <input id="menuPrice" type="number" min="0" step="0.01" placeholder="Price" required />
+
+            <select id="menuAvailable">
+              <option value="true">Available</option>
+              <option value="false">Unavailable</option>
+            </select>
+
+            <textarea id="menuIngredients" placeholder="Ingredients (comma separated)"></textarea>
+            <input id="menuCalories" type="number" min="0" placeholder="Calories" />
+            <textarea id="menuAllergens" placeholder="Allergens (comma separated)"></textarea>
+
+            <div class="row">
+              <input id="menuProtein" placeholder="Protein (e.g. 20g)" />
+              <input id="menuCarbs" placeholder="Carbs (e.g. 35g)" />
+            </div>
+
+            <div class="row">
+              <input id="menuFat" placeholder="Fat (e.g. 12g)" />
+              <input id="menuSodium" placeholder="Sodium (e.g. 680mg)" />
+            </div>
+
+            <textarea id="menuOptionGroups" placeholder='Option groups JSON example:
+[
+  {
+    "name":"Choose your sausage",
+    "type":"radio",
+    "required":true,
+    "options":["Pork Sausage","Turkey Sausage","Chicken Sausage","No Sausage"]
+  }
+]'></textarea>
+
+            <input id="menuImage" type="file" accept="image/*" />
+
+            <div class="actions">
+              <button type="submit" class="btn primary">Save Menu Item</button>
+              <button type="button" class="btn" onclick="resetMenuForm()">Reset</button>
+            </div>
+
+            <div id="menuMsg" class="small"></div>
+          </form>
+
+          <h3 style="margin-top:22px;margin-bottom:10px">Existing Menu Items</h3>
+          <div id="adminMenuListWrap"></div>
+        </div>
+
+        <div>
+          <h3 style="margin-bottom:10px">Customer Orders</h3>
+          <div id="adminOrders" class="list"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="modalRoot"></div>
+
+
+  <section class="location-section">
+  <div class="container location-grid">
+
+    <!-- LEFT SIDE (TEXT) -->
+    <div class="location-info">
+      <h2>Visit Us</h2>
+      <p class="location-sub">
+        Community Kitchen Café is proud to serve fresh, delicious meals in the heart of Monroe.
+      </p>
+
+      <div class="location-card">
+        <h3>📍 Address</h3>
+        <p>811 N Charlotte Ave<br>Monroe, NC 28110</p>
+      </div>
+
+      <div class="location-card">
+        <h3>⏰ Hours</h3>
+        <p>Mon – Sat: 7:00 AM – 3:00 PM<br>
+           Sun: Closed</p>
+      </div>
+
+      <div class="location-actions">
+        <a href="https://www.google.com/maps?q=811+N+Charlotte+Ave+Monroe+NC+28110"
+           target="_blank"
+           class="btn primary">
+          Open in Google Maps
+        </a>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDE (MAP) -->
+    <div class="location-map">
+      <iframe
+        src="https://www.google.com/maps?q=811+N+Charlotte+Ave+Monroe+NC+28110&output=embed"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+    </div>
+
+  </div>
+</section>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-grid">
+        <div class="footer-section">
+          <div class="footer-logo">
+            <img src="images/Community Kitchen Cafe logo design (1).png" alt="Community Kitchen Café Logo" class="footer-logo-img" />
+          </div>
+          <h2 class="footer-title">Community Kitchen Café</h2>
+          <p class="footer-desc">
+            Serving fresh meals with purpose. Supporting the community through food,
+            training, and opportunity.
+          </p>
+        </div>
+
+        <div class="footer-section">
+          <h3>Quick Links</h3>
+          <a href="#" onclick="showView('shop')">Home</a>
+          <a href="#" onclick="showView('shop')">Menu</a>
+          <a href="#" onclick="openCart()">Order Online</a>
+          <a href="#">About Us</a>
+        </div>
+
+        <div class="footer-section">
+          <h3>Our Services</h3>
+          <a href="#">Breakfast</a>
+          <a href="#">Lunch</a>
+          <a href="#">Catering</a>
+          <a href="#">Events</a>
+        </div>
+
+        <div class="footer-section">
+          <h3>Contact</h3>
+          <p>📍 Charlotte, NC</p>
+          <p>📞 (980) 123-4567</p>
+          <p>📧 communitykitchen@gmail.com</p>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        © 2026 Community Kitchen Café. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const API_BASE = "https://cafe-4nv2.onrender.com";
+    const TOKEN_KEY = "ckc_token";
+    const USER_KEY = "ckc_user";
+    const ADMIN_KEY_STORAGE = "ckc_admin_key";
+
+    let MENU = [];
+    let CART = JSON.parse(localStorage.getItem("ckc_cart") || "[]");
+
+    const $ = (id) => document.getElementById(id);
+
+    function saveCart() {
+      localStorage.setItem("ckc_cart", JSON.stringify(CART));
+      $("cartCount").textContent = CART.reduce((s, i) => s + i.qty, 0);
+    }
+
+    function getToken() {
+      return localStorage.getItem(TOKEN_KEY) || "";
+    }
+
+    function getUser() {
+      try {
+        return JSON.parse(localStorage.getItem(USER_KEY) || "null");
+      } catch {
+        return null;
+      }
+    }
+
+    function getAdminKey() {
+      return localStorage.getItem(ADMIN_KEY_STORAGE) || "";
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function getImageUrl(image) {
+      const fallback = "https://images.unsplash.com/photo-1543353071-10c8ba85a904?auto=format&fit=crop&w=900&q=70";
+      if (!image) return fallback;
+
+      const clean = String(image).trim();
+      if (!clean) return fallback;
+
+      // Works with Cloudinary/Firebase/S3 absolute URLs.
+      if (/^https?:\/\//i.test(clean)) return clean;
+
+      // Works if backend returns /uploads/file.jpg or uploads/file.jpg.
+      const path = clean.startsWith("/") ? clean : "/" + clean;
+      return API_BASE + path;
+    }
+
+    function handleImageError(img) {
+      img.onerror = null;
+      img.src = "https://images.unsplash.com/photo-1543353071-10c8ba85a904?auto=format&fit=crop&w=900&q=70";
+    }
+
+    async function fetchJSON(url, options = {}) {
+      const res = await fetch(url, options);
+      const text = await res.text();
+      let json = {};
+      try {
+        json = text ? JSON.parse(text) : {};
+      } catch {}
+      if (!res.ok) throw new Error(json.error || json.details || text || "Request failed");
+      return json;
+    }
+
+    function setUserSession(token, user) {
+      localStorage.setItem(TOKEN_KEY, token);
+      localStorage.setItem(USER_KEY, JSON.stringify(user));
+      updateAuthUI();
+    }
+
+    function logout() {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
+      updateAuthUI();
+      showView("shop");
+    }
+
+    function updateAuthUI() {
+  const user = getUser();
+  const authEl = $("authBtn");
+  authEl.textContent = user ? `${user.fullName} (Logout)` : "Login";
+  authEl.onclick = (e) => {
+    e.preventDefault();
+    user ? logout() : openAccount();
+  };
+}
+    function showView(view) {
+      $("shopView").classList.add("hidden");
+      $("ordersView").classList.add("hidden");
+      $("adminView").classList.add("hidden");
+
+      if (view === "shop") $("shopView").classList.remove("hidden");
+      if (view === "orders") $("ordersView").classList.remove("hidden");
+      if (view === "admin") $("adminView").classList.remove("hidden");
+    }
+
+    async function loadMenu() {
+      try {
+        const json = await fetchJSON(API_BASE + "/api/menu");
+        MENU = Array.isArray(json.items) ? json.items : [];
+        localStorage.setItem("ckc_menu_cache", JSON.stringify(MENU));
+      } catch (err) {
+        try {
+          MENU = JSON.parse(localStorage.getItem("ckc_menu_cache") || "[]");
+        } catch {
+          MENU = [];
+        }
+        console.warn("Menu loaded from cache because network failed:", err.message);
+      }
+      renderMenu();
+    }
+
+   function renderMenu() {
+  const q = $("searchBox").value.trim().toLowerCase();
+  const cat = $("categoryFilter").value;
+
+  let data = [...MENU];
+  if (cat !== "all") data = data.filter((i) => i.category === cat);
+
+  if (q) {
+    data = data.filter((i) =>
+      [i.name, i.description, i.category].join(" ").toLowerCase().includes(q)
+    );
+  }
+
+  $("menuGrid").innerHTML =
+    data.map((item) => `
+      <article class="menu-card-v2">
+        <div class="menu-card-media">
+          <img
+            src="${getImageUrl(item.image)}"
+            alt="${escapeHtml(item.name)}"
+            loading="lazy"
+            decoding="async"
+            referrerpolicy="no-referrer"
+            onerror="handleImageError(this)"
+          />
+        </div>
+
+        <div class="menu-card-content">
+          <h3 class="menu-card-title">${escapeHtml(item.name)}</h3>
+        </div>
+
+        <div class="menu-card-footer">
+          <button
+            class="menu-action"
+            ${item.available === false ? "disabled" : ""}
+            onclick='openFoodOptions(${JSON.stringify(item).replace(/'/g, "&#39;")})'
+          >
+            <span class="menu-action-icon">🧾</span>
+            <span>Order Now</span>
+          </button>
+
+          <a class="menu-action menu-action-link" href="food-details.html?id=${item._id}">
+            <span class="menu-action-icon">⊕</span>
+            <span>See Details</span>
+          </a>
+        </div>
+      </article>
+    `).join("") || `<div class="item">No menu items found.</div>`;
+}
+
+    function openFoodOptions(item){
+  const groups = Array.isArray(item.optionGroups) ? item.optionGroups : [];
+
+  const groupsHtml = groups.map((group, gi) => `
+    <div class="panel" style="margin-top:14px;">
+      <h4>${escapeHtml(group.name)}</h4>
+      <div class="small" style="margin-bottom:10px;">
+        ${group.required ? "Required" : "Optional"}
+      </div>
+
+      ${(group.options || []).map(opt => `
+        <label style="display:flex;gap:10px;align-items:center;margin-bottom:8px;">
+          <input
+            type="${group.type === "checkbox" ? "checkbox" : "radio"}"
+            name="group_${gi}"
+            value="${escapeHtml(opt)}"
+          />
+          ${escapeHtml(opt)}
+        </label>
+      `).join("")}
+    </div>
+  `).join("");
+
+  setModal(`
+    <div class="modal-wrap" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <div class="actions" style="justify-content:space-between;margin-bottom:10px">
+          <h3>${escapeHtml(item.name)}</h3>
+          <button class="btn" onclick="closeModal()">Close</button>
+        </div>
+
+        <img
+          src="${getImageUrl(item.image)}"
+          alt="${escapeHtml(item.name)}"
+          loading="lazy"
+          decoding="async"
+          referrerpolicy="no-referrer"
+          onerror="handleImageError(this)"
+          style="width:100%;border-radius:16px;aspect-ratio:4/3;object-fit:cover;margin-bottom:14px;"
+        />
+
+        <div class="desc">${escapeHtml(item.description || "")}</div>
+        <div class="price" style="margin-bottom:10px;">$${Number(item.price || 0).toFixed(2)}</div>
+
+        ${groupsHtml}
+
+        <div class="actions" style="margin-top:16px;">
+          <button class="btn primary" onclick='confirmFoodOrder(${JSON.stringify(item).replace(/'/g, "&#39;")})'>
+            Order Online
+          </button>
+        </div>
+      </div>
+    </div>
+  `);
+}
+    function confirmFoodOrder(item){
+  try {
+    const selected = [];
+
+    (item.optionGroups || []).forEach((group, gi) => {
+      const checked = Array.from(document.querySelectorAll(`[name="group_${gi}"]:checked`))
+        .map(el => el.value);
+
+      if (group.required && checked.length === 0) {
+        throw new Error(`Please choose: ${group.name}`);
+      }
+
+      selected.push({
+        name: group.name,
+        values: checked
+      });
+    });
+
+    const found = CART.find(x =>
+      x._id === item._id &&
+      JSON.stringify(x.selectedOptions || []) === JSON.stringify(selected)
+    );
+
+    if (found) {
+      found.qty += 1;
+    } else {
+      CART.push({
+        _id: item._id,
+        menuItemId: item._id,
+        name: item.name,
+        price: Number(item.price || 0),
+        image: item.image || "",
+        qty: 1,
+        selectedOptions: selected
+      });
+    }
+
+    saveCart();
+    closeModal();
+    openCart();
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
+    function setModal(html) {
+      $("modalRoot").innerHTML = html;
+    }
+
+    function closeModal() {
+      setModal("");
+    }
+
+    function openAccount() {
+      setModal(`
+        <div class="modal-wrap" onclick="if(event.target===this)closeModal()">
+          <div class="modal">
+            <div class="actions" style="justify-content:space-between;margin-bottom:10px">
+              <h3>Account</h3>
+              <button class="btn" onclick="closeModal()">Close</button>
+            </div>
+
+            <div class="row">
+              <form class="stack" onsubmit="register(event)">
+                <h4>Create Account</h4>
+                <input id="regName" placeholder="Full name" required />
+                <input id="regEmail" type="email" placeholder="Email" required />
+                <input id="regPassword" type="password" placeholder="Password" required />
+                <button class="btn primary" type="submit">Register</button>
+              </form>
+
+              <form class="stack" onsubmit="login(event)">
+                <h4>Login</h4>
+                <input id="loginEmail" type="email" placeholder="Email" required />
+                <input id="loginPassword" type="password" placeholder="Password" required />
+                <button class="btn primary" type="submit">Login</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      `);
+    }
+
+    async function register(e) {
+      e.preventDefault();
+      try {
+        const json = await fetchJSON(API_BASE + "/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fullName: $("regName").value.trim(),
+            email: $("regEmail").value.trim(),
+            password: $("regPassword").value
+          })
+        });
+
+        setUserSession(json.token, json.user);
+        closeModal();
+        alert("Account created");
+      } catch (err) {
+        alert("Register failed: " + err.message);
+      }
+    }
+
+    async function login(e) {
+      e.preventDefault();
+      try {
+        const json = await fetchJSON(API_BASE + "/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: $("loginEmail").value.trim(),
+            password: $("loginPassword").value
+          })
+        });
+
+        setUserSession(json.token, json.user);
+        closeModal();
+        alert("Logged in");
+      } catch (err) {
+        alert("Login failed: " + err.message);
+      }
+    }
+
+    function openCart() {
+      const total = CART.reduce((s, i) => s + i.price * i.qty, 0);
+
+      setModal(`
+        <div class="modal-wrap" onclick="if(event.target===this)closeModal()">
+          <div class="modal">
+            <div class="actions" style="justify-content:space-between;margin-bottom:10px">
+              <h3>Cart</h3>
+              <button class="btn" onclick="closeModal()">Close</button>
+            </div>
+
+            <div class="list">
+              ${
+                CART.length
+                  ? CART.map((i, idx) => `
+                      <div class="item">
+                        <div class="item-top">
+                          <div>
+                            <b>${escapeHtml(i.name)}</b>
+                            <div class="small">$${Number(i.price).toFixed(2)}</div>
+                            ${(i.selectedOptions || []).map(g => `
+                              <div class="small">${escapeHtml(g.name)}: ${(g.values || []).map(escapeHtml).join(", ") || "None"}</div>
+                            `).join("")}
+                          </div>
+
+                          <div class="qty">
+                            <button onclick="changeQty(${idx},-1)">-</button>
+                            <span>${i.qty}</span>
+                            <button onclick="changeQty(${idx},1)">+</button>
+                            <button class="btn danger" onclick="removeCartItem(${idx})">Remove</button>
+                          </div>
+                        </div>
+                      </div>
+                    `).join("")
+                  : '<div class="item">Your cart is empty.</div>'
+              }
+            </div>
+
+            <div style="margin-top:14px;font-weight:700">Total: $${total.toFixed(2)}</div>
+            <div class="actions" style="margin-top:14px">
+              <button class="btn primary" onclick="openCheckout()" ${CART.length ? "" : "disabled"}>
+                Checkout
+              </button>
+            </div>
+          </div>
+        </div>
+      `);
+    }
+
+    function changeQty(idx, delta) {
+      CART[idx].qty += delta;
+      if (CART[idx].qty <= 0) CART.splice(idx, 1);
+      saveCart();
+      openCart();
+    }
+
+    function removeCartItem(idx) {
+      CART.splice(idx, 1);
+      saveCart();
+      openCart();
+    }
+
+    function openCheckout() {
+      if (!getToken()) return alert("Please login first.");
+
+      setModal(`
+        <div class="modal-wrap" onclick="if(event.target===this)closeModal()">
+          <div class="modal">
+            <div class="actions" style="justify-content:space-between;margin-bottom:10px">
+              <h3>Checkout</h3>
+              <button class="btn" onclick="closeModal()">Close</button>
+            </div>
+
+            <form class="stack" onsubmit="submitOrder(event)">
+              <input id="checkoutName" placeholder="Full name" required value="${escapeHtml(getUser()?.fullName || "")}" />
+              <input id="checkoutPhone" placeholder="Phone number" required />
+              <input id="checkoutEmail" type="email" placeholder="Email" value="${escapeHtml(getUser()?.email || "")}" />
+              <input id="checkoutPickupTime" placeholder="Pickup time (optional)" />
+              <textarea id="checkoutNotes" placeholder="Notes (optional)"></textarea>
+              <select id="checkoutPayment">
+                <option value="cash">Cash</option>
+                <option value="card">Card</option>
+              </select>
+              <button class="btn primary" type="submit">Place Order</button>
+            </form>
+          </div>
+        </div>
+      `);
+    }
+
+    async function submitOrder(e) {
+      e.preventDefault();
+
+      const json = await fetchJSON(API_BASE + "/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`
+        },
+        body: JSON.stringify({
+          items: CART,
+          customer: {
+            fullName: $("checkoutName").value.trim(),
+            phone: $("checkoutPhone").value.trim(),
+            email: $("checkoutEmail").value.trim(),
+            pickupTime: $("checkoutPickupTime").value.trim(),
+            notes: $("checkoutNotes").value.trim()
+          },
+          payment: {
+            method: $("checkoutPayment").value
+          }
+        })
+      });
+
+      CART = [];
+      saveCart();
+      closeModal();
+      alert("Order placed: " + json.order.orderId);
+      openOrders();
+    }
+
+    async function openOrders() {
+      if (!getToken()) return alert("Please login first.");
+
+      showView("orders");
+      const json = await fetchJSON(API_BASE + "/api/orders/my", {
+        headers: {
+          Authorization: `Bearer ${getToken()}`
+        }
+      });
+
+      const orders = json.orders || [];
+
+      $("ordersList").innerHTML = orders.length
+        ? orders.map((o) => `
+            <div class="item">
+              <div class="item-top">
+                <div>
+                  <b>${escapeHtml(o.orderId)}</b>
+                  <div class="small">${new Date(o.createdAt).toLocaleString()}</div>
+                </div>
+                <div>
+                  <div>Status: <b>${escapeHtml(o.status)}</b></div>
+                  <div>Payment: <b>${escapeHtml(o.payment?.status || "pending")}</b></div>
+                  <div>Total: <b>$${Number(o.total || 0).toFixed(2)}</b></div>
+                </div>
+              </div>
+
+              <div class="list">
+                ${(o.items || []).map((it) => `
+                  <div class="item">
+                    <b>${escapeHtml(it.name)}</b> × ${it.qty} — $${Number(it.price).toFixed(2)}
+                    ${(it.selectedOptions || []).map(g => `
+                      <div class="small">${escapeHtml(g.name)}: ${(g.values || []).map(escapeHtml).join(", ") || "None"}</div>
+                    `).join("")}
+                  </div>
+                `).join("")}
+              </div>
+            </div>
+          `).join("")
+        : '<div class="item">No orders yet.</div>';
+    }
+
+    function clearAdminSession() {
+      localStorage.removeItem(ADMIN_KEY_STORAGE);
+    }
+
+    async function openAdmin() {
+      let key = getAdminKey();
+
+      if (!key) {
+        key = prompt("Enter admin key");
+        if (!key) return;
+      }
+
+      try {
+        await fetchJSON(API_BASE + "/api/admin/ping", {
+          headers: { "x-admin-key": key.trim() }
+        });
+
+        localStorage.setItem(ADMIN_KEY_STORAGE, key.trim());
+      } catch (err) {
+        localStorage.removeItem(ADMIN_KEY_STORAGE);
+        return alert("Admin key invalid");
+      }
+
+      showView("admin");
+      await loadMenu();
+      await loadAdminOrders();
+      await renderAdminMenuHelpers();
+    }
+
+    function logoutAdmin() {
+      clearAdminSession();
+      showView("shop");
+      alert("Admin logged out");
+    }
+
+    async function loadAdminOrders() {
+      const json = await fetchJSON(API_BASE + "/api/admin/orders", {
+        headers: { "x-admin-key": getAdminKey() }
+      });
+
+      const orders = json.orders || [];
+
+      $("adminOrders").innerHTML = orders.length
+        ? orders.map((o) => `
+            <div class="item">
+              <div class="item-top">
+                <div>
+                  <b>${escapeHtml(o.orderId)}</b>
+                  <div class="small">${escapeHtml(o.customer?.fullName || "")} • ${escapeHtml(o.customer?.email || "")}</div>
+                </div>
+                <div class="small">$${Number(o.total || 0).toFixed(2)}</div>
+              </div>
+
+              <div class="row" style="margin-top:10px">
+                <select id="status_${o._id}">
+                  ${["placed","confirmed","preparing","ready","completed","cancelled"].map((s) => `
+                    <option value="${s}" ${o.status === s ? "selected" : ""}>${s}</option>
+                  `).join("")}
+                </select>
+
+                <select id="pay_${o._id}">
+                  ${["pending","paid","failed"].map((s) => `
+                    <option value="${s}" ${o.payment?.status === s ? "selected" : ""}>${s}</option>
+                  `).join("")}
+                </select>
+              </div>
+
+              <div class="actions" style="margin-top:10px">
+                <button class="btn primary" onclick="updateOrder('${o._id}')">Update Order</button>
+                <button class="btn" onclick="emailCustomer('${o._id}')">Email Customer</button>
+              </div>
+            </div>
+          `).join("")
+        : '<div class="item">No orders yet.</div>';
+    }
+
+    async function updateOrder(id) {
+      await fetchJSON(API_BASE + "/api/admin/orders/" + encodeURIComponent(id), {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-key": getAdminKey()
+        },
+        body: JSON.stringify({
+          status: $("status_" + id).value,
+          paymentStatus: $("pay_" + id).value
+        })
+      });
+
+      alert("Order updated");
+      loadAdminOrders();
+    }
+
+    async function emailCustomer(id) {
+      const subject = prompt("Email subject", "Community Kitchen Café — Order Update");
+      if (subject === null) return;
+
+      const message = prompt("Email message", "Your order has been updated.");
+      if (message === null) return;
+
+      await fetchJSON(API_BASE + "/api/admin/orders/" + encodeURIComponent(id) + "/email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-key": getAdminKey()
+        },
+        body: JSON.stringify({ subject, message })
+      });
+
+      alert("Email sent");
+    }
+
+    $("menuForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const id = $("menuId").value;
+      const fd = new FormData();
+
+      fd.append("name", $("menuName").value.trim());
+      fd.append("description", $("menuDesc").value.trim());
+      fd.append("category", $("menuCategory").value);
+      fd.append("price", $("menuPrice").value);
+      fd.append("available", $("menuAvailable").value);
+      fd.append("ingredients", $("menuIngredients").value.trim());
+      fd.append("calories", $("menuCalories").value.trim());
+      fd.append("allergens", $("menuAllergens").value.trim());
+      fd.append("protein", $("menuProtein").value.trim());
+      fd.append("carbs", $("menuCarbs").value.trim());
+      fd.append("fat", $("menuFat").value.trim());
+      fd.append("sodium", $("menuSodium").value.trim());
+      fd.append("optionGroups", $("menuOptionGroups").value.trim());
+
+      if ($("menuImage").files[0]) {
+        fd.append("image", $("menuImage").files[0]);
+      }
+
+      const method = id ? "PUT" : "POST";
+      const url = API_BASE + (id ? "/api/menu/" + encodeURIComponent(id) : "/api/menu");
+
+      try {
+        await fetchJSON(url, {
+          method,
+          headers: { "x-admin-key": getAdminKey() },
+          body: fd
+        });
+
+        $("menuMsg").textContent = "Saved successfully";
+        resetMenuForm();
+        await loadMenu();
+        await renderAdminMenuHelpers();
+      } catch (err) {
+        $("menuMsg").textContent = err.message;
+      }
+    });
+
+    function resetMenuForm() {
+      $("menuId").value = "";
+      $("menuName").value = "";
+      $("menuDesc").value = "";
+      $("menuCategory").value = "breakfast";
+      $("menuPrice").value = "";
+      $("menuAvailable").value = "true";
+      $("menuIngredients").value = "";
+      $("menuCalories").value = "";
+      $("menuAllergens").value = "";
+      $("menuProtein").value = "";
+      $("menuCarbs").value = "";
+      $("menuFat").value = "";
+      $("menuSodium").value = "";
+      $("menuOptionGroups").value = "";
+      $("menuImage").value = "";
+      $("menuMsg").textContent = "";
+    }
+
+    function editMenuItem(item) {
+      showView("admin");
+      $("menuId").value = item._id;
+      $("menuName").value = item.name || "";
+      $("menuDesc").value = item.description || "";
+      $("menuCategory").value = item.category || "breakfast";
+      $("menuPrice").value = item.price || "";
+      $("menuAvailable").value = String(item.available !== false);
+      $("menuIngredients").value = (item.ingredients || []).join(", ");
+      $("menuCalories").value = item.calories || "";
+      $("menuAllergens").value = (item.allergens || []).join(", ");
+      $("menuProtein").value = item.nutrition?.protein || "";
+      $("menuCarbs").value = item.nutrition?.carbs || "";
+      $("menuFat").value = item.nutrition?.fat || "";
+      $("menuSodium").value = item.nutrition?.sodium || "";
+      $("menuOptionGroups").value = item.optionGroups ? JSON.stringify(item.optionGroups, null, 2) : "";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    async function deleteMenuItem(id) {
+      if (!confirm("Delete this menu item?")) return;
+
+      await fetchJSON(API_BASE + "/api/menu/" + encodeURIComponent(id), {
+        method: "DELETE",
+        headers: { "x-admin-key": getAdminKey() }
+      });
+
+      await loadMenu();
+      await renderAdminMenuHelpers();
+
+      if (!$("adminView").classList.contains("hidden")) {
+        loadAdminOrders();
+      }
+    }
+
+    async function renderAdminMenuHelpers() {
+      if ($("adminView").classList.contains("hidden")) return;
+
+      const helper = document.createElement("div");
+      helper.className = "list";
+
+      helper.innerHTML = MENU.map((item) => `
+        <div class="admin-menu-card">
+          <div class="admin-menu-thumb">
+            <img
+              src="${getImageUrl(item.image)}"
+              alt="${escapeHtml(item.name)}"
+              loading="lazy"
+              decoding="async"
+              referrerpolicy="no-referrer"
+              onerror="handleImageError(this)"
+            />
+          </div>
+
+          <div class="admin-menu-info">
+            <b>${escapeHtml(item.name)}</b>
+            <div class="small">${escapeHtml(item.category)} • $${Number(item.price || 0).toFixed(2)}</div>
+            <div class="small" style="margin-top:8px">${escapeHtml(item.description || "")}</div>
+          </div>
+
+          <div class="admin-menu-actions">
+            <button class="btn" onclick='editMenuItem(${JSON.stringify(item).replace(/'/g, "&#39;")})'>Edit</button>
+            <button class="btn danger" onclick="deleteMenuItem('${item._id}')">Delete</button>
+          </div>
+        </div>
+      `).join("");
+
+      const wrap = $("adminMenuListWrap");
+      wrap.innerHTML = "";
+      wrap.appendChild(helper);
+    }
+
+    let secretAdminClicks = 0;
+    let secretAdminTimer = null;
+
+    function handleSecretAdminClick() {
+      secretAdminClicks += 1;
+
+      clearTimeout(secretAdminTimer);
+      secretAdminTimer = setTimeout(() => {
+        secretAdminClicks = 0;
+      }, 1500);
+
+      if (secretAdminClicks >= 5) {
+        secretAdminClicks = 0;
+        openAdmin();
+      }
+    }
+
+    window.addEventListener("load", () => {
+      if (window.location.hash === "#owner-admin") {
+        openAdmin();
+      }
+    });
+
+
+
+
+
+ function toggleMobileMenu(){
+  const nav = document.getElementById("siteNav");
+  const btn = document.querySelector(".mobile-menu-btn");
+
+  if (!nav) return;
+
+  nav.classList.toggle("open");
+
+  const isOpen = nav.classList.contains("open");
+
+  if (btn) {
+    btn.classList.toggle("active", isOpen);
+    btn.innerHTML = isOpen ? "×" : "☰";
+    btn.setAttribute("aria-label", isOpen ? "Close menu" : "Open menu");
+  }
+}
+
+function closeMobileMenu(){
+  const nav = document.getElementById("siteNav");
+  const btn = document.querySelector(".mobile-menu-btn");
+
+  if (nav) nav.classList.remove("open");
+
+  if (btn) {
+    btn.classList.remove("active");
+    btn.innerHTML = "☰";
+    btn.setAttribute("aria-label", "Open menu");
+  }
+}
+
+document.addEventListener("click", function(e){
+  const nav = document.getElementById("siteNav");
+  const btn = document.querySelector(".mobile-menu-btn");
+
+  if (!nav || !btn) return;
+
+  const clickedInsideMenu = nav.contains(e.target);
+  const clickedButton = btn.contains(e.target);
+
+  if (nav.classList.contains("open") && !clickedInsideMenu && !clickedButton) {
+    closeMobileMenu();
+  }
+});
+    saveCart();
+    updateAuthUI();
+    loadMenu();
+  </script>
+</body>
+</html>

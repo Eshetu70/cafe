@@ -1,0 +1,915 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Menu — Community Kitchen Café</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <meta name="theme-color" content="#8B4513">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --brown:#5c2e0e;--caramel:#c17a36;--cream:#fdf6ee;
+      --warm:#fff8f0;--muted:#8c6e58;--border:#ede0d4;
+      --card:#ffffff;--clover:#1a5c38;--clover2:#2a7a4e;
+      --text:#1f130b;--text2:#6b5b4c;
+    }
+    html{scroll-behavior:smooth}
+    body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);min-height:100vh}
+
+    /* ── NAV ── */
+    .topbar{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(92,46,14,.07)}
+    .topbar-inner{max-width:1200px;margin:0 auto;padding:0 20px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--brown)}
+    .brand img{height:42px;width:42px;object-fit:contain}
+    .brand-name{display:block;font-family:'Playfair Display',serif;font-size:1rem;font-weight:700}
+    .brand-sub{display:block;font-size:.72rem;color:var(--muted)}
+    .nav-btns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .nbtn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:999px;font-size:.85rem;font-weight:700;text-decoration:none;border:none;cursor:pointer;transition:transform .15s,box-shadow .15s;white-space:nowrap}
+    .nbtn.outline{background:transparent;border:1.5px solid var(--border);color:var(--brown)}
+    .nbtn.outline:hover{background:var(--warm)}
+    .nbtn.green{background:linear-gradient(135deg,var(--clover),var(--clover2));color:#fff;box-shadow:0 3px 14px rgba(26,92,56,.25)}
+    .nbtn.green:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(26,92,56,.35)}
+    .nbtn.edit-mode-btn{background:linear-gradient(135deg,#7c3d12,#c17a36);color:#fff;box-shadow:0 3px 14px rgba(124,61,18,.25)}
+    .nbtn.edit-mode-btn.active{background:linear-gradient(135deg,#b91c1c,#ef4444)}
+    /* Admin controls: hidden until authenticated */
+    .admin-only{display:none!important}
+    body.admin-authed .admin-only{display:inline-flex!important}
+    /* Admin key modal */
+    .admin-modal-bd{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s ease}
+    .admin-modal-box{background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 24px 60px rgba(0,0,0,.3)}
+    .admin-modal-box h3{font-family:'Playfair Display',serif;font-size:1.4rem;margin-bottom:6px;color:#1f130b}
+    .admin-modal-box p{font-size:.85rem;color:#8c6e58;margin-bottom:20px;line-height:1.5}
+    .admin-key-input{width:100%;padding:12px 16px;border-radius:12px;border:1.5px solid #ede0d4;font-size:1rem;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:12px;transition:border-color .2s;letter-spacing:.08em}
+    .admin-key-input:focus{border-color:#c17a36}
+    .admin-submit{width:100%;padding:13px;border-radius:999px;border:none;cursor:pointer;background:linear-gradient(135deg,#5c2e0e,#c17a36);color:#fff;font-size:1rem;font-weight:800;margin-bottom:10px;transition:transform .15s}
+    .admin-submit:hover{transform:translateY(-1px)}
+    .admin-cancel-btn{width:100%;padding:10px;border-radius:999px;border:1.5px solid #ede0d4;background:transparent;cursor:pointer;font-size:.88rem;font-weight:700;color:#8c6e58}
+    .admin-err{color:#b91c1c;font-size:.82rem;margin-top:4px;text-align:center;min-height:18px}
+
+    /* ── HERO ── */
+    .hero{background:linear-gradient(135deg,#3b1a06 0%,#7c3d12 50%,#3b1a06 100%);color:#fff;text-align:center;padding:52px 20px 44px;position:relative;overflow:hidden}
+    .hero::before{content:'';position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1600&q=40') center/cover no-repeat;opacity:.12}
+    .hero-inner{position:relative;max-width:680px;margin:0 auto}
+    .hero-eye{display:inline-block;padding:5px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px;backdrop-filter:blur(6px)}
+    .hero h1{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,6vw,3.4rem);font-weight:900;line-height:1.05;margin-bottom:10px}
+    .hero h1 span{color:#ffd99b}
+    .hero p{color:rgba(255,255,255,.82);font-size:.95rem;line-height:1.65;margin-bottom:22px}
+    .hero-cta{display:inline-flex;align-items:center;gap:8px;padding:13px 28px;border-radius:999px;background:linear-gradient(135deg,var(--clover),var(--clover2));color:#fff;text-decoration:none;font-weight:800;font-size:.95rem;box-shadow:0 4px 20px rgba(26,92,56,.4);transition:transform .15s,box-shadow .15s}
+    .hero-cta:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(26,92,56,.5)}
+
+    /* ── EDIT MODE BANNER ── */
+    .edit-banner{
+      display:none;background:linear-gradient(135deg,#7c3d12,#c17a36);
+      color:#fff;padding:12px 24px;text-align:center;font-weight:700;font-size:.9rem;
+      position:sticky;top:64px;z-index:90;gap:16px;align-items:center;justify-content:center;flex-wrap:wrap;
+    }
+    .edit-banner.visible{display:flex}
+    .edit-banner .hint{opacity:.88;font-weight:400;font-size:.82rem}
+
+    /* ── SEARCH ── */
+    .search-wrap{max-width:520px;margin:-24px auto 0;padding:0 20px;position:relative;z-index:10}
+    .search-input{width:100%;padding:13px 20px 13px 46px;border-radius:999px;border:1.5px solid var(--border);background:#fff;font-size:.95rem;font-family:'DM Sans',sans-serif;box-shadow:0 6px 24px rgba(92,46,14,.1);outline:none;transition:border-color .2s,box-shadow .2s}
+    .search-input:focus{border-color:var(--caramel);box-shadow:0 6px 24px rgba(193,122,54,.18)}
+    .search-icon{position:absolute;left:36px;top:50%;transform:translateY(-50%);font-size:17px;pointer-events:none}
+
+    /* ── TABS ── */
+    .tabs-wrap{max-width:1200px;margin:28px auto 0;padding:0 20px;overflow-x:auto;scrollbar-width:none}
+    .tabs-wrap::-webkit-scrollbar{display:none}
+    .tabs{display:flex;gap:8px;padding-bottom:2px}
+    .tab{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:999px;border:1.5px solid var(--border);background:#fff;color:var(--text2);font-size:.84rem;font-weight:700;white-space:nowrap;cursor:pointer;transition:all .18s;flex-shrink:0}
+    .tab:hover{border-color:var(--caramel);color:var(--brown);background:var(--warm)}
+    .tab.active{background:var(--brown);color:#fff;border-color:var(--brown);box-shadow:0 4px 14px rgba(92,46,14,.25)}
+    .tab .cnt{font-size:.72rem;padding:1px 7px;border-radius:999px;background:rgba(255,255,255,.22)}
+    .tab:not(.active) .cnt{background:var(--border);color:var(--muted)}
+
+    /* ── SECTION HEAD ── */
+    .sec-head{max-width:1200px;margin:36px auto 0;padding:0 20px;display:flex;align-items:center;gap:14px}
+    .sec-head h2{font-family:'Playfair Display',serif;font-size:1.45rem;font-weight:900;color:var(--brown);white-space:nowrap}
+    .sec-div{flex:1;height:1.5px;background:linear-gradient(90deg,var(--border),transparent)}
+    .sec-badge{font-size:.75rem;font-weight:700;padding:4px 12px;border-radius:999px;background:var(--warm);color:var(--caramel);border:1px solid #f0dfc8;white-space:nowrap}
+
+    /* ── GRID ── */
+    .mgrid{max-width:1200px;margin:16px auto 0;padding:0 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px}
+
+    /* ── CARD ── */
+    .mcard{background:var(--card);border-radius:20px;border:1px solid var(--border);overflow:hidden;display:flex;flex-direction:column;transition:transform .2s,box-shadow .2s}
+    .mcard:not(.edit-active):hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(92,46,14,.13)}
+    .mcard-img{position:relative;aspect-ratio:4/3;overflow:hidden;background:#f3e6d7}
+    .mcard-img img{width:100%;height:100%;object-fit:cover;transition:transform .35s;display:block}
+    .mcard:not(.edit-active):hover .mcard-img img{transform:scale(1.05)}
+    .mcard-cat{position:absolute;top:9px;left:9px;background:rgba(255,255,255,.93);color:var(--brown);font-size:.68rem;font-weight:800;padding:3px 9px;border-radius:999px;backdrop-filter:blur(4px);text-transform:capitalize;z-index:2}
+    .mcard-unavail{position:absolute;top:9px;right:9px;background:rgba(160,0,0,.85);color:#fff;font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:999px;z-index:2}
+    .mcard-body{padding:12px 14px 8px;flex:1;display:flex;flex-direction:column;gap:3px}
+    .mcard-name{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--text);line-height:1.2}
+    .mcard-price{font-size:1.1rem;font-weight:900;color:var(--brown);margin-top:5px}
+    .mcard-foot{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--border)}
+    .mcard-btn{display:flex;align-items:center;justify-content:center;gap:5px;padding:11px 8px;font-size:.76rem;font-weight:700;border:none;background:transparent;cursor:pointer;transition:background .15s;text-decoration:none;color:var(--clover)}
+    .mcard-btn:first-child{border-right:1px solid var(--border)}
+    .mcard-btn:hover{background:#f0faf4}
+    .mcard-btn.det{color:var(--brown)}
+    .mcard-btn.det:hover{background:var(--warm)}
+
+    /* ── IMAGE EDIT OVERLAY ── */
+    .img-edit-overlay{
+      position:absolute;inset:0;z-index:5;
+      background:rgba(0,0,0,.55);
+      display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+    }
+    .edit-active .img-edit-overlay{display:flex}
+    .img-edit-overlay .eo-title{color:#fff;font-weight:800;font-size:.85rem;text-align:center;padding:0 10px}
+    .img-edit-btn{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:8px 16px;border-radius:999px;font-size:.78rem;font-weight:800;
+      border:none;cursor:pointer;transition:transform .12s;
+    }
+    .img-edit-btn:hover{transform:scale(1.04)}
+    .img-edit-btn.upload{background:#fff;color:var(--brown)}
+    .img-edit-btn.delete{background:rgba(185,28,28,.9);color:#fff}
+    .img-edit-btn.reset{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.4)}
+
+    /* ── EDIT CARD FOOTER ── */
+    .edit-card-foot{
+      display:none;
+      background:#fdf6ee;border-top:1px solid var(--border);
+      padding:10px 14px;font-size:.78rem;color:var(--muted);
+      align-items:center;gap:8px;
+    }
+    .edit-active .edit-card-foot{display:flex}
+    .edit-active .mcard-foot{display:none}
+    .img-status{font-size:.72rem;font-weight:700;padding:3px 8px;border-radius:999px}
+    .img-status.custom{background:#dcfce7;color:#166534}
+    .img-status.default{background:#fef3c7;color:#92400e}
+
+    /* ── MODAL ── */
+    .modal-bd{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.54);display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .2s ease}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .modal-sheet{background:#fff;border-radius:28px 28px 0 0;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;animation:slideUp .28s cubic-bezier(.22,1,.36,1)}
+    @keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .modal-hero{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:28px 28px 0 0;display:block;background:#f3e6d7}
+    .modal-close-btn{position:absolute;top:13px;right:13px;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.42);color:#fff;border:none;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+    .modal-body{padding:18px 22px 30px}
+    .modal-cat-pill{display:inline-block;padding:3px 11px;border-radius:999px;background:#fff0dc;color:#794719;font-size:.72rem;font-weight:800;text-transform:capitalize;margin-bottom:8px}
+    .modal-name{font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:900;color:var(--text);margin-bottom:5px;line-height:1.15}
+    .modal-price{font-size:1.4rem;font-weight:900;color:var(--brown);margin-bottom:18px}
+    .modal-pay{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:15px;border-radius:999px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--clover),var(--clover2));color:#fff;font-size:1.02rem;font-weight:800;text-decoration:none;box-shadow:0 4px 20px rgba(26,92,56,.3);transition:transform .15s,box-shadow .15s;margin-bottom:10px}
+    .modal-pay:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(26,92,56,.4)}
+    .secure{text-align:center;font-size:.76rem;color:#aaa;display:flex;align-items:center;justify-content:center;gap:5px}
+
+    /* ── IMAGE UPLOAD MANAGER MODAL ── */
+    .img-mgr{padding:22px}
+    .img-mgr h3{font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:4px}
+    .img-mgr .sub{font-size:.82rem;color:var(--muted);margin-bottom:18px}
+    .img-mgr-preview{
+      width:100%;aspect-ratio:16/9;border-radius:16px;object-fit:cover;
+      background:#f3e6d7;display:block;margin-bottom:16px;border:2px dashed var(--border);
+    }
+    .img-mgr-preview.has-img{border-style:solid;border-color:var(--caramel)}
+    .upload-zone{
+      border:2px dashed var(--border);border-radius:16px;
+      padding:28px 20px;text-align:center;cursor:pointer;
+      transition:border-color .2s,background .2s;background:#fff;
+      margin-bottom:14px;
+    }
+    .upload-zone:hover,.upload-zone.drag{border-color:var(--caramel);background:var(--warm)}
+    .upload-zone .uz-icon{font-size:2rem;margin-bottom:8px}
+    .upload-zone p{font-size:.85rem;color:var(--muted);line-height:1.5}
+    .upload-zone strong{color:var(--brown)}
+    .img-action-row{display:flex;gap:10px;flex-wrap:wrap}
+    .img-action-btn{
+      display:inline-flex;align-items:center;gap:7px;
+      padding:10px 18px;border-radius:999px;font-size:.82rem;font-weight:800;
+      border:none;cursor:pointer;transition:transform .12s,box-shadow .12s;
+    }
+    .img-action-btn:hover{transform:translateY(-1px)}
+    .img-action-btn.primary{background:linear-gradient(135deg,var(--brown),var(--caramel));color:#fff;box-shadow:0 3px 12px rgba(92,46,14,.25)}
+    .img-action-btn.danger{background:linear-gradient(135deg,#b91c1c,#ef4444);color:#fff;box-shadow:0 3px 12px rgba(185,28,28,.25)}
+    .img-action-btn.secondary{background:var(--warm);color:var(--brown);border:1.5px solid var(--border)}
+    .img-note{font-size:.75rem;color:var(--muted);margin-top:12px;line-height:1.55;padding:10px 14px;background:#fdf6ee;border-radius:10px;border:1px solid var(--border)}
+
+    /* ── ORDER BAR ── */
+    .order-bar{position:fixed;bottom:0;left:0;right:0;z-index:90;background:linear-gradient(135deg,var(--clover),var(--clover2));color:#fff;padding:12px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 -4px 24px rgba(26,92,56,.25)}
+    .ob-text{font-size:.88rem;font-weight:700}
+    .ob-text small{display:block;font-size:.72rem;opacity:.8;font-weight:400}
+    .ob-cta{display:inline-flex;align-items:center;gap:7px;background:#fff;color:var(--clover);font-weight:800;font-size:.85rem;padding:9px 20px;border-radius:999px;text-decoration:none;flex-shrink:0;transition:transform .15s}
+    .ob-cta:hover{transform:scale(1.03)}
+
+    /* ── EMPTY / STATES ── */
+    .empty{max-width:1200px;margin:0 auto;padding:60px 20px;text-align:center;color:var(--muted)}
+    .skel-grid{max-width:1200px;margin:18px auto;padding:0 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px}
+    .skel-card{background:#fff;border-radius:20px;border:1px solid var(--border);overflow:hidden;animation:pulse 1.4s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+    .skel-img{background:#f0e6dc;aspect-ratio:4/3}
+    .skel-body{padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+    .skel-line{background:#ede0d4;border-radius:6px;height:13px}
+    .skel-line.s{width:55%}.skel-line.p{width:30%;height:17px}
+    .skel-foot{height:42px;background:#f9f1eb;border-top:1px solid var(--border)}
+
+    /* ── FOOTER ── */
+    .pfooter{background:#1f130b;color:rgba(255,255,255,.65);text-align:center;padding:24px 20px 90px;font-size:.8rem;margin-top:60px}
+    .pfooter a{color:rgba(255,255,255,.5);text-decoration:none}
+
+    /* ── HIDDEN FILE INPUT ── */
+    #imgFileInput{display:none}
+
+    @media(max-width:600px){
+      .brand-sub,.nbtn.outline{display:none}
+      .mgrid{grid-template-columns:1fr 1fr;gap:12px}
+      .mcard-name{font-size:.88rem}
+      .mcard-body{padding:9px 11px 7px}
+      .mcard-btn{font-size:.7rem;padding:9px 5px}
+      .hero{padding:38px 16px 34px}
+      .nbtn{padding:7px 12px;font-size:.78rem}
+    }
+    @media(max-width:380px){.mgrid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+
+<!-- Hidden file input for image uploads -->
+<input type="file" id="imgFileInput" accept="image/*"/>
+
+<!-- ══ NAV ══ -->
+<nav class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="brand">
+      <img src="images/Community Kitchen Cafe logo design (1).png" alt="Logo" onerror="this.style.display='none'">
+      <div>
+        <span class="brand-name">Community Kitchen Café</span>
+        <span class="brand-sub">Food with a Purpose · Monroe, NC</span>
+      </div>
+    </a>
+    <div class="nav-btns">
+      <a href="index.html" class="nbtn outline">← Home</a>
+      <!-- Admin login button — visible when NOT authed -->
+      <button class="nbtn" id="adminLoginBtn" onclick="openAdminLogin()"
+        style="background:linear-gradient(135deg,#7c3d12,#c17a36);color:#fff;box-shadow:0 3px 14px rgba(124,61,18,.25);">
+        🔐 Admin
+      </button>
+      <!-- These only show when admin is authenticated (admin-only class) -->
+      <button class="nbtn edit-mode-btn admin-only" id="editModeBtn" onclick="toggleEditMode()">✏️ Edit Images</button>
+      <button class="nbtn admin-only" id="adminLogoutBtn" onclick="adminLogout()"
+        style="background:linear-gradient(135deg,#b91c1c,#ef4444);color:#fff;">
+        🔓 Logout
+      </button>
+      <a href="https://www.clover.com/online-ordering/community-kitchen-cafe--monroe" target="_blank" rel="noopener noreferrer" class="nbtn green">🍀 Order &amp; Pay</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Edit mode banner (only visible to admins in edit mode) -->
+<div class="edit-banner" id="editBanner">
+  <span>✏️ <strong>Image Edit Mode</strong> is ON — Admin</span>
+  <span class="hint">Click 📷 Upload or 🗑️ Remove on any card to manage its photo</span>
+  <button class="nbtn outline" style="background:#fff;padding:6px 14px;font-size:.78rem;" onclick="toggleEditMode()">✓ Done Editing</button>
+</div>
+
+<!-- Admin key login modal (injected by JS) -->
+<div id="adminModalRoot"></div>
+
+<!-- ══ HERO ══ -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eye">🍽️ Monroe NC · 7AM–3PM Mon–Sat · (240) 606-3319</div>
+    <h1>Our <span>Full Menu</span></h1>
+    <p>Breakfast, lunch, drinks, desserts, baked goods &amp; more — made fresh every day at 811 N Charlotte Ave.</p>
+    <a href="https://www.clover.com/online-ordering/community-kitchen-cafe--monroe" target="_blank" rel="noopener noreferrer" class="hero-cta">🛒 Order Online via Clover</a>
+  </div>
+</div>
+
+<!-- ══ SEARCH ══ -->
+<div class="search-wrap">
+  <span class="search-icon">🔍</span>
+  <input class="search-input" id="searchBox" placeholder="Search menu…" oninput="render()" autocomplete="off"/>
+</div>
+
+<!-- ══ TABS ══ -->
+<div class="tabs-wrap"><div class="tabs" id="tabBar"></div></div>
+
+<!-- ══ MENU ══ -->
+<div id="menuRoot"></div>
+
+<!-- ══ FIXED BAR ══ -->
+<div class="order-bar">
+  <div class="ob-text">Ready to order?<small>Pickup · 811 N Charlotte Ave, Monroe NC</small></div>
+  <a href="https://www.clover.com/online-ordering/community-kitchen-cafe--monroe" target="_blank" rel="noopener noreferrer" class="ob-cta">🍀 Order &amp; Pay →</a>
+</div>
+
+<!-- ══ MODAL ══ -->
+<div id="modalRoot"></div>
+
+<!-- ══ FOOTER ══ -->
+<footer class="pfooter">
+  <p>© 2026 Community Kitchen Café · 811 N Charlotte Ave, Monroe NC 28110 · (240) 606-3319</p>
+  <p style="margin-top:6px"><a href="index.html">← Back to Home</a></p>
+</footer>
+
+<script>
+const CLOVER = "https://www.clover.com/online-ordering/community-kitchen-cafe--monroe";
+const API    = "https://cafe-4nv2.onrender.com";
+const FALL   = "https://images.unsplash.com/photo-1543353071-10c8ba85a904?auto=format&fit=crop&w=900&q=70";
+const IMG_STORE_KEY = "ckc_item_images"; // localStorage key for custom images
+
+/* ── Default category images ── */
+const CAT_IMGS = {
+  coffee:   "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=800&q=70",
+  drinks:   "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=800&q=70",
+  smoothies:"https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=800&q=70",
+  breakfast:"https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=70",
+  lunch:    "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=70",
+  burger:   "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=70",
+  salad:    "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=70",
+  pancakes: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=800&q=70",
+  waffle:   "https://images.unsplash.com/photo-1590137876181-2a5a7e340de2?auto=format&fit=crop&w=800&q=70",
+  eggs:     "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=800&q=70",
+  sandwich: "https://images.unsplash.com/photo-1528736235302-52922df5c122?auto=format&fit=crop&w=800&q=70",
+  dessert:  "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=70",
+  baked:    "https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=800&q=70",
+  kids:     "https://images.unsplash.com/photo-1561758033-d89a9ad46330?auto=format&fit=crop&w=800&q=70",
+  sides:    "https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?auto=format&fit=crop&w=800&q=70",
+};
+
+/* ══ FULL MENU DATA ══ */
+const MENU = [
+  {id:"sc01",cat:"Specialty Coffee",emoji:"☕",price:3.50,name:"Doppio",def:CAT_IMGS.coffee},
+  {id:"sc02",cat:"Specialty Coffee",emoji:"☕",price:3.50,name:"Americano",def:CAT_IMGS.coffee},
+  {id:"sc03",cat:"Specialty Coffee",emoji:"☕",price:4.50,name:"Cappuccino",def:CAT_IMGS.coffee},
+  {id:"sc04",cat:"Specialty Coffee",emoji:"☕",price:3.99,name:"Cortado",def:CAT_IMGS.coffee},
+  {id:"sc05",cat:"Specialty Coffee",emoji:"☕",price:4.50,name:"Latte",def:CAT_IMGS.coffee},
+  {id:"sc06",cat:"Specialty Coffee",emoji:"☕",price:5.00,name:"Caramel Latte",def:CAT_IMGS.coffee},
+  {id:"sc07",cat:"Specialty Coffee",emoji:"☕",price:5.00,name:"Vanilla Latte",def:CAT_IMGS.coffee},
+  {id:"sc08",cat:"Specialty Coffee",emoji:"☕",price:3.99,name:"Café au Lait",def:CAT_IMGS.coffee},
+  {id:"sc09",cat:"Specialty Coffee",emoji:"☕",price:4.50,name:"Chai Latte",def:CAT_IMGS.coffee},
+  {id:"sc10",cat:"Specialty Coffee",emoji:"☕",price:4.50,name:"Matcha Latte",def:CAT_IMGS.coffee},
+  {id:"sc11",cat:"Specialty Coffee",emoji:"☕",price:3.50,name:"Macchiato",def:CAT_IMGS.coffee},
+  {id:"sc12",cat:"Specialty Coffee",emoji:"☕",price:5.50,name:"Caramel Macchiato",def:CAT_IMGS.coffee},
+  {id:"sc13",cat:"Specialty Coffee",emoji:"☕",price:4.99,name:"Mocha",def:CAT_IMGS.coffee},
+  {id:"sc14",cat:"Specialty Coffee",emoji:"☕",price:4.50,name:"White Mocha",def:CAT_IMGS.coffee},
+  {id:"sc15",cat:"Specialty Coffee",emoji:"☕",price:4.50,name:"Hot Chocolate",def:CAT_IMGS.coffee},
+  {id:"sc16",cat:"Specialty Coffee",emoji:"☕",price:2.50,name:"Batch Brew (Decaf)",def:CAT_IMGS.coffee},
+  {id:"sc17",cat:"Specialty Coffee",emoji:"☕",price:2.50,name:"Batch Brew (Regular)",def:CAT_IMGS.coffee},
+  {id:"sc18",cat:"Specialty Coffee",emoji:"☕",price:2.50,name:"Black Tea",def:CAT_IMGS.coffee},
+  {id:"sc19",cat:"Specialty Coffee",emoji:"☕",price:2.50,name:"Herbal Tea",def:CAT_IMGS.coffee},
+  {id:"sc20",cat:"Specialty Coffee",emoji:"☕",price:2.50,name:"Green Tea — Medium",def:CAT_IMGS.coffee},
+  {id:"sc21",cat:"Specialty Coffee",emoji:"☕",price:4.50,name:"Iced Latte — Medium",def:CAT_IMGS.coffee},
+  {id:"sc22",cat:"Specialty Coffee",emoji:"☕",price:3.50,name:"Iced Coffee — Medium",def:CAT_IMGS.coffee},
+  {id:"sc23",cat:"Specialty Coffee",emoji:"☕",price:4.50,name:"Spiced Chai Latte — Medium",def:CAT_IMGS.coffee},
+  {id:"cl01",cat:"Coffee — Large",emoji:"☕",price:4.00,name:"Americano — Large",def:CAT_IMGS.coffee},
+  {id:"cl02",cat:"Coffee — Large",emoji:"☕",price:5.50,name:"Cappuccino — Large",def:CAT_IMGS.coffee},
+  {id:"cl03",cat:"Coffee — Large",emoji:"☕",price:5.50,name:"Latte — Large",def:CAT_IMGS.coffee},
+  {id:"cl04",cat:"Coffee — Large",emoji:"☕",price:6.00,name:"Caramel Latte — Large",def:CAT_IMGS.coffee},
+  {id:"cl05",cat:"Coffee — Large",emoji:"☕",price:6.00,name:"Vanilla Latte — Large",def:CAT_IMGS.coffee},
+  {id:"cl06",cat:"Coffee — Large",emoji:"☕",price:4.50,name:"Café au Lait — Large",def:CAT_IMGS.coffee},
+  {id:"cl07",cat:"Coffee — Large",emoji:"☕",price:5.50,name:"Chai Latte — Large",def:CAT_IMGS.coffee},
+  {id:"cl08",cat:"Coffee — Large",emoji:"☕",price:5.50,name:"Matcha Latte — Large",def:CAT_IMGS.coffee},
+  {id:"cl09",cat:"Coffee — Large",emoji:"☕",price:4.50,name:"Macchiato — Large",def:CAT_IMGS.coffee},
+  {id:"cl10",cat:"Coffee — Large",emoji:"☕",price:6.50,name:"Caramel Macchiato — Large",def:CAT_IMGS.coffee},
+  {id:"cl11",cat:"Coffee — Large",emoji:"☕",price:5.99,name:"Mocha — Large",def:CAT_IMGS.coffee},
+  {id:"cl12",cat:"Coffee — Large",emoji:"☕",price:5.99,name:"White Mocha — Large",def:CAT_IMGS.coffee},
+  {id:"cl13",cat:"Coffee — Large",emoji:"☕",price:5.50,name:"Hot Chocolate — Large",def:CAT_IMGS.coffee},
+  {id:"cl14",cat:"Coffee — Large",emoji:"☕",price:3.50,name:"Batch Brew (Decaf) — Large",def:CAT_IMGS.coffee},
+  {id:"cl15",cat:"Coffee — Large",emoji:"☕",price:3.50,name:"Batch Brew (Regular) — Large",def:CAT_IMGS.coffee},
+  {id:"cl16",cat:"Coffee — Large",emoji:"☕",price:3.50,name:"Black Tea — Large",def:CAT_IMGS.coffee},
+  {id:"cl17",cat:"Coffee — Large",emoji:"☕",price:3.50,name:"Herbal Tea — Large",def:CAT_IMGS.coffee},
+  {id:"cl18",cat:"Coffee — Large",emoji:"☕",price:3.50,name:"Green Tea — Large",def:CAT_IMGS.coffee},
+  {id:"cl19",cat:"Coffee — Large",emoji:"☕",price:4.50,name:"Iced Coffee — Large",def:CAT_IMGS.coffee},
+  {id:"cl20",cat:"Coffee — Large",emoji:"☕",price:5.50,name:"Iced Latte — Large",def:CAT_IMGS.coffee},
+  {id:"cl21",cat:"Coffee — Large",emoji:"☕",price:5.50,name:"Spiced Chai Latte — Large",def:CAT_IMGS.coffee},
+  {id:"st01",cat:"Starters",emoji:"🥟",price:4.99,name:"Two Pieces of Lentil Sambusa",def:CAT_IMGS.sides},
+  {id:"st02",cat:"Starters",emoji:"🥓",price:4.99,name:"Candied Gold Bacon",def:CAT_IMGS.breakfast},
+  {id:"st03",cat:"Starters",emoji:"🍩",price:6.99,name:"Sweet Street Donut Bites",def:CAT_IMGS.dessert},
+  {id:"cf01",cat:"Classic Favorites",emoji:"🍳",price:12.99,name:"Sunrise Breakfast",def:CAT_IMGS.breakfast},
+  {id:"cf02",cat:"Classic Favorites",emoji:"🍳",price:12.99,name:"Sunrise Trio",def:CAT_IMGS.breakfast},
+  {id:"cf03",cat:"Classic Favorites",emoji:"🥣",price:10.99,name:"Biscuits & Sausage Gravy",def:CAT_IMGS.breakfast},
+  {id:"hs01",cat:"The Healthier Side",emoji:"🥑",price:12.99,name:"Avocado Delight Toast",def:CAT_IMGS.breakfast},
+  {id:"hs02",cat:"The Healthier Side",emoji:"🥚",price:12.99,name:"Lean Turkey Omelet",def:CAT_IMGS.eggs},
+  {id:"hs03",cat:"The Healthier Side",emoji:"🍓",price:10.99,name:"Fruit & Granola Bowl",def:CAT_IMGS.breakfast},
+  {id:"hs04",cat:"The Healthier Side",emoji:"🌾",price:10.99,name:"Cinnamon Oatmeal Bowl",def:CAT_IMGS.breakfast},
+  {id:"hs05",cat:"The Healthier Side",emoji:"🥜",price:8.99,name:"The Elvis PB&J",def:CAT_IMGS.breakfast},
+  {id:"hs06",cat:"The Healthier Side",emoji:"🌯",price:12.99,name:"Power Protein Wrap",def:CAT_IMGS.sandwich},
+  {id:"hs07",cat:"The Healthier Side",emoji:"🌿",price:12.49,name:"Herb Chicken Quinoa Bowl",def:CAT_IMGS.salad},
+  {id:"fg01",cat:"From the Griddle",emoji:"🥞",price:7.99,name:"Multigrain Pancakes (1)",def:CAT_IMGS.pancakes},
+  {id:"fg02",cat:"From the Griddle",emoji:"🥞",price:9.99,name:"Multigrain Pancakes (2)",def:CAT_IMGS.pancakes},
+  {id:"fg03",cat:"From the Griddle",emoji:"🧇",price:10.79,name:"Belgian Waffle",def:CAT_IMGS.waffle},
+  {id:"fg04",cat:"From the Griddle",emoji:"🍗",price:13.99,name:"Chicken and Waffles",def:CAT_IMGS.waffle},
+  {id:"fg05",cat:"From the Griddle",emoji:"🍞",price:11.49,name:"Brioche French Toast",def:CAT_IMGS.pancakes},
+  {id:"fg06",cat:"From the Griddle",emoji:"🍫",price:13.49,name:"Nutella French Toast",def:CAT_IMGS.pancakes},
+  {id:"eg01",cat:"Egg-Sclusives",emoji:"🥚",price:13.99,name:"Eggs Benedict — Classic",def:CAT_IMGS.eggs},
+  {id:"eg02",cat:"Egg-Sclusives",emoji:"🥚",price:13.79,name:"Eggs Benedict — Florentine",def:CAT_IMGS.eggs},
+  {id:"eg03",cat:"Egg-Sclusives",emoji:"🥚",price:13.79,name:"Eggs Benedict — BLT",def:CAT_IMGS.eggs},
+  {id:"eg04",cat:"Egg-Sclusives",emoji:"🌮",price:13.50,name:"Farmhouse Breakfast Tacos",def:CAT_IMGS.eggs},
+  {id:"sh01",cat:"Skillet Hashes",emoji:"🍳",price:13.79,name:"Country Hash",def:CAT_IMGS.breakfast},
+  {id:"sh02",cat:"Skillet Hashes",emoji:"🌽",price:13.79,name:"Market Harvest Hash",def:CAT_IMGS.breakfast},
+  {id:"om01",cat:"Omelets & Frittatas",emoji:"🥚",price:13.79,name:"Bacado Omelet",def:CAT_IMGS.eggs},
+  {id:"om02",cat:"Omelets & Frittatas",emoji:"🥚",price:12.99,name:"Garden Market Omelet",def:CAT_IMGS.eggs},
+  {id:"om03",cat:"Omelets & Frittatas",emoji:"🥚",price:13.79,name:"The Full Farm Omelet",def:CAT_IMGS.eggs},
+  {id:"om04",cat:"Omelets & Frittatas",emoji:"🥚",price:12.00,name:"Rustic Frittata",def:CAT_IMGS.eggs},
+  {id:"sa01",cat:"Salads",emoji:"🥗",price:12.20,name:"Chicken Avocado Chop",def:CAT_IMGS.salad},
+  {id:"sa02",cat:"Salads",emoji:"🥗",price:12.20,name:"Cobb Salad",def:CAT_IMGS.salad},
+  {id:"sb01",cat:"Sandwiches & Burgers",emoji:"🥪",price:12.79,name:"Community Club",def:CAT_IMGS.sandwich},
+  {id:"sb02",cat:"Sandwiches & Burgers",emoji:"🥓",price:11.99,name:"BLTE",def:CAT_IMGS.sandwich},
+  {id:"sb03",cat:"Sandwiches & Burgers",emoji:"🌿",price:11.99,name:"Veggie Burger",def:CAT_IMGS.burger},
+  {id:"sb04",cat:"Sandwiches & Burgers",emoji:"🍔",price:14.59,name:"Morning Rise Burger",def:CAT_IMGS.burger},
+  {id:"sb05",cat:"Sandwiches & Burgers",emoji:"🍔",price:14.59,name:"CKC Classic Angus Burger",def:CAT_IMGS.burger},
+  {id:"sb06",cat:"Sandwiches & Burgers",emoji:"🥩",price:14.59,name:"Philly Cheesesteak",def:CAT_IMGS.sandwich},
+  {id:"sb07",cat:"Sandwiches & Burgers",emoji:"🍗",price:12.49,name:"Crispy Homestyle Chicken Sandwich",def:CAT_IMGS.sandwich},
+  {id:"si01",cat:"Sides & Small Plates",emoji:"🥣",price:3.40,name:"Bob's Red Mill Grits — Buttered",def:CAT_IMGS.sides},
+  {id:"si02",cat:"Sides & Small Plates",emoji:"🧀",price:3.40,name:"Bob's Red Mill Grits — Cheesy",def:CAT_IMGS.sides},
+  {id:"si03",cat:"Sides & Small Plates",emoji:"🍓",price:4.00,name:"Fresh Seasonal Fruit — Small",def:CAT_IMGS.breakfast},
+  {id:"si04",cat:"Sides & Small Plates",emoji:"🍓",price:5.89,name:"Fresh Seasonal Fruit — Large",def:CAT_IMGS.breakfast},
+  {id:"si05",cat:"Sides & Small Plates",emoji:"🥔",price:3.00,name:"Seasoned Potatoes",def:CAT_IMGS.sides},
+  {id:"si06",cat:"Sides & Small Plates",emoji:"🍟",price:5.00,name:"Seasoned Golden Fries",def:CAT_IMGS.sides},
+  {id:"si07",cat:"Sides & Small Plates",emoji:"🥚",price:1.50,name:"Cage-Free Eggs Any Style",def:CAT_IMGS.eggs},
+  {id:"si08",cat:"Sides & Small Plates",emoji:"🥔",price:5.00,name:"Loaded Potatoes",def:CAT_IMGS.sides},
+  {id:"si09",cat:"Sides & Small Plates",emoji:"🥣",price:5.89,name:"Biscuits & Gravy",def:CAT_IMGS.breakfast},
+  {id:"si10",cat:"Sides & Small Plates",emoji:"🍞",price:2.49,name:"Multigrain Toast with House Preserves",def:CAT_IMGS.baked},
+  {id:"si11",cat:"Sides & Small Plates",emoji:"🫓",price:2.40,name:"English Muffin",def:CAT_IMGS.baked},
+  {id:"si12",cat:"Sides & Small Plates",emoji:"🍞",price:2.49,name:"Gluten-Free Toast",def:CAT_IMGS.baked},
+  {id:"si13",cat:"Sides & Small Plates",emoji:"🧁",price:3.00,name:"Muffin of the Day",def:CAT_IMGS.baked},
+  {id:"si14",cat:"Sides & Small Plates",emoji:"🍞",price:2.49,name:"Buttermilk Biscuits",def:CAT_IMGS.baked},
+  {id:"si15",cat:"Sides & Small Plates",emoji:"🥓",price:5.40,name:"Hardwood Smoked Bacon",def:CAT_IMGS.breakfast},
+  {id:"si16",cat:"Sides & Small Plates",emoji:"🍖",price:4.89,name:"Smoked Ham",def:CAT_IMGS.breakfast},
+  {id:"si17",cat:"Sides & Small Plates",emoji:"🌭",price:4.89,name:"Pork Sausage",def:CAT_IMGS.breakfast},
+  {id:"si18",cat:"Sides & Small Plates",emoji:"🦃",price:4.89,name:"Turkey Sausage",def:CAT_IMGS.breakfast},
+  {id:"si19",cat:"Sides & Small Plates",emoji:"🥓",price:4.99,name:"Candied Gold Bacon",def:CAT_IMGS.breakfast},
+  {id:"si20",cat:"Sides & Small Plates",emoji:"🥗",price:3.59,name:"Mixed Greens with White Balsamic Citrus Basil",def:CAT_IMGS.salad},
+  {id:"si21",cat:"Sides & Small Plates",emoji:"🍅",price:4.99,name:"Tomato Basil Soup",def:CAT_IMGS.sides},
+  {id:"si22",cat:"Sides & Small Plates",emoji:"🍲",price:4.99,name:"Soup of the Day",def:CAT_IMGS.sides},
+  {id:"km01",cat:"Kids Menu",emoji:"🍗",price:6.99,name:"Crispy Chicken Strips",def:CAT_IMGS.kids},
+  {id:"km02",cat:"Kids Menu",emoji:"🍔",price:6.99,name:"Little Cheeseburger",def:CAT_IMGS.kids},
+  {id:"km03",cat:"Kids Menu",emoji:"🧀",price:5.99,name:"Grilled Cheese Melt",def:CAT_IMGS.kids},
+  {id:"km04",cat:"Kids Menu",emoji:"🥞",price:5.99,name:"Mini Pancake Stack",def:CAT_IMGS.pancakes},
+  {id:"km05",cat:"Kids Menu",emoji:"🍳",price:5.49,name:"Scrambled Egg and Toast",def:CAT_IMGS.eggs},
+  {id:"de01",cat:"Desserts",emoji:"🍰",price:6.00,name:"Cheesecake",def:CAT_IMGS.dessert},
+  {id:"de02",cat:"Desserts",emoji:"🎂",price:6.00,name:"Chocolate Cake",def:CAT_IMGS.dessert},
+  {id:"de03",cat:"Desserts",emoji:"🥕",price:6.00,name:"Carrot Cake",def:CAT_IMGS.dessert},
+  {id:"sm01",cat:"Smoothies & Juices",emoji:"🍊",price:5.00,name:"Cold Squeezed Orange Juice — Large",def:CAT_IMGS.smoothies},
+  {id:"sm02",cat:"Smoothies & Juices",emoji:"🍎",price:2.50,name:"Apple Juice — Medium",def:CAT_IMGS.smoothies},
+  {id:"sm03",cat:"Smoothies & Juices",emoji:"🍎",price:3.50,name:"Apple Juice — Large",def:CAT_IMGS.smoothies},
+  {id:"sm04",cat:"Smoothies & Juices",emoji:"🥜",price:5.50,name:"Peanut Paradise — Medium",def:CAT_IMGS.smoothies},
+  {id:"sm05",cat:"Smoothies & Juices",emoji:"🥜",price:6.50,name:"Peanut Paradise — Large",def:CAT_IMGS.smoothies},
+  {id:"sm06",cat:"Smoothies & Juices",emoji:"🍓",price:5.50,name:"Strawberry Banana Smoothie — Medium",def:CAT_IMGS.smoothies},
+  {id:"sm07",cat:"Smoothies & Juices",emoji:"🍓",price:6.50,name:"Strawberry Banana Smoothie — Large",def:CAT_IMGS.smoothies},
+  {id:"sm08",cat:"Smoothies & Juices",emoji:"🥭",price:5.50,name:"Mango Magic — Medium",def:CAT_IMGS.smoothies},
+  {id:"sm09",cat:"Smoothies & Juices",emoji:"🥭",price:6.50,name:"Mango Magic — Large",def:CAT_IMGS.smoothies},
+  {id:"sm10",cat:"Smoothies & Juices",emoji:"🍍",price:5.50,name:"Pineapple Tonic",def:CAT_IMGS.smoothies},
+  {id:"sd01",cat:"Soft Drinks",emoji:"🧋",price:3.50,name:"Unsweet Tea — Medium",def:CAT_IMGS.drinks},
+  {id:"sd02",cat:"Soft Drinks",emoji:"🥤",price:3.50,name:"Soft Drink — Medium",def:CAT_IMGS.drinks},
+  {id:"sd03",cat:"Soft Drinks",emoji:"🧋",price:3.50,name:"Sweet Tea",def:CAT_IMGS.drinks},
+  {id:"bg01",cat:"Baked Goods",emoji:"🧁",price:3.99,name:"Muffin — Chocolate",def:CAT_IMGS.baked},
+  {id:"bg02",cat:"Baked Goods",emoji:"🧁",price:3.99,name:"Muffin — Blueberry",def:CAT_IMGS.baked},
+  {id:"bg03",cat:"Baked Goods",emoji:"🧁",price:3.99,name:"Muffin — Double Chocolate",def:CAT_IMGS.baked},
+  {id:"bg04",cat:"Baked Goods",emoji:"🧁",price:3.99,name:"Muffin — Banana Nut",def:CAT_IMGS.baked},
+  {id:"bg05",cat:"Baked Goods",emoji:"🥐",price:2.50,name:"Croissant",def:CAT_IMGS.baked},
+  {id:"bg06",cat:"Baked Goods",emoji:"🍮",price:3.99,name:"Danish — Cream Cheese",def:CAT_IMGS.baked},
+  {id:"bg07",cat:"Baked Goods",emoji:"🍮",price:3.99,name:"Danish — Cherry",def:CAT_IMGS.baked},
+  {id:"bg08",cat:"Baked Goods",emoji:"🍮",price:3.99,name:"Danish — Almond",def:CAT_IMGS.baked},
+  {id:"bg09",cat:"Baked Goods",emoji:"🥐",price:3.99,name:"Assorted Pastries",def:CAT_IMGS.baked},
+];
+
+const CAT_ORDER = [
+  "Specialty Coffee","Coffee — Large","Smoothies & Juices","Soft Drinks",
+  "Starters","Classic Favorites","The Healthier Side","From the Griddle",
+  "Egg-Sclusives","Skillet Hashes","Omelets & Frittatas","Salads",
+  "Sandwiches & Burgers","Sides & Small Plates","Kids Menu","Desserts","Baked Goods"
+];
+
+/* ══ IMAGE STORAGE ══ */
+function loadImgStore() {
+  try { return JSON.parse(localStorage.getItem(IMG_STORE_KEY) || "{}"); }
+  catch { return {}; }
+}
+function saveImgStore(store) {
+  localStorage.setItem(IMG_STORE_KEY, JSON.stringify(store));
+}
+function getItemImg(id) {
+  const store = loadImgStore();
+  return store[id] || null; // null = use default
+}
+function setItemImg(id, dataUrl) {
+  const store = loadImgStore();
+  store[id] = dataUrl;
+  saveImgStore(store);
+}
+function deleteItemImg(id) {
+  const store = loadImgStore();
+  delete store[id];
+  saveImgStore(store);
+}
+function resolveImg(item) {
+  return getItemImg(item.id) || item.def || FALL;
+}
+
+/* ══ ADMIN AUTH ══ */
+const ADMIN_KEY_LOCAL = "ckc_menu_admin_key";
+
+function getAdminKey()  { return localStorage.getItem(ADMIN_KEY_LOCAL) || ""; }
+function isAdminAuthed(){ return !!getAdminKey(); }
+
+function applyAdminUI() {
+  if (isAdminAuthed()) {
+    document.body.classList.add("admin-authed");
+    const loginBtn = document.getElementById("adminLoginBtn");
+    if (loginBtn) loginBtn.style.display = "none";
+  } else {
+    document.body.classList.remove("admin-authed");
+    const loginBtn = document.getElementById("adminLoginBtn");
+    if (loginBtn) loginBtn.style.display = "";
+    // If edit mode was on, turn it off
+    if (editMode) { editMode = false; updateEditBanner(); render(); }
+  }
+}
+
+function openAdminLogin() {
+  document.getElementById("adminModalRoot").innerHTML = `
+    <div class="admin-modal-bd" id="adminLoginBd" onclick="if(event.target===this)closeAdminLogin()">
+      <div class="admin-modal-box">
+        <h3>🔐 Admin Access</h3>
+        <p>Enter your admin key to manage menu images — upload, change, or remove photos for any item.</p>
+        <input class="admin-key-input" type="password" id="adminKeyInput"
+          placeholder="Enter admin key…"
+          onkeydown="if(event.key==='Enter')submitAdminKey()"/>
+        <button class="admin-submit" onclick="submitAdminKey()">Unlock Admin</button>
+        <button class="admin-cancel-btn" onclick="closeAdminLogin()">Cancel</button>
+        <div class="admin-err" id="adminKeyErr"></div>
+      </div>
+    </div>`;
+  document.body.style.overflow = "hidden";
+  setTimeout(()=>{ const el=document.getElementById("adminKeyInput"); if(el) el.focus(); },80);
+}
+
+async function submitAdminKey() {
+  const input = document.getElementById("adminKeyInput");
+  const errEl = document.getElementById("adminKeyErr");
+  const key   = (input?.value||"").trim();
+  if (!key) { if(errEl) errEl.textContent="Please enter a key."; return; }
+  if (errEl) errEl.textContent = "Checking…";
+
+  try {
+    const res = await fetch("https://cafe-4nv2.onrender.com/api/admin/ping", {
+      headers: { "x-admin-key": key }
+    });
+    if (!res.ok) throw new Error("Invalid key");
+    // Verified — save and apply
+    localStorage.setItem(ADMIN_KEY_LOCAL, key);
+    closeAdminLogin();
+    applyAdminUI();
+    showToast("✅ Admin unlocked — you can now edit images");
+  } catch {
+    if (errEl) errEl.textContent = "❌ Incorrect admin key. Try again.";
+    if (input) { input.value=""; input.focus(); }
+  }
+}
+
+function closeAdminLogin() {
+  document.getElementById("adminModalRoot").innerHTML = "";
+  document.body.style.overflow = "";
+}
+
+function adminLogout() {
+  if (!confirm("Log out of admin? You will need to enter your key again to edit images.")) return;
+  localStorage.removeItem(ADMIN_KEY_LOCAL);
+  editMode = false;
+  updateEditBanner();
+  applyAdminUI();
+  render();
+  showToast("🔒 Admin logged out");
+}
+
+/* ══ EDIT MODE ══ */
+let editMode = false;
+
+function updateEditBanner() {
+  const btn    = document.getElementById("editModeBtn");
+  const banner = document.getElementById("editBanner");
+  if (btn) { btn.classList.toggle("active", editMode); btn.textContent = editMode ? "✓ Done Editing" : "✏️ Edit Images"; }
+  if (banner) banner.classList.toggle("visible", editMode);
+}
+
+function toggleEditMode() {
+  // Guard: must be admin
+  if (!isAdminAuthed()) { openAdminLogin(); return; }
+  editMode = !editMode;
+  updateEditBanner();
+  render();
+}
+
+/* ══ UTILITIES ══ */
+function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function handleErr(el){ el.onerror=null; el.src=FALL; }
+
+/* ══ TABS ══ */
+let activeCat = "all";
+
+function buildTabs() {
+  const cats = CAT_ORDER.filter(c => MENU.some(i=>i.cat===c));
+  const bar  = document.getElementById("tabBar");
+  bar.innerHTML = [
+    `<button class="tab active" data-c="all" onclick="setcat('all')">🍴 All <span class="cnt">${MENU.length}</span></button>`,
+    ...cats.map(c => {
+      const cnt   = MENU.filter(i=>i.cat===c).length;
+      const emoji = MENU.find(i=>i.cat===c)?.emoji||"🍽️";
+      return `<button class="tab" data-c="${esc(c)}" onclick="setcat('${esc(c)}')">${emoji} ${esc(c)} <span class="cnt">${cnt}</span></button>`;
+    })
+  ].join("");
+}
+
+function setcat(cat) {
+  activeCat = cat;
+  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.c===cat));
+  render();
+}
+
+/* ══ RENDER ══ */
+function render() {
+  const q    = (document.getElementById("searchBox").value||"").trim().toLowerCase();
+  const root = document.getElementById("menuRoot");
+  let items  = [...MENU];
+  if (activeCat!=="all") items=items.filter(i=>i.cat===activeCat);
+  if (q) items=items.filter(i=>(i.name+" "+i.cat).toLowerCase().includes(q));
+  if (!items.length) {
+    root.innerHTML=`<div class="empty"><div style="font-size:3rem;margin-bottom:14px">🔍</div><h3>No items found</h3><p>Try a different search or category.</p></div>`;
+    return;
+  }
+  const cats = activeCat==="all"
+    ? CAT_ORDER.filter(c=>items.some(i=>i.cat===c))
+    : [activeCat];
+  root.innerHTML = cats.map(cat => {
+    const grp   = items.filter(i=>i.cat===cat);
+    const emoji = grp[0]?.emoji||"🍽️";
+    const secId = "sec-"+cat.replace(/\s+/g,"-").replace(/[^a-zA-Z0-9-]/g,"");
+    return `
+      <div id="${secId}">
+        <div class="sec-head">
+          <h2>${emoji} ${esc(cat)}</h2>
+          <div class="sec-div"></div>
+          <div class="sec-badge">${grp.length} item${grp.length!==1?"s":""}</div>
+        </div>
+        <div class="mgrid">${grp.map(cardHtml).join("")}</div>
+      </div>`;
+  }).join("");
+}
+
+function cardHtml(item) {
+  const img      = resolveImg(item);
+  const hasCustom= !!getItemImg(item.id);
+  const safe     = JSON.stringify(item).replace(/'/g,"&#39;");
+
+  const editOverlay = editMode ? `
+    <div class="img-edit-overlay">
+      <div class="eo-title">📸 ${esc(item.name)}</div>
+      <button class="img-edit-btn upload" onclick="event.stopPropagation();triggerUpload('${item.id}')">
+        📤 ${hasCustom?"Change Photo":"Upload Photo"}
+      </button>
+      ${hasCustom?`<button class="img-edit-btn delete" onclick="event.stopPropagation();confirmDelete('${item.id}')">🗑️ Remove Photo</button>`:""}
+      <button class="img-edit-btn reset" onclick="event.stopPropagation();openMgr('${item.id}')">⚙️ Manage</button>
+    </div>` : "";
+
+  const editFoot = editMode ? `
+    <div class="edit-card-foot">
+      <span class="img-status ${hasCustom?"custom":"default"}">${hasCustom?"✓ Custom Photo":"Default Photo"}</span>
+      <span style="flex:1"></span>
+      <button style="font-size:.72rem;border:none;background:transparent;cursor:pointer;color:var(--brown);font-weight:700;" onclick="triggerUpload('${item.id}')">Change →</button>
+    </div>` : "";
+
+  return `
+    <article class="mcard ${editMode?"edit-active":""}" id="card-${item.id}">
+      <div class="mcard-img">
+        <img src="${esc(img)}" alt="${esc(item.name)}" loading="lazy" decoding="async" onerror="handleErr(this)" id="img-${item.id}"/>
+        <div class="mcard-cat">${item.emoji} ${esc(item.cat)}</div>
+        ${editOverlay}
+      </div>
+      <div class="mcard-body">
+        <div class="mcard-name">${esc(item.name)}</div>
+        <div class="mcard-price">$${Number(item.price).toFixed(2)}</div>
+      </div>
+      ${editFoot}
+      <div class="mcard-foot">
+        <button class="mcard-btn" onclick='openItem(${safe})'>🛒 Order &amp; Pay</button>
+        <a class="mcard-btn det" href="${CLOVER}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">🍀 Clover</a>
+      </div>
+    </article>`;
+}
+
+/* ══ IMAGE UPLOAD FLOW ══ */
+let pendingUploadId = null;
+
+function triggerUpload(itemId) {
+  if (!isAdminAuthed()) { openAdminLogin(); return; }
+  pendingUploadId = itemId;
+  const fi = document.getElementById("imgFileInput");
+  fi.value = "";
+  fi.onchange = null;
+  fi.onchange = () => handleFileChosen(fi);
+  fi.click();
+}
+
+function handleFileChosen(input) {
+  if (!input.files || !input.files[0] || !pendingUploadId) return;
+  const file = input.files[0];
+  // Validate
+  if (!file.type.startsWith("image/")) { alert("Please choose an image file."); return; }
+  if (file.size > 5 * 1024 * 1024) { alert("Image must be under 5MB."); return; }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const dataUrl = e.target.result;
+    setItemImg(pendingUploadId, dataUrl);
+    // Live-update the card image without full re-render
+    const imgEl = document.getElementById("img-"+pendingUploadId);
+    if (imgEl) imgEl.src = dataUrl;
+    // Re-render just that card
+    const cardEl = document.getElementById("card-"+pendingUploadId);
+    if (cardEl) {
+      const item = MENU.find(i=>i.id===pendingUploadId);
+      if (item) cardEl.outerHTML = cardHtml(item);
+    }
+    pendingUploadId = null;
+    showToast("✅ Photo saved!");
+  };
+  reader.readAsDataURL(file);
+}
+
+function confirmDelete(itemId) {
+  if (!isAdminAuthed()) { openAdminLogin(); return; }
+  const item = MENU.find(i=>i.id===itemId);
+  if (!confirm(`Remove the custom photo for "${item?.name||itemId}" and revert to the default image?`)) return;
+  deleteItemImg(itemId);
+  const cardEl = document.getElementById("card-"+itemId);
+  if (cardEl) {
+    const it = MENU.find(i=>i.id===itemId);
+    if (it) cardEl.outerHTML = cardHtml(it);
+  }
+  showToast("🗑️ Photo removed");
+}
+
+/* ══ IMAGE MANAGER MODAL ══ */
+function openMgr(itemId) {
+  if (!isAdminAuthed()) { openAdminLogin(); return; }
+  const item     = MENU.find(i=>i.id===itemId);
+  if (!item) return;
+  const hasCustom= !!getItemImg(itemId);
+  const curImg   = resolveImg(item);
+
+  document.getElementById("modalRoot").innerHTML = `
+    <div class="modal-bd" onclick="if(event.target===this)closeMgr()">
+      <div class="modal-sheet">
+        <div class="img-mgr">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+            <div>
+              <h3>${esc(item.name)}</h3>
+              <div class="sub">${item.emoji} ${esc(item.cat)} · $${Number(item.price).toFixed(2)}</div>
+            </div>
+            <button onclick="closeMgr()" style="background:transparent;border:none;font-size:1.2rem;cursor:pointer;color:var(--muted);padding:4px;">✕</button>
+          </div>
+
+          <img id="mgrPreview" class="img-mgr-preview ${hasCustom?"has-img":""}" src="${esc(curImg)}" alt="${esc(item.name)}" onerror="this.src='${FALL}'"/>
+
+          <div class="upload-zone" id="dropZone"
+            onclick="triggerMgrUpload('${itemId}')"
+            ondragover="event.preventDefault();this.classList.add('drag')"
+            ondragleave="this.classList.remove('drag')"
+            ondrop="handleDrop(event,'${itemId}')">
+            <div class="uz-icon">📷</div>
+            <p><strong>Click to upload</strong> or drag &amp; drop a photo here</p>
+            <p>JPG, PNG, WEBP · Max 5MB</p>
+          </div>
+
+          <div class="img-action-row">
+            <button class="img-action-btn primary" onclick="triggerMgrUpload('${itemId}')">
+              📤 ${hasCustom?"Change Photo":"Upload Photo"}
+            </button>
+            ${hasCustom?`<button class="img-action-btn danger" onclick="deleteMgr('${itemId}')">🗑️ Remove & Reset</button>`:""}
+            <button class="img-action-btn secondary" onclick="closeMgr()">Cancel</button>
+          </div>
+
+          <div class="img-note">
+            💡 <strong>Photos are saved in your browser.</strong> They stay saved across visits on this device.
+            To update photos on a different device, upload the image again on that device.
+          </div>
+        </div>
+      </div>
+    </div>`;
+  document.body.style.overflow="hidden";
+}
+
+function triggerMgrUpload(itemId) {
+  pendingUploadId = itemId;
+  const fi = document.getElementById("imgFileInput");
+  fi.value = "";
+  fi.onchange = () => handleMgrFileChosen(fi, itemId);
+  fi.click();
+}
+
+function handleMgrFileChosen(input, itemId) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  if (!file.type.startsWith("image/")) { alert("Please choose an image file."); return; }
+  if (file.size > 5 * 1024 * 1024) { alert("Image must be under 5MB."); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const dataUrl = e.target.result;
+    setItemImg(itemId, dataUrl);
+    // Update modal preview
+    const prev = document.getElementById("mgrPreview");
+    if (prev) { prev.src = dataUrl; prev.classList.add("has-img"); }
+    // Update card
+    const cardEl = document.getElementById("card-"+itemId);
+    if (cardEl) { const it=MENU.find(i=>i.id===itemId); if(it) cardEl.outerHTML=cardHtml(it); }
+    showToast("✅ Photo saved!");
+    closeMgr();
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleDrop(event, itemId) {
+  event.preventDefault();
+  document.getElementById("dropZone")?.classList.remove("drag");
+  const file = event.dataTransfer.files[0];
+  if (!file) return;
+  if (!file.type.startsWith("image/")) { alert("Please drop an image file."); return; }
+  if (file.size > 5 * 1024 * 1024) { alert("Image must be under 5MB."); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const dataUrl = e.target.result;
+    setItemImg(itemId, dataUrl);
+    const prev = document.getElementById("mgrPreview");
+    if (prev) { prev.src=dataUrl; prev.classList.add("has-img"); }
+    const cardEl = document.getElementById("card-"+itemId);
+    if (cardEl){ const it=MENU.find(i=>i.id===itemId); if(it) cardEl.outerHTML=cardHtml(it); }
+    showToast("✅ Photo saved!");
+    closeMgr();
+  };
+  reader.readAsDataURL(file);
+}
+
+function deleteMgr(itemId) {
+  const item = MENU.find(i=>i.id===itemId);
+  if (!confirm(`Reset photo for "${item?.name||itemId}" to the default?`)) return;
+  deleteItemImg(itemId);
+  const cardEl = document.getElementById("card-"+itemId);
+  if (cardEl){ const it=MENU.find(i=>i.id===itemId); if(it) cardEl.outerHTML=cardHtml(it); }
+  showToast("🗑️ Photo reset to default");
+  closeMgr();
+}
+
+function closeMgr() {
+  document.getElementById("modalRoot").innerHTML="";
+  document.body.style.overflow="";
+}
+
+/* ══ ITEM ORDER POPUP ══ */
+function openItem(item) {
+  document.getElementById("modalRoot").innerHTML=`
+    <div class="modal-bd" onclick="if(event.target===this)closeItem()">
+      <div class="modal-sheet">
+        <div style="position:relative">
+          <img class="modal-hero" src="${esc(resolveImg(item))}" alt="${esc(item.name)}" loading="lazy" onerror="handleErr(this)"/>
+          <button class="modal-close-btn" onclick="closeItem()">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-cat-pill">${item.emoji} ${esc(item.cat)}</div>
+          <div class="modal-name">${esc(item.name)}</div>
+          <div class="modal-price">$${Number(item.price).toFixed(2)}</div>
+          <a href="${CLOVER}" target="_blank" rel="noopener noreferrer" class="modal-pay">
+            🍀 Order &amp; Pay via Clover — $${Number(item.price).toFixed(2)}
+          </a>
+          <div class="secure">🔒 Secure checkout · All major cards accepted</div>
+        </div>
+      </div>
+    </div>`;
+  document.body.style.overflow="hidden";
+}
+
+function closeItem() { document.getElementById("modalRoot").innerHTML=""; document.body.style.overflow=""; }
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){ closeItem(); closeMgr(); closeAdminLogin(); }
+});
+
+/* ══ TOAST ══ */
+function showToast(msg) {
+  const t = document.createElement("div");
+  t.textContent = msg;
+  Object.assign(t.style,{
+    position:"fixed",bottom:"90px",left:"50%",transform:"translateX(-50%)",
+    background:"#1f130b",color:"#fff",padding:"10px 22px",borderRadius:"999px",
+    fontWeight:"700",fontSize:".88rem",zIndex:"999",
+    boxShadow:"0 4px 20px rgba(0,0,0,.3)",
+    animation:"fadeIn .2s ease",
+    whiteSpace:"nowrap"
+  });
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 2500);
+}
+
+/* ══ BOOT ══ */
+buildTabs();
+render();
+applyAdminUI(); // show/hide admin controls based on saved session
+</script>
+</body>
+</html>

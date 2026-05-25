@@ -365,7 +365,7 @@
 
 <script>
 const PAYPAL_MANUAL_LINK = "https://www.paypal.com/ncp/payment/N383Y35W986VU";
-const API = "https://cafe-4nv2.onrender.com";
+const API = window.CKC_API_BASE || "https://cafe-4nv2.onrender.com";
 const CART_KEY = "ckc_paypal_cart";
 const ORDER_KEY = "ckc_customer_orders";
 const MENU_EDIT_KEY = "ckc_menu_item_edits";
@@ -1227,15 +1227,22 @@ async function removeDeliveredOrder(orderId){
 async function testOwnerEmail(){
   if(!isAdminAuthed()) return openAdminLogin();
   try{
-    const res=await fetch(API+"/api/admin/test-email",{method:"POST",headers:{"x-admin-key":getAdminKey()}});
+    const res=await fetch(`${API}/api/admin/test-email`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json","x-admin-key":getAdminKey()}
+    });
     const data=await res.json().catch(()=>({}));
-    if(!res.ok) throw new Error(data.error||"Email test failed");
-    alert("✅ Test email sent to communitykitchenclt@gmail.com. Check Inbox/Spam.");
+    if(!res.ok) throw new Error(data.error||data.details||"Email test failed");
+    alert("✅ Test email sent to communitykitchenclt@gmail.com. Check Inbox, Spam, and Promotions.");
   }catch(err){
-    alert("Email test failed: "+err.message+"\n\nCheck SMTP_PASS, SMTP_USER, OWNER_EMAIL in Render and redeploy.");
+    alert(
+      "❌ Email test failed: " + err.message +
+      "\n\nThis button must call Render, not 127.0.0.1." +
+      "\nCurrent API: " + API +
+      "\n\nCheck SMTP_PASS, SMTP_USER, OWNER_EMAIL in Render and redeploy."
+    );
   }
 }
-
 function openEditItem(item){
   if(!isAdminAuthed()) return openAdminLogin();
   const real=applyEdit(item);

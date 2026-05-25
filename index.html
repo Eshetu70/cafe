@@ -390,7 +390,7 @@
         <h3>Contact</h3>
         <p>📍 811 N Charlotte Ave, Monroe NC 28110</p>
         <p>📞 (240) 606-3319</p>
-        <p>📧 communitykitchen@gmail.com</p>
+        <p>📧 communitykitchenclt@gmail.com</p>
       </div>
     </div>
     <div class="footer-bottom">© 2026 Community Kitchen Café. All rights reserved.</div>
@@ -408,7 +408,7 @@ const PAYPAL_CLIENT_ID  = "ARyqZnmkozCfqLh13N7pKvwmkhtrEYFsP3nu87sMcLBBeO_liUzdV
 const PAYPAL_FALLBACK_URL = "https://www.paypal.com/ncp/payment/N383Y35W986VU";
 const PAYPAL_URL        = PAYPAL_FALLBACK_URL;
 const CLOVER_URL        = PAYPAL_FALLBACK_URL; // kept as alias so older code still works
-const API_BASE          = "https://cafe-4nv2.onrender.com";
+const API_BASE          = window.CKC_API_BASE || "https://cafe-4nv2.onrender.com";
 const TOKEN_KEY         = "ckc_token";
 const USER_KEY          = "ckc_user";
 const ADMIN_KEY_STORAGE = "ckc_admin_key";
@@ -978,14 +978,23 @@ async function openAdmin(){
 async function testOwnerEmail(){
   if(!getAdminKey()) return openAdmin();
   try{
-    await fetchJSON(API_BASE+"/api/admin/test-email",{method:"POST",headers:{"x-admin-key":getAdminKey()}});
+    const res = await fetch(`${API_BASE}/api/admin/test-email`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json","x-admin-key":getAdminKey()}
+    });
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(data.error || data.details || "Email test failed");
     showToast("✅ Test email sent to communitykitchenclt@gmail.com");
-    alert("Test email sent. Check Inbox/Spam for communitykitchenclt@gmail.com.");
+    alert("✅ Test email sent to communitykitchenclt@gmail.com. Check Inbox, Spam, and Promotions.");
   }catch(err){
-    alert("Email test failed: "+err.message+"\n\nCheck SMTP_USER, SMTP_PASS, OWNER_EMAIL in Render, then redeploy backend.");
+    alert(
+      "❌ Email test failed: " + err.message +
+      "\n\nThis button must call Render, not 127.0.0.1." +
+      "\nCurrent API: " + API_BASE +
+      "\n\nCheck SMTP_USER, SMTP_PASS, OWNER_EMAIL in Render, then redeploy backend."
+    );
   }
-}
-function logoutAdmin(){ clearAdminSession(); showView("shop"); alert("Admin logged out"); }
+}function logoutAdmin(){ clearAdminSession(); showView("shop"); alert("Admin logged out"); }
 
 async function loadAdminOrders(){
   let orders=[];

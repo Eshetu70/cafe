@@ -15,7 +15,7 @@
     :root{
       --brown:#5c2e0e;--caramel:#c17a36;--cream:#fdf6ee;
       --warm:#fff8f0;--muted:#8c6e58;--border:#ede0d4;
-      --card:#ffffff;--clover:#1a5c38;--clover2:#2a7a4e;
+      --card:#ffffff;--paypal:#003087;--paypal2:#0070ba;--clover:#003087;--clover2:#0070ba;
       --text:#1f130b;--text2:#6b5b4c;
     }
     html{scroll-behavior:smooth}
@@ -216,6 +216,57 @@
     /* ── HIDDEN FILE INPUT ── */
     #imgFileInput{display:none}
 
+
+
+
+
+    /* ── Screenshot-style menu cards + full edit controls ── */
+    .mcard{border-radius:24px;overflow:hidden;background:#f7f3ec;border:1px solid #eadfd2;box-shadow:0 6px 22px rgba(92,46,14,.08)}
+    .mcard-img{aspect-ratio:1.25/1;background:#e9dfd5}
+    .mcard-name{text-align:center;font-size:1.18rem;line-height:1.25;margin-top:8px;color:#2b2119}
+    .mcard-price{text-align:center;font-size:1.28rem;letter-spacing:.12em;color:#6f3f1f;margin:10px 0 6px}
+    .mcard-foot{grid-template-columns:1fr 1fr;background:#f8f5ee;border-top:2px solid #efe7dd;min-height:92px}
+    .mcard-btn{font-size:.9rem;text-transform:uppercase;letter-spacing:.18em;color:#2f7d49;gap:14px;font-weight:900;padding:18px 10px;background:#f8f5ee}
+    .mcard-btn.det{color:#6f3f1f}
+    .mcard-btn .btn-ico{font-size:2rem;line-height:1}
+    .mcard-btn .btn-txt{display:inline-block;line-height:1.25}
+    .mcard-admin-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:10px 12px;background:#fff7ed;border-top:1px solid var(--border)}
+    .mcard-admin-row button{border:none;border-radius:999px;padding:8px 12px;font-weight:900;cursor:pointer;background:#7c2d12;color:#fff;font-size:.78rem}
+    .mcard-admin-row button.secondary{background:#fff;color:#7c2d12;border:1px solid #fed7aa}
+    .edit-image-preview{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:16px;border:1px solid var(--border);background:#f3e6d7;margin:14px 0 10px}
+    .edit-image-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+
+    /* ── PayPal Cart / Admin Orders ── */
+    .cart-pill{position:relative}
+    .cart-count{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#fff;color:#003087;font-size:.72rem;font-weight:900;margin-left:2px}
+    .cart-list{display:flex;flex-direction:column;gap:10px;margin:14px 0}
+    .cart-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start;padding:12px;border:1px solid var(--border);border-radius:14px;background:#fff8f0}
+    .cart-title{font-weight:900;color:var(--text)}
+    .cart-meta{font-size:.8rem;color:var(--muted);margin-top:3px;line-height:1.4}
+    .qty-box{display:flex;align-items:center;gap:7px;justify-content:flex-end;flex-wrap:wrap}
+    .qty-btn,.mini-btn{border:none;border-radius:999px;background:#f0dfc8;color:var(--brown);font-weight:900;cursor:pointer;padding:6px 10px}
+    .mini-btn.danger{background:#fee2e2;color:#991b1b}
+    .mini-btn.good{background:#dcfce7;color:#166534}
+    .checkout-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+    .checkout-form input,.checkout-form textarea,.checkout-form select,.edit-form input,.edit-form textarea,.edit-form select{width:100%;padding:11px 13px;border-radius:12px;border:1.5px solid var(--border);font-family:'DM Sans',sans-serif;outline:none;background:#fff}
+    .checkout-form textarea,.edit-form textarea{grid-column:1/-1;min-height:72px;resize:vertical}
+    .total-box{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#fdf6ee;border:1px solid var(--border);border-radius:16px;padding:14px;margin:14px 0;font-weight:900}
+    .paypal-box{border:1px solid var(--border);border-radius:16px;padding:14px;background:#fff;margin-top:12px}
+    .admin-orders-grid{display:flex;flex-direction:column;gap:12px;margin-top:14px}
+    .admin-order-card{border:1px solid var(--border);border-radius:16px;background:#fff;padding:14px}
+    .detail-section{border:1px solid var(--border);border-radius:16px;background:#fff8f0;padding:14px;margin:14px 0}
+    .detail-section h3{font-family:'Playfair Display',serif;color:var(--brown);font-size:1.05rem;margin-bottom:8px}
+    .detail-list{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;font-size:.9rem;color:var(--text2)}
+    .detail-line{font-size:.92rem;color:var(--text2);line-height:1.55;white-space:pre-wrap}
+    .admin-customer-box{background:#fdf6ee;border:1px solid var(--border);border-radius:14px;padding:12px;margin:10px 0}
+    .admin-customer-box b{color:var(--brown)}
+    .status-pill{display:inline-flex;padding:4px 10px;border-radius:999px;font-size:.72rem;font-weight:900;background:#fef3c7;color:#92400e;margin-left:6px}
+    .status-pill.paid{background:#dcfce7;color:#166534}.status-pill.delivered{background:#dbeafe;color:#1d4ed8}
+    .edit-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+    .admin-edit-btn{background:#fff7ed;color:#7c2d12;border:1px solid #fed7aa;border-radius:999px;padding:8px 12px;font-weight:900;cursor:pointer}
+    .manual-pay-link{display:inline-flex;justify-content:center;align-items:center;width:100%;margin-top:10px;text-decoration:none;border-radius:999px;padding:12px;font-weight:900;background:#f3f4f6;color:#003087;border:1px solid #d1d5db}
+    @media(max-width:600px){.checkout-form,.edit-form{grid-template-columns:1fr}.cart-row{grid-template-columns:1fr}.qty-box{justify-content:flex-start}.order-bar{padding-bottom:calc(12px + env(safe-area-inset-bottom))}}
+
     @media(max-width:600px){
       .brand-sub,.nbtn.outline{display:none}
       .mgrid{grid-template-columns:1fr 1fr;gap:12px}
@@ -227,6 +278,7 @@
     }
     @media(max-width:380px){.mgrid{grid-template-columns:1fr}}
   </style>
+  <script src="https://www.paypal.com/sdk/js?client-id=ARyqZnmkozCfqLh13N7pKvwmkhtrEYFsP3nu87sMcLBBeO_liUzdVjLOs_reT3oxLle4G2g_Le4vjEQH&currency=USD&intent=capture"></script>
 </head>
 <body>
 
@@ -252,11 +304,13 @@
       </button>
       <!-- These only show when admin is authenticated (admin-only class) -->
       <button class="nbtn edit-mode-btn admin-only" id="editModeBtn" onclick="toggleEditMode()">✏️ Edit Images</button>
+      <button class="nbtn admin-only" onclick="openAdminOrders()" style="background:#fff7ed;color:#7c2d12;border:1.5px solid #fed7aa;">📦 Owner Orders</button>
       <button class="nbtn admin-only" id="adminLogoutBtn" onclick="adminLogout()"
         style="background:linear-gradient(135deg,#b91c1c,#ef4444);color:#fff;">
         🔓 Logout
       </button>
-      <a href="https://www.clover.com/online-ordering/community-kitchen-cafe--monroe" target="_blank" rel="noopener noreferrer" class="nbtn green">🍀 Order &amp; Pay</a>
+      <button class="nbtn outline" onclick="openCustomerOrders()">📋 My Orders</button>
+      <button class="nbtn green cart-pill" onclick="openCart()">💳 Checkout <span class="cart-count" id="cartBadge">0</span></button>
     </div>
   </div>
 </nav>
@@ -277,7 +331,7 @@
     <div class="hero-eye">🍽️ Monroe NC · 7AM–3PM Mon–Sat · (240) 606-3319</div>
     <h1>Our <span>Full Menu</span></h1>
     <p>Breakfast, lunch, drinks, desserts, baked goods &amp; more — made fresh every day at 811 N Charlotte Ave.</p>
-    <a href="https://www.clover.com/online-ordering/community-kitchen-cafe--monroe" target="_blank" rel="noopener noreferrer" class="hero-cta">🛒 Order Online via Clover</a>
+    <button class="hero-cta" onclick="openCart()" style="border:none;cursor:pointer">🛒 Review Cart & Pay with PayPal</button>
   </div>
 </div>
 
@@ -296,7 +350,7 @@
 <!-- ══ FIXED BAR ══ -->
 <div class="order-bar">
   <div class="ob-text">Ready to order?<small>Pickup · 811 N Charlotte Ave, Monroe NC</small></div>
-  <a href="https://www.clover.com/online-ordering/community-kitchen-cafe--monroe" target="_blank" rel="noopener noreferrer" class="ob-cta">🍀 Order &amp; Pay →</a>
+  <button class="ob-cta" onclick="openCart()" style="border:none;cursor:pointer">💳 Cart / PayPal →</button>
 </div>
 
 <!-- ══ MODAL ══ -->
@@ -309,8 +363,13 @@
 </footer>
 
 <script>
-const CLOVER = "https://www.clover.com/online-ordering/community-kitchen-cafe--monroe";
-const API    = "https://cafe-4nv2.onrender.com";
+const PAYPAL_MANUAL_LINK = "https://www.paypal.com/ncp/payment/N383Y35W986VU";
+const API = "https://cafe-4nv2.onrender.com";
+const CART_KEY = "ckc_paypal_cart";
+const ORDER_KEY = "ckc_customer_orders";
+const MENU_EDIT_KEY = "ckc_menu_item_edits";
+const PAYPAL_CLIENT_ID = "ARyqZnmkozCfqLh13N7pKvwmkhtrEYFsP3nu87sMcLBBeO_liUzdVjLOs_reT3oxLle4G2g_Le4vjEQH";
+const CLOVER = PAYPAL_MANUAL_LINK;
 const FALL   = "https://images.unsplash.com/photo-1543353071-10c8ba85a904?auto=format&fit=crop&w=900&q=70";
 const IMG_STORE_KEY = "ckc_item_images"; // localStorage key for custom images
 
@@ -601,19 +660,53 @@ function toggleEditMode() {
 /* ══ UTILITIES ══ */
 function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 function handleErr(el){ el.onerror=null; el.src=FALL; }
+function fmtText(v, fallback='Not listed yet'){ const t=String(v||'').trim(); return t ? esc(t) : fallback; }
+function fmtNum(v){ const t=String(v||'').trim(); return t ? esc(t) : 'N/A'; }
+function detailsHtml(item){
+  return `<div class="detail-section">
+    <h3>Ingredients</h3>
+    <div class="detail-line">${fmtText(item.ingredients)}</div>
+  </div>
+  <div class="detail-section">
+    <h3>Nutrition</h3>
+    <div class="detail-list">
+      <div>Calories: <b>${fmtNum(item.calories)}</b></div>
+      <div>Protein: <b>${fmtNum(item.protein)}</b></div>
+      <div>Carbs: <b>${fmtNum(item.carbs)}</b></div>
+      <div>Fat: <b>${fmtNum(item.fat)}</b></div>
+      <div>Sodium: <b>${fmtNum(item.sodium)}</b></div>
+    </div>
+  </div>
+  <div class="detail-section">
+    <h3>Allergy Info</h3>
+    <div class="detail-line">${fmtText(item.allergens || item.allergyInfo, 'No allergy information listed')}</div>
+  </div>`;
+}
 
 /* ══ TABS ══ */
 let activeCat = "all";
+
+function normalizeCategoryFromUrl(){
+  const params = new URLSearchParams(location.search);
+  const raw = params.get("cat") || params.get("category") || decodeURIComponent((location.hash||"").replace(/^#sec-/,"").replace(/^#/,""));
+  if(!raw) return "all";
+  const clean = raw.replace(/-/g," ").replace(/&amp;/g,"&").trim().toLowerCase();
+  const exact = CAT_ORDER.find(c => c.toLowerCase() === clean);
+  if(exact) return exact;
+  const partial = CAT_ORDER.find(c => c.toLowerCase().replace(/[^a-z0-9]/g,"").includes(clean.replace(/[^a-z0-9]/g,"")));
+  return partial || "all";
+}
+
 
 function buildTabs() {
   const cats = CAT_ORDER.filter(c => MENU.some(i=>i.cat===c));
   const bar  = document.getElementById("tabBar");
   bar.innerHTML = [
-    `<button class="tab active" data-c="all" onclick="setcat('all')">🍴 All <span class="cnt">${MENU.length}</span></button>`,
+    `<button class="tab ${activeCat==='all'?'active':''}" data-c="all" onclick="setcat('all')">🍴 All <span class="cnt">${MENU.length}</span></button>`,
     ...cats.map(c => {
       const cnt   = MENU.filter(i=>i.cat===c).length;
       const emoji = MENU.find(i=>i.cat===c)?.emoji||"🍽️";
-      return `<button class="tab" data-c="${esc(c)}" onclick="setcat('${esc(c)}')">${emoji} ${esc(c)} <span class="cnt">${cnt}</span></button>`;
+      return `<button class="tab ${activeCat===c?'active':''}" data-c="${esc(c)}" onclick="setcat('${esc(c)}')">${emoji} ${esc(c)} <span class="cnt">${cnt}</span></button>`;
     })
   ].join("");
 }
@@ -628,7 +721,7 @@ function setcat(cat) {
 function render() {
   const q    = (document.getElementById("searchBox").value||"").trim().toLowerCase();
   const root = document.getElementById("menuRoot");
-  let items  = [...MENU];
+  let items  = getEditableMenu();
   if (activeCat!=="all") items=items.filter(i=>i.cat===activeCat);
   if (q) items=items.filter(i=>(i.name+" "+i.cat).toLowerCase().includes(q));
   if (!items.length) {
@@ -655,43 +748,55 @@ function render() {
 }
 
 function cardHtml(item) {
-  const img      = resolveImg(item);
-  const hasCustom= !!getItemImg(item.id);
-  const safe     = JSON.stringify(item).replace(/'/g,"&#39;");
+  const real     = applyEdit(item);
+  const img      = resolveImg(real);
+  const hasCustom= !!getItemImg(real.id);
+  const safe     = JSON.stringify(real).replace(/'/g,"&#39;");
 
   const editOverlay = editMode ? `
     <div class="img-edit-overlay">
-      <div class="eo-title">📸 ${esc(item.name)}</div>
-      <button class="img-edit-btn upload" onclick="event.stopPropagation();triggerUpload('${item.id}')">
+      <div class="eo-title">📸 ${esc(real.name)}</div>
+      <button class="img-edit-btn upload" onclick="event.stopPropagation();triggerUpload('${real.id}')">
         📤 ${hasCustom?"Change Photo":"Upload Photo"}
       </button>
-      ${hasCustom?`<button class="img-edit-btn delete" onclick="event.stopPropagation();confirmDelete('${item.id}')">🗑️ Remove Photo</button>`:""}
-      <button class="img-edit-btn reset" onclick="event.stopPropagation();openMgr('${item.id}')">⚙️ Manage</button>
+      ${hasCustom?`<button class="img-edit-btn delete" onclick="event.stopPropagation();confirmDelete('${real.id}')">🗑️ Remove Photo</button>`:""}
+      <button class="img-edit-btn reset" onclick="event.stopPropagation();openMgr('${real.id}')">⚙️ Manage Image</button>
     </div>` : "";
 
   const editFoot = editMode ? `
     <div class="edit-card-foot">
       <span class="img-status ${hasCustom?"custom":"default"}">${hasCustom?"✓ Custom Photo":"Default Photo"}</span>
       <span style="flex:1"></span>
-      <button style="font-size:.72rem;border:none;background:transparent;cursor:pointer;color:var(--brown);font-weight:700;" onclick="triggerUpload('${item.id}')">Change →</button>
+      <button style="font-size:.72rem;border:none;background:transparent;cursor:pointer;color:var(--brown);font-weight:700;" onclick="triggerUpload('${real.id}')">Change Photo →</button>
+    </div>` : "";
+
+  const adminRow = isAdminAuthed() ? `
+    <div class="mcard-admin-row">
+      <button onclick='openEditItem(${safe})'>✏️ Edit all details</button>
+      <button class="secondary" onclick="triggerUpload('${real.id}')">📷 Image</button>
     </div>` : "";
 
   return `
-    <article class="mcard ${editMode?"edit-active":""}" id="card-${item.id}">
+    <article class="mcard ${editMode?"edit-active":""}" id="card-${real.id}">
       <div class="mcard-img">
-        <img src="${esc(img)}" alt="${esc(item.name)}" loading="lazy" decoding="async" onerror="handleErr(this)" id="img-${item.id}"/>
-        <div class="mcard-cat">${item.emoji} ${esc(item.cat)}</div>
+        <img src="${esc(img)}" alt="${esc(real.name)}" loading="lazy" decoding="async" onerror="handleErr(this)" id="img-${real.id}"/>
+        <div class="mcard-cat">${real.emoji || "🍽️"} ${esc(real.cat)}</div>
         ${editOverlay}
       </div>
       <div class="mcard-body">
-        <div class="mcard-name">${esc(item.name)}</div>
-        <div class="mcard-price">$${Number(item.price).toFixed(2)}</div>
+        <div class="mcard-name">${esc(real.name)}</div>
+        <div class="mcard-price">$${Number(real.price).toFixed(2)}</div>
       </div>
       ${editFoot}
       <div class="mcard-foot">
-        <button class="mcard-btn" onclick='openItem(${safe})'>🛒 Order &amp; Pay</button>
-        <a class="mcard-btn det" href="${CLOVER}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">🍀 Clover</a>
+        <button class="mcard-btn" onclick='addToCart(${safe});openCart();event.stopPropagation();'>
+          <span class="btn-ico">🛒</span><span class="btn-txt">Order &amp; Pay</span>
+        </button>
+        <button class="mcard-btn det" onclick='openItem(${safe})'>
+          <span class="btn-ico">⊕</span><span class="btn-txt">See Details</span>
+        </button>
       </div>
+      ${adminRow}
     </article>`;
 }
 
@@ -862,30 +967,242 @@ function closeMgr() {
   document.body.style.overflow="";
 }
 
-/* ══ ITEM ORDER POPUP ══ */
+
+/* ══ MENU EDITS, CART, CHECKOUT, ORDERS ══ */
+function getMenuEdits(){ try{return JSON.parse(localStorage.getItem(MENU_EDIT_KEY)||"{}")}catch{return{}} }
+function saveMenuEdits(edits){ localStorage.setItem(MENU_EDIT_KEY, JSON.stringify(edits)); }
+function applyEdit(item){ return {...item, ...(getMenuEdits()[item.id]||{})}; }
+function getEditableMenu(){ return MENU.map(applyEdit); }
+function getEditableItem(id){ return getEditableMenu().find(i=>i.id===id); }
+function cart(){ try{return JSON.parse(localStorage.getItem(CART_KEY)||"[]")}catch{return[]} }
+function saveCart(c){ localStorage.setItem(CART_KEY, JSON.stringify(c)); updateCartBadge(); }
+function cartTotal(c=cart()){ return c.reduce((sum,i)=>sum + Number(i.price||0)*Number(i.qty||1),0); }
+function orderList(){ try{return JSON.parse(localStorage.getItem(ORDER_KEY)||"[]")}catch{return[]} }
+function saveOrders(list){ localStorage.setItem(ORDER_KEY, JSON.stringify(list)); }
+function updateCartBadge(){ const b=document.getElementById("cartBadge"); if(b) b.textContent=cart().reduce((s,i)=>s+Number(i.qty||1),0); }
+
+function addToCart(item, qty=1){
+  const current = cart();
+  const real = applyEdit(item);
+  const found = current.find(i=>i.id===real.id);
+  if(found) found.qty += Number(qty||1);
+  else current.push({id:real.id,name:real.name,cat:real.cat,emoji:real.emoji,price:Number(real.price||0),qty:Number(qty||1)});
+  saveCart(current);
+  showToast(`✅ Added ${real.name} to cart`);
+}
+function changeCartQty(id, delta){
+  const c=cart(); const item=c.find(i=>i.id===id); if(!item) return;
+  item.qty += delta; if(item.qty<=0) c.splice(c.findIndex(i=>i.id===id),1);
+  saveCart(c); openCart();
+}
+function removeCartItem(id){ saveCart(cart().filter(i=>i.id!==id)); openCart(); }
+
+/* Item popup */
 function openItem(item) {
+  const real = applyEdit(item);
   document.getElementById("modalRoot").innerHTML=`
     <div class="modal-bd" onclick="if(event.target===this)closeItem()">
       <div class="modal-sheet">
         <div style="position:relative">
-          <img class="modal-hero" src="${esc(resolveImg(item))}" alt="${esc(item.name)}" loading="lazy" onerror="handleErr(this)"/>
+          <img class="modal-hero" src="${esc(resolveImg(real))}" alt="${esc(real.name)}" loading="lazy" onerror="handleErr(this)"/>
           <button class="modal-close-btn" onclick="closeItem()">✕</button>
         </div>
         <div class="modal-body">
-          <div class="modal-cat-pill">${item.emoji} ${esc(item.cat)}</div>
-          <div class="modal-name">${esc(item.name)}</div>
-          <div class="modal-price">$${Number(item.price).toFixed(2)}</div>
-          <a href="${CLOVER}" target="_blank" rel="noopener noreferrer" class="modal-pay">
-            🍀 Order &amp; Pay via Clover — $${Number(item.price).toFixed(2)}
-          </a>
-          <div class="secure">🔒 Secure checkout · All major cards accepted</div>
+          <div class="modal-cat-pill">${real.emoji} ${esc(real.cat)}</div>
+          <div class="modal-name">${esc(real.name)}</div>
+          <div class="modal-price">$${Number(real.price).toFixed(2)}</div>
+          ${real.description?`<p style="color:var(--text2);line-height:1.6;margin-bottom:12px">${esc(real.description)}</p>`:""}
+          ${detailsHtml(real)}
+          <label style="font-weight:900;font-size:.86rem;display:block;margin-bottom:6px">Quantity</label>
+          <select id="itemQty" style="width:100%;padding:12px;border-radius:12px;border:1.5px solid var(--border);margin-bottom:12px">
+            ${[1,2,3,4,5,6,7,8,9,10].map(n=>`<option value="${n}">${n}</option>`).join("")}
+          </select>
+          <button class="modal-pay" onclick='addToCart(${JSON.stringify(real).replace(/'/g,"&#39;")}, Number(document.getElementById("itemQty").value)); closeItem(); openCart();'>
+            🛒 Add to Cart — $${Number(real.price).toFixed(2)}
+          </button>
+          ${isAdminAuthed()?`<button class="manual-pay-link" onclick='openEditItem(${JSON.stringify(real).replace(/'/g,"&#39;")})'>✏️ Admin: Edit Name / Price / Ingredients / Nutrition / Allergies</button>`:""}
+          <div class="secure">🔒 Customer can review details before ordering</div>
         </div>
       </div>
     </div>`;
   document.body.style.overflow="hidden";
 }
-
 function closeItem() { document.getElementById("modalRoot").innerHTML=""; document.body.style.overflow=""; }
+
+function openCart(){
+  const c=cart(); const total=cartTotal(c);
+  document.getElementById("modalRoot").innerHTML=`
+  <div class="modal-bd" onclick="if(event.target===this)closeItem()">
+    <div class="modal-sheet"><div class="modal-body">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2 style="font-family:'Playfair Display',serif;color:var(--brown)">Checkout</h2><button class="mini-btn" onclick="closeItem()">Close</button></div>
+      ${c.length?`<div class="cart-list">${c.map(i=>`<div class="cart-row"><div><div class="cart-title">${esc(i.name)}</div><div class="cart-meta">${esc(i.cat)} · $${Number(i.price).toFixed(2)} each</div></div><div class="qty-box"><button class="qty-btn" onclick="changeCartQty('${i.id}',-1)">−</button><b>${i.qty}</b><button class="qty-btn" onclick="changeCartQty('${i.id}',1)">+</button><button class="mini-btn danger" onclick="removeCartItem('${i.id}')">Remove</button></div></div>`).join("")}</div>`:`<div class="empty" style="padding:30px 10px"><h3>Your cart is empty</h3><p>Select food from the menu first.</p></div>`}
+      <div class="total-box"><span>Total</span><span>$${total.toFixed(2)}</span></div>
+      ${c.length?`
+        <div class="checkout-form">
+          <input id="custName" placeholder="Customer name" required>
+          <input id="custPhone" placeholder="Phone number" required>
+          <input id="custEmail" type="email" placeholder="Email for order history">
+          <select id="pickupTime"><option>ASAP pickup</option><option>15 minutes</option><option>30 minutes</option><option>45 minutes</option><option>1 hour</option></select>
+          <textarea id="orderNotes" placeholder="Special instructions"></textarea>
+        </div>
+        <div class="paypal-box"><div id="paypal-button-container"></div><a class="manual-pay-link" href="${PAYPAL_MANUAL_LINK}" target="_blank" rel="noopener noreferrer">Backup: manual PayPal payment link</a></div>`:""}
+    </div></div>
+  </div>`;
+  document.body.style.overflow="hidden";
+  if(c.length) renderPayPalButtons();
+}
+
+function getCheckoutPayload(){
+  const c=cart();
+  return {
+    items:c,
+    total:Number(cartTotal(c).toFixed(2)),
+    customer:{
+      fullName:document.getElementById("custName")?.value.trim()||"Guest Customer",
+      phone:document.getElementById("custPhone")?.value.trim()||"",
+      email:document.getElementById("custEmail")?.value.trim()||""
+    },
+    pickupTime:document.getElementById("pickupTime")?.value||"ASAP pickup",
+    notes:document.getElementById("orderNotes")?.value.trim()||""
+  };
+}
+function requireCustomerInfo(){
+  const name=document.getElementById("custName"), phone=document.getElementById("custPhone");
+  if(!name?.value.trim() || !phone?.value.trim()){ alert("Please enter customer name and phone number before payment."); return false; }
+  return true;
+}
+function renderPayPalButtons(){
+  const box=document.getElementById("paypal-button-container"); if(!box || !window.paypal) return;
+  box.innerHTML="";
+  paypal.Buttons({
+    createOrder:function(data,actions){
+      if(!requireCustomerInfo()) return;
+      const payload=getCheckoutPayload();
+      return actions.order.create({purchase_units:[{description:"Community Kitchen Cafe Online Food Order",amount:{currency_code:"USD",value:payload.total.toFixed(2)}}],application_context:{brand_name:"Community Kitchen Cafe",shipping_preference:"NO_SHIPPING",user_action:"PAY_NOW"}});
+    },
+    onApprove:function(data,actions){
+      return actions.order.capture().then(function(details){
+        const payload=getCheckoutPayload();
+        const order={...payload,orderId:"CKC-"+Date.now().toString().slice(-7),paypalOrderId:data.orderID,payment:{status:"paid",method:"PayPal Checkout",payerEmail:details?.payer?.email_address||""},status:"paid",deliveryStatus:"preparing",createdAt:new Date().toISOString()};
+        const orders=orderList(); orders.unshift(order); saveOrders(orders);
+        try{ fetch(API+"/api/orders/public",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(order)}).catch(()=>{}); }catch{}
+        saveCart([]); closeItem(); openConfirmation(order);
+      });
+    },
+    onError:function(err){ console.error(err); alert("Checkout error. Please check PayPal setup or use the backup PayPal link."); }
+  }).render("#paypal-button-container");
+}
+function openConfirmation(order){
+  document.getElementById("modalRoot").innerHTML=`<div class="modal-bd"><div class="modal-sheet"><div class="modal-body"><h2 style="font-family:'Playfair Display',serif;color:var(--brown)">✅ Order Confirmed</h2><p style="color:var(--muted);margin:8px 0 14px">Payment received through PayPal.</p><div class="admin-order-card"><b>${order.orderId}</b><span class="status-pill paid">paid</span><div class="cart-meta">${esc(order.customer.fullName)} · ${esc(order.customer.phone)} · ${esc(order.pickupTime)}</div><div style="margin-top:10px">${order.items.map(i=>`${esc(i.name)} × ${i.qty}`).join("<br>")}</div><h3 style="margin-top:12px">Total: $${Number(order.total).toFixed(2)}</h3></div><button class="modal-pay" onclick="closeItem()">Done</button></div></div></div>`;
+  document.body.style.overflow="hidden"; updateCartBadge();
+}
+
+function openCustomerOrders(){
+  const orders=orderList();
+  document.getElementById("modalRoot").innerHTML=`<div class="modal-bd" onclick="if(event.target===this)closeItem()"><div class="modal-sheet"><div class="modal-body"><div style="display:flex;justify-content:space-between;align-items:center"><h2 style="font-family:'Playfair Display',serif;color:var(--brown)">My Orders</h2><button class="mini-btn" onclick="closeItem()">Close</button></div>${orders.length?`<div class="admin-orders-grid">${orders.map(orderHtml).join("")}</div>`:`<div class="empty" style="padding:30px 10px"><h3>No orders yet</h3><p>Orders paid on this device will appear here.</p></div>`}</div></div></div>`;
+  document.body.style.overflow="hidden";
+}
+function orderHtml(o,admin=false){
+  const delivered=o.deliveryStatus==="delivered"||o.status==="delivered"||o.status==="completed";
+  const payStatus=esc(o.payment?.status||o.status||"paid");
+  const customer=o.customer||{};
+  const items=o.items||[];
+  return `<div class="admin-order-card">
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:space-between">
+      <div><b>${esc(o.orderId||"")}</b><span class="status-pill paid">${payStatus}</span><span class="status-pill ${delivered?"delivered":""}">${esc(o.deliveryStatus||"preparing")}</span></div>
+      <div style="font-weight:900;color:var(--brown)">$${Number(o.total||0).toFixed(2)}</div>
+    </div>
+    <div class="admin-customer-box">
+      <div><b>Customer:</b> ${esc(customer.fullName||"Guest Customer")}</div>
+      <div><b>Phone:</b> ${esc(customer.phone||"Not provided")}</div>
+      <div><b>Email:</b> ${esc(customer.email||"Not provided")}</div>
+      <div><b>Pickup:</b> ${esc(o.pickupTime||"ASAP pickup")}</div>
+      <div><b>Notes:</b> ${esc(o.notes||"No notes")}</div>
+      <div><b>Order time:</b> ${o.createdAt?new Date(o.createdAt).toLocaleString():""}</div>
+      ${o.paypalOrderId?`<div><b>PayPal ID:</b> ${esc(o.paypalOrderId)}</div>`:""}
+    </div>
+    <div style="margin-top:10px"><b>Items:</b><br>${items.map(i=>`${esc(i.name)} × ${i.qty} — $${(Number(i.price)*Number(i.qty)).toFixed(2)}`).join("<br>")}</div>
+    ${admin?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+      <button class="mini-btn good" onclick="markDelivered('${esc(o.orderId)}')">Mark Delivered</button>
+      <button class="mini-btn danger" onclick="removeDeliveredOrder('${esc(o.orderId)}')" ${delivered?"":"title='Mark delivered first'"}>Remove Delivered Order</button>
+    </div>`:""}
+  </div>`;
+}
+function openAdminOrders(){
+  if(!isAdminAuthed()) return openAdminLogin();
+  const orders=orderList();
+  document.getElementById("modalRoot").innerHTML=`<div class="modal-bd" onclick="if(event.target===this)closeItem()"><div class="modal-sheet"><div class="modal-body"><div style="display:flex;justify-content:space-between;align-items:center"><div><h2 style="font-family:'Playfair Display',serif;color:var(--brown);margin-bottom:4px">Owner Orders</h2><p style="color:var(--muted);font-size:.86rem">Admin can see customer details, food items, payment status, notes, and remove delivered orders.</p></div><button class="mini-btn" onclick="closeItem()">Close</button></div>${orders.length?`<div class="admin-orders-grid">${orders.map(o=>orderHtml(o,true)).join("")}</div>`:`<div class="empty" style="padding:30px 10px"><h3>No orders yet</h3></div>`}</div></div></div>`;
+  document.body.style.overflow="hidden";
+}
+function markDelivered(orderId){
+  const orders=orderList();
+  const o=orders.find(x=>x.orderId===orderId);
+  if(o){ o.deliveryStatus="delivered"; o.status="delivered"; o.deliveredAt=new Date().toISOString(); saveOrders(orders); }
+  openAdminOrders();
+}
+function removeDeliveredOrder(orderId){
+  const orders=orderList();
+  const o=orders.find(x=>x.orderId===orderId);
+  if(!o) return;
+  const delivered=o.deliveryStatus==="delivered"||o.status==="delivered"||o.status==="completed";
+  if(!delivered){ alert("Please mark this order delivered before removing it from the owner order list."); return; }
+  if(!confirm("Remove this delivered order from the owner order list?")) return;
+  saveOrders(orders.filter(x=>x.orderId!==orderId));
+  openAdminOrders();
+}
+
+function openEditItem(item){
+  if(!isAdminAuthed()) return openAdminLogin();
+  const real=applyEdit(item);
+  document.getElementById("modalRoot").innerHTML=`<div class="modal-bd" onclick="if(event.target===this)closeItem()"><div class="modal-sheet"><div class="modal-body">
+    <h2 style="font-family:'Playfair Display',serif;color:var(--brown)">Edit Menu Item Details</h2>
+    <p style="color:var(--muted);font-size:.88rem;margin-top:6px">These details show to customers in the card and in the See Details page before they order.</p>
+    <img class="edit-image-preview" src="${esc(resolveImg(real))}" alt="${esc(real.name)}" onerror="handleErr(this)">
+    <div class="edit-image-actions">
+      <button class="mini-btn good" onclick="triggerUpload('${real.id}')">📷 Upload / Change Image</button>
+      <button class="mini-btn" onclick="openMgr('${real.id}')">⚙️ Image Manager</button>
+      ${getItemImg(real.id)?`<button class="mini-btn danger" onclick="confirmDelete('${real.id}')">🗑️ Remove Image</button>`:""}
+    </div>
+    <div class="edit-form">
+      <input id="editName" value="${esc(real.name)}" placeholder="Name">
+      <input id="editPrice" type="number" step="0.01" value="${Number(real.price).toFixed(2)}" placeholder="Price">
+      <input id="editCat" value="${esc(real.cat)}" placeholder="Category">
+      <input id="editEmoji" value="${esc(real.emoji)}" placeholder="Emoji">
+      <textarea id="editDesc" placeholder="Description">${esc(real.description||real.desc||"")}</textarea>
+      <textarea id="editIngredients" placeholder="Ingredients, example: potatoes, peppers, onions, eggs">${esc(real.ingredients||"")}</textarea>
+      <input id="editCalories" value="${esc(real.calories||"")}" placeholder="Calories, example: 520">
+      <input id="editProtein" value="${esc(real.protein||"")}" placeholder="Protein, example: 20g">
+      <input id="editCarbs" value="${esc(real.carbs||"")}" placeholder="Carbs, example: 45g">
+      <input id="editFat" value="${esc(real.fat||"")}" placeholder="Fat, example: 18g">
+      <input id="editSodium" value="${esc(real.sodium||"")}" placeholder="Sodium, example: 780mg">
+      <textarea id="editAllergens" placeholder="Allergy info, example: contains eggs, dairy">${esc(real.allergens||real.allergyInfo||"")}</textarea>
+    </div>
+    <button class="modal-pay" onclick="saveItemDetails('${real.id}')">Save Details</button>
+    <button class="manual-pay-link" onclick="resetItemDetails('${real.id}')">Reset This Item</button>
+  </div></div></div>`;
+  document.body.style.overflow="hidden";
+}
+function saveItemDetails(id){
+  const edits=getMenuEdits();
+  edits[id]={
+    name:document.getElementById("editName").value.trim(),
+    price:Number(document.getElementById("editPrice").value||0),
+    cat:document.getElementById("editCat").value.trim(),
+    emoji:document.getElementById("editEmoji").value.trim()||"🍽️",
+    description:document.getElementById("editDesc").value.trim(),
+    ingredients:document.getElementById("editIngredients").value.trim(),
+    calories:document.getElementById("editCalories").value.trim(),
+    protein:document.getElementById("editProtein").value.trim(),
+    carbs:document.getElementById("editCarbs").value.trim(),
+    fat:document.getElementById("editFat").value.trim(),
+    sodium:document.getElementById("editSodium").value.trim(),
+    allergens:document.getElementById("editAllergens").value.trim()
+  };
+  saveMenuEdits(edits);
+  closeItem(); buildTabs(); render(); showToast("✅ Menu details updated");
+}
+function resetItemDetails(id){ const edits=getMenuEdits(); delete edits[id]; saveMenuEdits(edits); closeItem(); buildTabs(); render(); showToast("↩️ Item reset"); }
+
 document.addEventListener("keydown",e=>{
   if(e.key==="Escape"){ closeItem(); closeMgr(); closeAdminLogin(); }
 });
@@ -907,9 +1224,11 @@ function showToast(msg) {
 }
 
 /* ══ BOOT ══ */
+activeCat = normalizeCategoryFromUrl();
 buildTabs();
 render();
 applyAdminUI(); // show/hide admin controls based on saved session
+updateCartBadge();
 </script>
 </body>
 </html>

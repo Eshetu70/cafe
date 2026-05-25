@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -261,7 +262,7 @@
     .admin-customer-box{background:#fdf6ee;border:1px solid var(--border);border-radius:14px;padding:12px;margin:10px 0}
     .admin-customer-box b{color:var(--brown)}
     .status-pill{display:inline-flex;padding:4px 10px;border-radius:999px;font-size:.72rem;font-weight:900;background:#fef3c7;color:#92400e;margin-left:6px}
-    .status-pill.paid{background:#dcfce7;color:#166534}.status-pill.delivered{background:#dbeafe;color:#1d4ed8}
+    .status-pill.paid{background:#dcfce7;color:#166534}.status-pill.delivered{background:#dbeafe;color:#1d4ed8}.status-pill.reviewed{background:#ede9fe;color:#5b21b6}
     .edit-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
     .admin-edit-btn{background:#fff7ed;color:#7c2d12;border:1px solid #fed7aa;border-radius:999px;padding:8px 12px;font-weight:900;cursor:pointer}
     .manual-pay-link{display:inline-flex;justify-content:center;align-items:center;width:100%;margin-top:10px;text-decoration:none;border-radius:999px;padding:12px;font-weight:900;background:#f3f4f6;color:#003087;border:1px solid #d1d5db}
@@ -1148,12 +1149,14 @@ function openCustomerOrders(){
 }
 function orderHtml(o,admin=false){
   const delivered=o.deliveryStatus==="delivered"||o.status==="delivered"||o.status==="completed";
+  const reviewed=["confirmed","preparing","ready","delivered","completed"].includes(String(o.status||"").toLowerCase());
   const payStatus=esc(o.payment?.status||o.status||"paid");
   const customer=o.customer||{};
   const items=o.items||[];
+  const adminId=esc(o._id||o.orderId||"");
   return `<div class="admin-order-card">
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:space-between">
-      <div><b>${esc(o.orderId||"")}</b><span class="status-pill paid">${payStatus}</span><span class="status-pill ${delivered?"delivered":""}">${esc(o.deliveryStatus||"preparing")}</span></div>
+      <div><b>${esc(o.orderId||o._id||"")}</b><span class="status-pill paid">${payStatus}</span><span class="status-pill ${reviewed?"reviewed":""}">${reviewed?"reviewed":"new"}</span><span class="status-pill ${delivered?"delivered":""}">${esc(o.deliveryStatus||o.status||"preparing")}</span></div>
       <div style="font-weight:900;color:var(--brown)">$${Number(o.total||0).toFixed(2)}</div>
     </div>
     <div class="admin-customer-box">
@@ -1167,8 +1170,9 @@ function orderHtml(o,admin=false){
     </div>
     <div style="margin-top:10px"><b>Items:</b><br>${items.map(i=>`${esc(i.name)} × ${i.qty} — $${(Number(i.price)*Number(i.qty)).toFixed(2)}`).join("<br>")}</div>
     ${admin?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-      <button class="mini-btn good" onclick="markDelivered('${esc(o.orderId)}')">Mark Delivered</button>
-      <button class="mini-btn danger" onclick="removeDeliveredOrder('${esc(o.orderId)}')" ${delivered?"":"title='Mark delivered first'"}>Remove Delivered Order</button>
+      <button class="mini-btn good" onclick="keepAdminOrder('${adminId}')">Keep / Reviewed</button>
+      <button class="mini-btn good" onclick="markDelivered('${adminId}')">Mark Delivered</button>
+      <button class="mini-btn danger" onclick="removeDeliveredOrder('${adminId}')" ${delivered?"":"title='Mark delivered first'"}>Remove Delivered Order</button>
     </div>`:""}
   </div>`;
 }
@@ -1190,8 +1194,28 @@ async function openAdminOrders(){
   document.getElementById("modalRoot").innerHTML=`<div class="modal-bd"><div class="modal-sheet"><div class="modal-body"><h2 style="font-family:'Playfair Display',serif;color:var(--brown)">Loading owner orders…</h2></div></div></div>`;
   document.body.style.overflow="hidden";
   const orders=await fetchAdminOrders();
-  document.getElementById("modalRoot").innerHTML=`<div class="modal-bd" onclick="if(event.target===this)closeItem()"><div class="modal-sheet"><div class="modal-body"><div style="display:flex;justify-content:space-between;align-items:center"><div><h2 style="font-family:'Playfair Display',serif;color:var(--brown);margin-bottom:4px">Owner Orders</h2><p style="color:var(--muted);font-size:.86rem">Admin can see customer details, food items, payment status, notes, and remove delivered orders. Orders are loaded from the Render backend when available.</p></div><button class="mini-btn" onclick="closeItem()">Close</button></div>${orders.length?`<div class="admin-orders-grid">${orders.map(o=>orderHtml(o,true)).join("")}</div>`:`<div class="empty" style="padding:30px 10px"><h3>No orders yet</h3></div>`}</div></div></div>`;
+  document.getElementById("modalRoot").innerHTML=`<div class="modal-bd" onclick="if(event.target===this)closeItem()"><div class="modal-sheet"><div class="modal-body"><div style="display:flex;justify-content:space-between;align-items:center"><div><h2 style="font-family:'Playfair Display',serif;color:var(--brown);margin-bottom:4px">Review Customer Orders</h2><p style="color:var(--muted);font-size:.86rem">After admin login, this tab shows every customer order with food items, phone, email, payment, notes, and pickup time. Admin can keep/review the order or remove it after delivery.</p></div><button class="mini-btn" onclick="closeItem()">Close</button></div>${orders.length?`<div class="admin-orders-grid">${orders.map(o=>orderHtml(o,true)).join("")}</div>`:`<div class="empty" style="padding:30px 10px"><h3>No orders yet</h3></div>`}</div></div></div>`;
 }
+
+async function keepAdminOrder(orderId){
+  const key=getAdminKey();
+  if(key){
+    try{
+      const res=await fetch(API+"/api/admin/orders/"+encodeURIComponent(orderId),{
+        method:"PUT",
+        headers:{"Content-Type":"application/json","x-admin-key":key},
+        body:JSON.stringify({status:"confirmed"})
+      });
+      if(!res.ok){ const data=await res.json().catch(()=>({})); throw new Error(data.error||"Keep failed"); }
+    }catch(err){ alert("Backend keep failed: "+err.message); return; }
+  }
+  const orders=orderList();
+  const o=orders.find(x=>x.orderId===orderId || x._id===orderId);
+  if(o){ o.status="confirmed"; o.reviewedAt=new Date().toISOString(); saveOrders(orders); }
+  showToast("✅ Order kept and marked reviewed");
+  openAdminOrders();
+}
+
 async function markDelivered(orderId){
   const key=getAdminKey();
   if(key){
@@ -1211,17 +1235,47 @@ async function markDelivered(orderId){
 async function removeDeliveredOrder(orderId){
   const orders=orderList();
   const o=orders.find(x=>x.orderId===orderId || x._id===orderId);
-  const delivered=!o || o.deliveryStatus==="delivered"||o.status==="delivered"||o.status==="completed";
-  if(!delivered){ alert("Please mark this order delivered before removing it from the owner order list."); return; }
-  if(!confirm("Remove this delivered order from the owner order list?")) return;
+  const delivered=!o || ["delivered","completed","cancelled"].includes(String(o.deliveryStatus||o.status||"").toLowerCase());
+
+  if(!delivered){
+    const markFirst = confirm("This order is not marked delivered yet. Mark it delivered and remove it now?");
+    if(!markFirst) return;
+    await markDelivered(orderId);
+  }
+
+  if(!confirm("Remove this order from the owner order list?")) return;
+
   const key=getAdminKey();
   if(key){
     try{
-      const res=await fetch(API+"/api/admin/orders/"+encodeURIComponent(orderId),{method:"DELETE",headers:{"x-admin-key":key}});
-      if(!res.ok){ const data=await res.json().catch(()=>({})); throw new Error(data.error||"Delete failed"); }
-    }catch(err){ alert("Backend remove failed: "+err.message); return; }
+      // First try the force remove route. This route does not block by status.
+      let res=await fetch(API+"/api/admin/orders/"+encodeURIComponent(orderId)+"/remove",{
+        method:"POST",
+        headers:{"Content-Type":"application/json","x-admin-key":key},
+        body:JSON.stringify({force:true})
+      });
+
+      // Backup: older backend delete route.
+      if(!res.ok){
+        res=await fetch(API+"/api/admin/orders/"+encodeURIComponent(orderId),{
+          method:"DELETE",
+          headers:{"Content-Type":"application/json","x-admin-key":key},
+          body:JSON.stringify({force:true})
+        });
+      }
+
+      if(!res.ok){
+        const data=await res.json().catch(()=>({}));
+        throw new Error(data.error||data.details||"Delete failed");
+      }
+    }catch(err){
+      alert("Backend remove failed: "+err.message+"\n\nMake sure the updated server.js is deployed on Render, then Clear build cache & deploy.");
+      return;
+    }
   }
+
   saveOrders(orders.filter(x=>x.orderId!==orderId && x._id!==orderId));
+  showToast("🗑️ Order removed from owner list");
   openAdminOrders();
 }
 async function testOwnerEmail(){

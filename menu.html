@@ -305,6 +305,7 @@
       <!-- These only show when admin is authenticated (admin-only class) -->
       <button class="nbtn edit-mode-btn admin-only" id="editModeBtn" onclick="toggleEditMode()">✏️ Edit Images</button>
       <button class="nbtn admin-only" onclick="openAdminOrders()" style="background:#fff7ed;color:#7c2d12;border:1.5px solid #fed7aa;">📦 Owner Orders</button>
+      <button class="nbtn admin-only" onclick="testOwnerEmail()" style="background:#eef6ff;color:#003087;border:1.5px solid #bfdbfe;">📧 Test Email</button>
       <button class="nbtn admin-only" id="adminLogoutBtn" onclick="adminLogout()"
         style="background:linear-gradient(135deg,#b91c1c,#ef4444);color:#fff;">
         🔓 Logout
@@ -1075,21 +1076,64 @@ function renderPayPalButtons(){
   const box=document.getElementById("paypal-button-container"); if(!box || !window.paypal) return;
   box.innerHTML="";
   paypal.Buttons({
+    style:{layout:"vertical",color:"gold",shape:"pill",label:"paypal"},
     createOrder:function(data,actions){
       if(!requireCustomerInfo()) return;
       const payload=getCheckoutPayload();
-      return actions.order.create({purchase_units:[{description:"Community Kitchen Cafe Online Food Order",amount:{currency_code:"USD",value:payload.total.toFixed(2)}}],application_context:{brand_name:"Community Kitchen Cafe",shipping_preference:"NO_SHIPPING",user_action:"PAY_NOW"}});
+      const amount=Number(payload.total || 0).toFixed(2);
+      const paypalItems=(payload.items||[]).map(i=>({
+        name:String(i.name||"Food item").slice(0,127),
+        quantity:String(Math.max(1,parseInt(i.qty||1,10))),
+        unit_amount:{currency_code:"USD",value:Number(i.price||0).toFixed(2)}
+      }));
+      return actions.order.create({
+        intent:"CAPTURE",
+        purchase_units:[{
+          description:"Community Kitchen Cafe Online Food Order",
+          amount:{
+            currency_code:"USD",
+            value:amount,
+            breakdown:{ item_total:{currency_code:"USD",value:amount} }
+          },
+          items:paypalItems
+        }],
+        application_context:{brand_name:"Community Kitchen Cafe",shipping_preference:"NO_SHIPPING",user_action:"PAY_NOW"}
+      });
     },
     onApprove:function(data,actions){
-      return actions.order.capture().then(function(details){
+      return actions.order.capture().then(async function(details){
         const payload=getCheckoutPayload();
-        const order={...payload,orderId:"CKC-"+Date.now().toString().slice(-7),paypalOrderId:data.orderID,payment:{status:"paid",method:"PayPal Checkout",payerEmail:details?.payer?.email_address||""},status:"paid",deliveryStatus:"preparing",createdAt:new Date().toISOString()};
+        const captureId=details?.purchase_units?.[0]?.payments?.captures?.[0]?.id || "";
+        const order={
+          ...payload,
+          orderId:"CKC-"+Date.now().toString().slice(-7),
+          paypalOrderId:data.orderID,
+          payment:{
+            status:"paid",
+            method:"PayPal Checkout",
+            paypalOrderId:data.orderID,
+            paypalCaptureId:captureId,
+            payerEmail:details?.payer?.email_address||"",
+            payerName:((details?.payer?.name?.given_name||"")+" "+(details?.payer?.name?.surname||"")).trim()
+          },
+          status:"paid",
+          deliveryStatus:"preparing",
+          createdAt:new Date().toISOString()
+        };
         const orders=orderList(); orders.unshift(order); saveOrders(orders);
-        try{ fetch(API+"/api/orders/public",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(order)}).catch(()=>{}); }catch{}
+
+        // Send the paid food order to Render so the owner receives an email.
+        // If Render/email is not configured yet, payment still succeeds and the order stays in My Orders.
+        try{
+          const r=await fetch(API+"/api/orders/paypal",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(order)});
+          if(!r.ok){ console.warn("Owner email/backend save failed", await r.text()); }
+        }catch(e){ console.warn("Owner email/backend save failed", e); }
+
         saveCart([]); closeItem(); openConfirmation(order);
       });
     },
-    onError:function(err){ console.error(err); alert("Checkout error. Please check PayPal setup or use the backup PayPal link."); }
+    onCancel:function(){ alert("Payment was cancelled. Your cart is still saved."); },
+    onError:function(err){ console.error(err); alert("PayPal checkout error. Please refresh and try again, or use the backup manual PayPal link."); }
   }).render("#paypal-button-container");
 }
 function openConfirmation(order){
@@ -1128,27 +1172,68 @@ function orderHtml(o,admin=false){
     </div>`:""}
   </div>`;
 }
-function openAdminOrders(){
-  if(!isAdminAuthed()) return openAdminLogin();
-  const orders=orderList();
-  document.getElementById("modalRoot").innerHTML=`<div class="modal-bd" onclick="if(event.target===this)closeItem()"><div class="modal-sheet"><div class="modal-body"><div style="display:flex;justify-content:space-between;align-items:center"><div><h2 style="font-family:'Playfair Display',serif;color:var(--brown);margin-bottom:4px">Owner Orders</h2><p style="color:var(--muted);font-size:.86rem">Admin can see customer details, food items, payment status, notes, and remove delivered orders.</p></div><button class="mini-btn" onclick="closeItem()">Close</button></div>${orders.length?`<div class="admin-orders-grid">${orders.map(o=>orderHtml(o,true)).join("")}</div>`:`<div class="empty" style="padding:30px 10px"><h3>No orders yet</h3></div>`}</div></div></div>`;
-  document.body.style.overflow="hidden";
+async function fetchAdminOrders(){
+  const key=getAdminKey();
+  if(!key) return orderList();
+  try{
+    const res=await fetch(API+"/api/admin/orders",{headers:{"x-admin-key":key}});
+    const data=await res.json();
+    if(!res.ok) throw new Error(data.error||"Could not load admin orders");
+    if(Array.isArray(data.orders)) return data.orders;
+  }catch(err){
+    console.warn("Using local orders fallback", err);
+  }
+  return orderList();
 }
-function markDelivered(orderId){
+async function openAdminOrders(){
+  if(!isAdminAuthed()) return openAdminLogin();
+  document.getElementById("modalRoot").innerHTML=`<div class="modal-bd"><div class="modal-sheet"><div class="modal-body"><h2 style="font-family:'Playfair Display',serif;color:var(--brown)">Loading owner orders…</h2></div></div></div>`;
+  document.body.style.overflow="hidden";
+  const orders=await fetchAdminOrders();
+  document.getElementById("modalRoot").innerHTML=`<div class="modal-bd" onclick="if(event.target===this)closeItem()"><div class="modal-sheet"><div class="modal-body"><div style="display:flex;justify-content:space-between;align-items:center"><div><h2 style="font-family:'Playfair Display',serif;color:var(--brown);margin-bottom:4px">Owner Orders</h2><p style="color:var(--muted);font-size:.86rem">Admin can see customer details, food items, payment status, notes, and remove delivered orders. Orders are loaded from the Render backend when available.</p></div><button class="mini-btn" onclick="closeItem()">Close</button></div>${orders.length?`<div class="admin-orders-grid">${orders.map(o=>orderHtml(o,true)).join("")}</div>`:`<div class="empty" style="padding:30px 10px"><h3>No orders yet</h3></div>`}</div></div></div>`;
+}
+async function markDelivered(orderId){
+  const key=getAdminKey();
+  if(key){
+    try{
+      await fetch(API+"/api/admin/orders/"+encodeURIComponent(orderId)+"/status",{
+        method:"PATCH",
+        headers:{"Content-Type":"application/json","x-admin-key":key},
+        body:JSON.stringify({status:"delivered",deliveryStatus:"delivered"})
+      });
+    }catch(err){ console.warn("Backend mark delivered failed",err); }
+  }
   const orders=orderList();
-  const o=orders.find(x=>x.orderId===orderId);
+  const o=orders.find(x=>x.orderId===orderId || x._id===orderId);
   if(o){ o.deliveryStatus="delivered"; o.status="delivered"; o.deliveredAt=new Date().toISOString(); saveOrders(orders); }
   openAdminOrders();
 }
-function removeDeliveredOrder(orderId){
+async function removeDeliveredOrder(orderId){
   const orders=orderList();
-  const o=orders.find(x=>x.orderId===orderId);
-  if(!o) return;
-  const delivered=o.deliveryStatus==="delivered"||o.status==="delivered"||o.status==="completed";
+  const o=orders.find(x=>x.orderId===orderId || x._id===orderId);
+  const delivered=!o || o.deliveryStatus==="delivered"||o.status==="delivered"||o.status==="completed";
   if(!delivered){ alert("Please mark this order delivered before removing it from the owner order list."); return; }
   if(!confirm("Remove this delivered order from the owner order list?")) return;
-  saveOrders(orders.filter(x=>x.orderId!==orderId));
+  const key=getAdminKey();
+  if(key){
+    try{
+      const res=await fetch(API+"/api/admin/orders/"+encodeURIComponent(orderId),{method:"DELETE",headers:{"x-admin-key":key}});
+      if(!res.ok){ const data=await res.json().catch(()=>({})); throw new Error(data.error||"Delete failed"); }
+    }catch(err){ alert("Backend remove failed: "+err.message); return; }
+  }
+  saveOrders(orders.filter(x=>x.orderId!==orderId && x._id!==orderId));
   openAdminOrders();
+}
+async function testOwnerEmail(){
+  if(!isAdminAuthed()) return openAdminLogin();
+  try{
+    const res=await fetch(API+"/api/admin/test-email",{method:"POST",headers:{"x-admin-key":getAdminKey()}});
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(data.error||"Email test failed");
+    alert("✅ Test email sent to communitykitchenclt@gmail.com. Check Inbox/Spam.");
+  }catch(err){
+    alert("Email test failed: "+err.message+"\n\nCheck SMTP_PASS, SMTP_USER, OWNER_EMAIL in Render and redeploy.");
+  }
 }
 
 function openEditItem(item){

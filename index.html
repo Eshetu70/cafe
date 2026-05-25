@@ -232,18 +232,18 @@
   </div>
 
   <div class="cat-strip">
-    <a href="menu.html#sec-Specialty-Coffee" class="cat-card"><span class="cat-emoji">☕</span><span class="cat-label">Specialty Coffee</span></a>
-    <a href="menu.html#sec-Smoothies-&amp;-Juices" class="cat-card"><span class="cat-emoji">🥤</span><span class="cat-label">Smoothies &amp; Juices</span></a>
-    <a href="menu.html#sec-Starters" class="cat-card"><span class="cat-emoji">🥟</span><span class="cat-label">Starters</span></a>
-    <a href="menu.html#sec-Classic-Favorites" class="cat-card"><span class="cat-emoji">🍳</span><span class="cat-label">Classic Favorites</span></a>
-    <a href="menu.html#sec-From-the-Griddle" class="cat-card"><span class="cat-emoji">🥞</span><span class="cat-label">From the Griddle</span></a>
-    <a href="menu.html#sec-Egg-Sclusives" class="cat-card"><span class="cat-emoji">🥚</span><span class="cat-label">Egg-Sclusives</span></a>
-    <a href="menu.html#sec-Sandwiches-&amp;-Burgers" class="cat-card"><span class="cat-emoji">🍔</span><span class="cat-label">Sandwiches &amp; Burgers</span></a>
-    <a href="menu.html#sec-Salads" class="cat-card"><span class="cat-emoji">🥗</span><span class="cat-label">Salads</span></a>
-    <a href="menu.html#sec-Desserts" class="cat-card"><span class="cat-emoji">🍰</span><span class="cat-label">Desserts</span></a>
-    <a href="menu.html#sec-Baked-Goods" class="cat-card"><span class="cat-emoji">🥐</span><span class="cat-label">Baked Goods</span></a>
-    <a href="menu.html#sec-Kids-Menu" class="cat-card"><span class="cat-emoji">🍗</span><span class="cat-label">Kids Menu</span></a>
-    <a href="menu.html#sec-Sides-&amp;-Small-Plates" class="cat-card"><span class="cat-emoji">🍟</span><span class="cat-label">Sides &amp; Plates</span></a>
+    <a href="menu.html?cat=Specialty%20Coffee" class="cat-card"><span class="cat-emoji">☕</span><span class="cat-label">Specialty Coffee</span></a>
+    <a href="menu.html?cat=Smoothies%20%26%20Juices" class="cat-card"><span class="cat-emoji">🥤</span><span class="cat-label">Smoothies &amp; Juices</span></a>
+    <a href="menu.html?cat=Starters" class="cat-card"><span class="cat-emoji">🥟</span><span class="cat-label">Starters</span></a>
+    <a href="menu.html?cat=Classic%20Favorites" class="cat-card"><span class="cat-emoji">🍳</span><span class="cat-label">Classic Favorites</span></a>
+    <a href="menu.html?cat=From%20the%20Griddle" class="cat-card"><span class="cat-emoji">🥞</span><span class="cat-label">From the Griddle</span></a>
+    <a href="menu.html?cat=Egg-Sclusives" class="cat-card"><span class="cat-emoji">🥚</span><span class="cat-label">Egg-Sclusives</span></a>
+    <a href="menu.html?cat=Sandwiches%20%26%20Burgers" class="cat-card"><span class="cat-emoji">🍔</span><span class="cat-label">Sandwiches &amp; Burgers</span></a>
+    <a href="menu.html?cat=Salads" class="cat-card"><span class="cat-emoji">🥗</span><span class="cat-label">Salads</span></a>
+    <a href="menu.html?cat=Desserts" class="cat-card"><span class="cat-emoji">🍰</span><span class="cat-label">Desserts</span></a>
+    <a href="menu.html?cat=Baked%20Goods" class="cat-card"><span class="cat-emoji">🥐</span><span class="cat-label">Baked Goods</span></a>
+    <a href="menu.html?cat=Kids%20Menu" class="cat-card"><span class="cat-emoji">🍗</span><span class="cat-label">Kids Menu</span></a>
+    <a href="menu.html?cat=Sides%20%26%20Small%20Plates" class="cat-card"><span class="cat-emoji">🍟</span><span class="cat-label">Sides &amp; Plates</span></a>
   </div>
 
   <div class="filters">
@@ -279,7 +279,10 @@
         <h2>Admin Dashboard</h2>
         <p class="admin-subtitle">Manage menu items, images, food details, nutrition, ingredients, customer orders, and statuses from one place.</p>
       </div>
-      <button class="btn danger" onclick="logoutAdmin()" style="border-radius:999px;padding:14px 28px;font-weight:900;">Logout</button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <button class="btn" onclick="testOwnerEmail()" style="border-radius:999px;padding:14px 22px;font-weight:900;background:#eef6ff;color:#003087;border:1.5px solid #bfdbfe;">📧 Test Email</button>
+        <button class="btn danger" onclick="logoutAdmin()" style="border-radius:999px;padding:14px 28px;font-weight:900;">Logout</button>
+      </div>
     </div>
 
     <div class="admin-tab-row">
@@ -378,10 +381,10 @@
       </div>
       <div class="footer-section">
         <h3>Our Services</h3>
-        <a href="menu.html#sec-Classic-Favorites">Breakfast</a>
+        <a href="menu.html?cat=Classic%20Favorites">Breakfast</a>
         <a href="menu.html#sec-Sandwiches-&-Burgers">Lunch</a>
         <a href="menu.html#sec-Sides-&-Small-Plates">Catering</a>
-        <a href="menu.html#sec-Desserts">Desserts</a>
+        <a href="menu.html?cat=Desserts">Desserts</a>
       </div>
       <div class="footer-section">
         <h3>Contact</h3>
@@ -971,6 +974,16 @@ async function openAdmin(){
   switchAdminTab("menu");
   await loadMenu();
   await renderAdminMenuHelpers();
+}
+async function testOwnerEmail(){
+  if(!getAdminKey()) return openAdmin();
+  try{
+    await fetchJSON(API_BASE+"/api/admin/test-email",{method:"POST",headers:{"x-admin-key":getAdminKey()}});
+    showToast("✅ Test email sent to communitykitchenclt@gmail.com");
+    alert("Test email sent. Check Inbox/Spam for communitykitchenclt@gmail.com.");
+  }catch(err){
+    alert("Email test failed: "+err.message+"\n\nCheck SMTP_USER, SMTP_PASS, OWNER_EMAIL in Render, then redeploy backend.");
+  }
 }
 function logoutAdmin(){ clearAdminSession(); showView("shop"); alert("Admin logged out"); }
 

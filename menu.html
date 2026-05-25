@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1169,13 +1168,70 @@ function orderHtml(o,admin=false){
       ${o.paypalOrderId?`<div><b>PayPal ID:</b> ${esc(o.paypalOrderId)}</div>`:""}
     </div>
     <div style="margin-top:10px"><b>Items:</b><br>${items.map(i=>`${esc(i.name)} × ${i.qty} — $${(Number(i.price)*Number(i.qty)).toFixed(2)}`).join("<br>")}</div>
-    ${admin?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-      <button class="mini-btn good" onclick="keepAdminOrder('${adminId}')">Keep / Reviewed</button>
-      <button class="mini-btn good" onclick="markDelivered('${adminId}')">Mark Delivered</button>
-      <button class="mini-btn danger" onclick="removeDeliveredOrder('${adminId}')" ${delivered?"":"title='Mark delivered first'"}>Remove Delivered Order</button>
-    </div>`:""}
+    ${admin ? ownerOrderButtons(o, adminId) : ""}
   </div>`;
 }
+
+function ownerOrderButtons(order, adminId){
+  const status = String(order.status || order.orderStatus || "placed").toLowerCase();
+  const deliveryStatus = String(order.deliveryStatus || "").toLowerCase();
+  const isDelivered = ["delivered","completed","cancelled"].includes(status) || ["delivered","completed","cancelled"].includes(deliveryStatus);
+
+  if(isDelivered){
+    return `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+      <button class="mini-btn" onclick="updateOwnerOrderStatus('${adminId}','confirmed')">Keep / Reviewed</button>
+      <button class="mini-btn danger" onclick="removeDeliveredOrder('${adminId}')">Remove Delivered Order</button>
+    </div>`;
+  }
+
+  return `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+    <button class="mini-btn good" onclick="updateOwnerOrderStatus('${adminId}','confirmed')">Keep / Reviewed</button>
+    <button class="mini-btn" onclick="updateOwnerOrderStatus('${adminId}','preparing')">Mark Preparing</button>
+    <button class="mini-btn" onclick="updateOwnerOrderStatus('${adminId}','ready')">Mark Ready</button>
+    <button class="mini-btn good" onclick="updateOwnerOrderStatus('${adminId}','delivered')">Mark Delivered</button>
+  </div>`;
+}
+
+async function updateOwnerOrderStatus(orderId, status){
+  const key=getAdminKey();
+  if(key){
+    try{
+      let res=await fetch(API+"/api/admin/orders/"+encodeURIComponent(orderId)+"/status",{
+        method:"PATCH",
+        headers:{"Content-Type":"application/json","x-admin-key":key},
+        body:JSON.stringify({status,deliveryStatus:status})
+      });
+
+      if(!res.ok){
+        res=await fetch(API+"/api/admin/orders/"+encodeURIComponent(orderId),{
+          method:"PUT",
+          headers:{"Content-Type":"application/json","x-admin-key":key},
+          body:JSON.stringify({status})
+        });
+      }
+
+      if(!res.ok){
+        const data=await res.json().catch(()=>({}));
+        throw new Error(data.error||data.details||"Order update failed");
+      }
+    }catch(err){
+      alert("❌ Order update failed: "+err.message);
+      return;
+    }
+  }
+
+  const orders=orderList();
+  const o=orders.find(x=>x.orderId===orderId || x._id===orderId || x.id===orderId);
+  if(o){
+    o.status=status;
+    if(status==="delivered" || status==="completed") o.deliveryStatus="delivered";
+    if(status==="delivered") o.deliveredAt=new Date().toISOString();
+    saveOrders(orders);
+  }
+  showToast("✅ Order updated: "+status);
+  openAdminOrders();
+}
+
 async function fetchAdminOrders(){
   const key=getAdminKey();
   if(!key) return orderList();

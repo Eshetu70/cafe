@@ -288,7 +288,7 @@
     <div class="admin-tab-row">
       <button class="admin-tab-pro active" id="tab-menu" onclick="switchAdminTab('menu')">📋 Menu Items</button>
       <button class="admin-tab-pro" id="tab-images" onclick="switchAdminTab('images')">🖼️ Manage Images</button>
-      <button class="admin-tab-pro" id="tab-orders" onclick="switchAdminTab('orders')">📦 Review Customer Orders</button>
+      <button class="admin-tab-pro" id="tab-orders" onclick="switchAdminTab('orders')">📦 Customer Orders</button>
     </div>
 
     <div id="adminTabMenu" style="margin-top:20px;">
@@ -338,7 +338,7 @@
       </div>
     </div>
     <div id="adminTabImages" style="display:none;margin-top:20px;"><div class="admin-card-panel"><h3>🖼️ Menu Item Images</h3><p class="small" style="margin-bottom:16px;">Upload, change, or remove photos for any menu item.</p><div class="img-mgr-stats" id="imgMgrStats"></div><input class="img-mgr-search" id="imgMgrSearch" placeholder="🔍  Search items…" oninput="renderImgMgr()"/><div class="img-mgr-filter" id="imgMgrFilter"></div><div class="img-mgr-grid" id="imgMgrGrid"></div></div></div>
-    <div id="adminTabOrders" style="display:none;margin-top:20px;"><div class="admin-card-panel"><h3>📦 Review Customer Orders</h3><p class="small">After admin login, this tab shows all customer orders with full customer details and food items. Admin can keep/review the order, update status, mark delivered, email the customer, or delete delivered/completed orders.</p><div id="adminOrders" class="list"></div></div></div>
+    <div id="adminTabOrders" style="display:none;margin-top:20px;"><div class="admin-card-panel"><h3>📦 Customer Orders</h3><p class="small">Owner can see customer details, order items, payment status, mark delivered, and remove delivered orders.</p><div id="adminOrders" class="list"></div></div></div>
   </div>
 </section>
 
@@ -1033,26 +1033,13 @@ async function loadAdminOrders(){
         <select id="pay_${o._id}">${["pending","paid","failed","refunded"].map(s=>`<option value="${s}" ${o.payment?.status===s?"selected":""}>${s}</option>`).join("")}</select>
       </div>
       <div class="actions" style="margin-top:12px;gap:8px;flex-wrap:wrap">
-        <button class="btn primary" onclick="keepOrder('${o._id}')">Keep / Reviewed</button>
-        <button class="btn" onclick="updateOrder('${o._id}')">Update Order</button>
+        <button class="btn primary" onclick="updateOrder('${o._id}')">Update Order</button>
         <button class="btn" onclick="markDelivered('${o._id}')">Mark Delivered</button>
         <button class="btn" onclick="emailCustomer('${o._id}')">Email Customer</button>
         <button class="btn danger" ${delivered?"":"disabled title='Mark delivered first'"} onclick="removeDeliveredOrder('${o._id}', ${delivered}, ${paid})">Remove Delivered</button>
       </div>
     </div>`}).join(""):'<div class="item">No orders yet.</div>';
 }
-
-async function keepOrder(id){
-  if($("status_"+id)) $("status_"+id).value="confirmed";
-  await fetchJSON(API_BASE+"/api/admin/orders/"+encodeURIComponent(id),{
-    method:"PUT",
-    headers:{"Content-Type":"application/json","x-admin-key":getAdminKey()},
-    body:JSON.stringify({status:"confirmed"})
-  });
-  showToast("✅ Order kept and marked reviewed");
-  loadAdminOrders();
-}
-
 async function updateOrder(id){
   await fetchJSON(API_BASE+"/api/admin/orders/"+encodeURIComponent(id),{method:"PUT",headers:{"Content-Type":"application/json","x-admin-key":getAdminKey()},body:JSON.stringify({status:$("status_"+id).value,paymentStatus:$("pay_"+id).value})});
   alert("Order updated"); loadAdminOrders();

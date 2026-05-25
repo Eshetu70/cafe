@@ -1125,8 +1125,14 @@ function renderPayPalButtons(){
         // Send the paid food order to Render so the owner receives an email.
         // If Render/email is not configured yet, payment still succeeds and the order stays in My Orders.
         try{
-          const r=await fetch(API+"/api/orders/paypal",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(order)});
-          if(!r.ok){ console.warn("Owner email/backend save failed", await r.text()); }
+          const r=await fetch(API+"/api/orders/paid",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(order)});
+          const saved=await r.json().catch(()=>({}));
+          if(!r.ok){ console.warn("Owner email/backend save failed", saved); }
+          if(saved && saved.order){
+            const current=orderList().filter(x=>x.paypalOrderId!==order.paypalOrderId && x.orderId!==order.orderId);
+            current.unshift({...order, ...saved.order, customer:saved.order.customer||order.customer, items:saved.order.items||order.items});
+            saveOrders(current);
+          }
         }catch(e){ console.warn("Owner email/backend save failed", e); }
 
         saveCart([]); closeItem(); openConfirmation(order);
@@ -1152,7 +1158,7 @@ function orderHtml(o,admin=false){
   const payStatus=esc(o.payment?.status||o.status||"paid");
   const customer=o.customer||{};
   const items=o.items||[];
-  const adminId=esc(o._id||o.orderId||"");
+  const adminId=esc(o._id||o.orderId||o.paypalOrderId||o.payment?.paypalOrderId||"");
   return `<div class="admin-order-card">
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:space-between">
       <div><b>${esc(o.orderId||o._id||"")}</b><span class="status-pill paid">${payStatus}</span><span class="status-pill ${reviewed?"reviewed":""}">${reviewed?"reviewed":"new"}</span><span class="status-pill ${delivered?"delivered":""}">${esc(o.deliveryStatus||o.status||"preparing")}</span></div>
@@ -1162,95 +1168,47 @@ function orderHtml(o,admin=false){
       <div><b>Customer:</b> ${esc(customer.fullName||"Guest Customer")}</div>
       <div><b>Phone:</b> ${esc(customer.phone||"Not provided")}</div>
       <div><b>Email:</b> ${esc(customer.email||"Not provided")}</div>
-      <div><b>Pickup:</b> ${esc(o.pickupTime||"ASAP pickup")}</div>
-      <div><b>Notes:</b> ${esc(o.notes||"No notes")}</div>
+      <div><b>Pickup:</b> ${esc(customer.pickupTime||o.pickupTime||"ASAP pickup")}</div>
+      <div><b>Notes:</b> ${esc(customer.notes||o.notes||"No notes")}</div>
       <div><b>Order time:</b> ${o.createdAt?new Date(o.createdAt).toLocaleString():""}</div>
-      ${o.paypalOrderId?`<div><b>PayPal ID:</b> ${esc(o.paypalOrderId)}</div>`:""}
+      ${(o.paypalOrderId||o.payment?.paypalOrderId)?`<div><b>PayPal ID:</b> ${esc(o.paypalOrderId||o.payment?.paypalOrderId)}</div>`:""}
     </div>
     <div style="margin-top:10px"><b>Items:</b><br>${items.map(i=>`${esc(i.name)} × ${i.qty} — $${(Number(i.price)*Number(i.qty)).toFixed(2)}`).join("<br>")}</div>
-    ${admin ? ownerOrderButtons(o, adminId) : ""}
+    ${admin?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+      <button class="mini-btn good" onclick="keepAdminOrder('${adminId}')">Keep / Reviewed</button>
+      <button class="mini-btn good" onclick="markReady('${adminId}')">Mark Ready</button>
+      <button class="mini-btn good" onclick="markDelivered('${adminId}')">Mark Delivered</button>
+      <button class="mini-btn danger" onclick="removeDeliveredOrder('${adminId}')" ${delivered?"":"title='Mark delivered first'"}>Remove Delivered Order</button>
+    </div>`:""}
   </div>`;
 }
-
-function ownerOrderButtons(order, adminId){
-  const status = String(order.status || order.orderStatus || "placed").toLowerCase();
-  const deliveryStatus = String(order.deliveryStatus || "").toLowerCase();
-  const isDelivered = ["delivered","completed","cancelled"].includes(status) || ["delivered","completed","cancelled"].includes(deliveryStatus);
-
-  if(isDelivered){
-    return `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-      <button class="mini-btn" onclick="updateOwnerOrderStatus('${adminId}','confirmed')">Keep / Reviewed</button>
-      <button class="mini-btn danger" onclick="removeDeliveredOrder('${adminId}')">Remove Delivered Order</button>
-    </div>`;
-  }
-
-  return `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-    <button class="mini-btn good" onclick="updateOwnerOrderStatus('${adminId}','confirmed')">Keep / Reviewed</button>
-    <button class="mini-btn" onclick="updateOwnerOrderStatus('${adminId}','preparing')">Mark Preparing</button>
-    <button class="mini-btn" onclick="updateOwnerOrderStatus('${adminId}','ready')">Mark Ready</button>
-    <button class="mini-btn good" onclick="updateOwnerOrderStatus('${adminId}','delivered')">Mark Delivered</button>
-  </div>`;
-}
-
-async function updateOwnerOrderStatus(orderId, status){
+async function fetchAdminOrders(){
+  const local = orderList();
   const key=getAdminKey();
+  let backend=[];
   if(key){
     try{
-      let res=await fetch(API+"/api/admin/orders/"+encodeURIComponent(orderId)+"/status",{
-        method:"PATCH",
-        headers:{"Content-Type":"application/json","x-admin-key":key},
-        body:JSON.stringify({status,deliveryStatus:status})
-      });
-
-      if(!res.ok){
-        res=await fetch(API+"/api/admin/orders/"+encodeURIComponent(orderId),{
-          method:"PUT",
-          headers:{"Content-Type":"application/json","x-admin-key":key},
-          body:JSON.stringify({status})
-        });
-      }
-
-      if(!res.ok){
-        const data=await res.json().catch(()=>({}));
-        throw new Error(data.error||data.details||"Order update failed");
-      }
+      const res=await fetch(API+"/api/admin/orders",{headers:{"x-admin-key":key}});
+      const data=await res.json();
+      if(!res.ok) throw new Error(data.error||"Could not load admin orders");
+      backend=Array.isArray(data.orders)?data.orders:[];
     }catch(err){
-      alert("❌ Order update failed: "+err.message);
-      return;
+      console.warn("Backend orders failed, using local fallback", err);
     }
   }
-
-  const orders=orderList();
-  const o=orders.find(x=>x.orderId===orderId || x._id===orderId || x.id===orderId);
-  if(o){
-    o.status=status;
-    if(status==="delivered" || status==="completed") o.deliveryStatus="delivered";
-    if(status==="delivered") o.deliveredAt=new Date().toISOString();
-    saveOrders(orders);
-  }
-  showToast("✅ Order updated: "+status);
-  openAdminOrders();
-}
-
-async function fetchAdminOrders(){
-  const key=getAdminKey();
-  if(!key) return orderList();
-  try{
-    const res=await fetch(API+"/api/admin/orders",{headers:{"x-admin-key":key}});
-    const data=await res.json();
-    if(!res.ok) throw new Error(data.error||"Could not load admin orders");
-    if(Array.isArray(data.orders)) return data.orders;
-  }catch(err){
-    console.warn("Using local orders fallback", err);
-  }
-  return orderList();
+  const seen=new Set();
+  return [...backend, ...local].filter(o=>{
+    const k=o._id || o.orderId || o.paypalOrderId || o.payment?.paypalOrderId || JSON.stringify(o);
+    if(seen.has(k)) return false;
+    seen.add(k); return true;
+  });
 }
 async function openAdminOrders(){
   if(!isAdminAuthed()) return openAdminLogin();
   document.getElementById("modalRoot").innerHTML=`<div class="modal-bd"><div class="modal-sheet"><div class="modal-body"><h2 style="font-family:'Playfair Display',serif;color:var(--brown)">Loading owner orders…</h2></div></div></div>`;
   document.body.style.overflow="hidden";
   const orders=await fetchAdminOrders();
-  document.getElementById("modalRoot").innerHTML=`<div class="modal-bd" onclick="if(event.target===this)closeItem()"><div class="modal-sheet"><div class="modal-body"><div style="display:flex;justify-content:space-between;align-items:center"><div><h2 style="font-family:'Playfair Display',serif;color:var(--brown);margin-bottom:4px">Review Customer Orders</h2><p style="color:var(--muted);font-size:.86rem">After admin login, this tab shows every customer order with food items, phone, email, payment, notes, and pickup time. Admin can keep/review the order or remove it after delivery.</p></div><button class="mini-btn" onclick="closeItem()">Close</button></div>${orders.length?`<div class="admin-orders-grid">${orders.map(o=>orderHtml(o,true)).join("")}</div>`:`<div class="empty" style="padding:30px 10px"><h3>No orders yet</h3></div>`}</div></div></div>`;
+  document.getElementById("modalRoot").innerHTML=`<div class="modal-bd" onclick="if(event.target===this)closeItem()"><div class="modal-sheet"><div class="modal-body"><div style="display:flex;justify-content:space-between;align-items:center"><div><h2 style="font-family:'Playfair Display',serif;color:var(--brown);margin-bottom:4px">Review Customer Orders</h2><p style="color:var(--muted);font-size:.86rem">After admin login, this tab shows every customer order with food items, phone, email, payment, notes, and pickup time. Admin can review, mark ready for pickup, mark delivered, or remove it after delivery.</p></div><button class="mini-btn" onclick="closeItem()">Close</button></div>${orders.length?`<div class="admin-orders-grid">${orders.map(o=>orderHtml(o,true)).join("")}</div>`:`<div class="empty" style="padding:30px 10px"><h3>No orders yet</h3></div>`}</div></div></div>`;
 }
 
 async function keepAdminOrder(orderId){
@@ -1269,6 +1227,25 @@ async function keepAdminOrder(orderId){
   const o=orders.find(x=>x.orderId===orderId || x._id===orderId);
   if(o){ o.status="confirmed"; o.reviewedAt=new Date().toISOString(); saveOrders(orders); }
   showToast("✅ Order kept and marked reviewed");
+  openAdminOrders();
+}
+
+async function markReady(orderId){
+  const key=getAdminKey();
+  if(key){
+    try{
+      const res=await fetch(API+"/api/admin/orders/"+encodeURIComponent(orderId)+"/status",{
+        method:"PATCH",
+        headers:{"Content-Type":"application/json","x-admin-key":key},
+        body:JSON.stringify({status:"ready",paymentStatus:"paid"})
+      });
+      if(!res.ok){ const data=await res.json().catch(()=>({})); throw new Error(data.error||"Ready failed"); }
+    }catch(err){ console.warn("Backend mark ready failed",err); }
+  }
+  const orders=orderList();
+  const o=orders.find(x=>x.orderId===orderId || x._id===orderId || x.paypalOrderId===orderId || x.payment?.paypalOrderId===orderId);
+  if(o){ o.deliveryStatus="ready"; o.status="ready"; o.readyAt=new Date().toISOString(); saveOrders(orders); }
+  showToast("✅ Order marked ready for pickup");
   openAdminOrders();
 }
 
@@ -1291,47 +1268,20 @@ async function markDelivered(orderId){
 async function removeDeliveredOrder(orderId){
   const orders=orderList();
   const o=orders.find(x=>x.orderId===orderId || x._id===orderId);
-  const delivered=!o || ["delivered","completed","cancelled"].includes(String(o.deliveryStatus||o.status||"").toLowerCase());
-
-  if(!delivered){
-    const markFirst = confirm("This order is not marked delivered yet. Mark it delivered and remove it now?");
-    if(!markFirst) return;
-    await markDelivered(orderId);
-  }
-
-  if(!confirm("Remove this order from the owner order list?")) return;
-
+  const delivered=!o || o.deliveryStatus==="delivered"||o.status==="delivered"||o.status==="completed";
+  if(!delivered){ alert("Please mark this order delivered before removing it from the owner order list."); return; }
+  if(!confirm("Remove this delivered order from the owner order list?")) return;
   const key=getAdminKey();
   if(key){
     try{
-      // First try the force remove route. This route does not block by status.
-      let res=await fetch(API+"/api/admin/orders/"+encodeURIComponent(orderId)+"/remove",{
-        method:"POST",
-        headers:{"Content-Type":"application/json","x-admin-key":key},
-        body:JSON.stringify({force:true})
-      });
-
-      // Backup: older backend delete route.
-      if(!res.ok){
-        res=await fetch(API+"/api/admin/orders/"+encodeURIComponent(orderId),{
-          method:"DELETE",
-          headers:{"Content-Type":"application/json","x-admin-key":key},
-          body:JSON.stringify({force:true})
-        });
-      }
-
-      if(!res.ok){
-        const data=await res.json().catch(()=>({}));
-        throw new Error(data.error||data.details||"Delete failed");
-      }
+      const res=await fetch(API+"/api/admin/orders/"+encodeURIComponent(orderId),{method:"DELETE",headers:{"x-admin-key":key}});
+      if(!res.ok){ const data=await res.json().catch(()=>({})); throw new Error(data.error||"Delete failed"); }
     }catch(err){
-      alert("Backend remove failed: "+err.message+"\n\nMake sure the updated server.js is deployed on Render, then Clear build cache & deploy.");
-      return;
+      console.warn("Backend remove failed; removing local copy if present", err);
+      if(!o){ alert("Backend remove failed: "+err.message); return; }
     }
   }
-
-  saveOrders(orders.filter(x=>x.orderId!==orderId && x._id!==orderId));
-  showToast("🗑️ Order removed from owner list");
+  saveOrders(orders.filter(x=>x.orderId!==orderId && x._id!==orderId && x.paypalOrderId!==orderId && x.payment?.paypalOrderId!==orderId));
   openAdminOrders();
 }
 async function testOwnerEmail(){

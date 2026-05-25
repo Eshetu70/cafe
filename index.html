@@ -243,20 +243,13 @@
     <a href="menu.html?cat=Desserts" class="cat-card"><span class="cat-emoji">🍰</span><span class="cat-label">Desserts</span></a>
     <a href="menu.html?cat=Baked%20Goods" class="cat-card"><span class="cat-emoji">🥐</span><span class="cat-label">Baked Goods</span></a>
     <a href="menu.html?cat=Kids%20Menu" class="cat-card"><span class="cat-emoji">🍗</span><span class="cat-label">Kids Menu</span></a>
-    <a href="menu.html?cat=Sides%20%26%20Small%20Plates" class="cat-card"><span class="cat-emoji">🍟</span><span class="cat-label">Sides &amp; Plates</span></a>
+    <a href="menu.html?cat=Sides%20%26%20Plates" class="cat-card"><span class="cat-emoji">🍟</span><span class="cat-label">Sides &amp; Plates</span></a>
   </div>
 
   <div class="filters">
     <div class="filters-row">
       <input id="searchBox" placeholder="Search menu item…" oninput="renderMenu()" />
-      <select id="categoryFilter" onchange="renderMenu()">
-        <option value="all">All Categories</option>
-        <option value="breakfast">Breakfast</option>
-        <option value="lunch">Lunch</option>
-        <option value="catering">Catering</option>
-        <option value="drink">Drinks</option>
-        <option value="dessert">Dessert</option>
-      </select>
+      <select id="categoryFilter" onchange="renderMenu()"><option value="all">All Categories</option><option value="Specialty Coffee">☕ Specialty Coffee</option><option value="Smoothies & Juices">🥤 Smoothies & Juices</option><option value="Starters">🥟 Starters</option><option value="Classic Favorites">🍳 Classic Favorites</option><option value="From the Griddle">🥞 From the Griddle</option><option value="Egg-Sclusives">🥚 Egg-Sclusives</option><option value="Sandwiches & Burgers">🍔 Sandwiches & Burgers</option><option value="Salads">🥗 Salads</option><option value="Desserts">🍰 Desserts</option><option value="Baked Goods">🥐 Baked Goods</option><option value="Kids Menu">🍗 Kids Menu</option><option value="Sides & Plates">🍟 Sides & Plates</option></select>
     </div>
   </div>
   <div class="grid" id="menuGrid"></div>
@@ -288,7 +281,7 @@
     <div class="admin-tab-row">
       <button class="admin-tab-pro active" id="tab-menu" onclick="switchAdminTab('menu')">📋 Menu Items</button>
       <button class="admin-tab-pro" id="tab-images" onclick="switchAdminTab('images')">🖼️ Manage Images</button>
-      <button class="admin-tab-pro" id="tab-orders" onclick="switchAdminTab('orders')">📦 Customer Orders</button>
+      <button class="admin-tab-pro" id="tab-orders" onclick="switchAdminTab('orders')">📦 Review Customer Orders</button>
     </div>
 
     <div id="adminTabMenu" style="margin-top:20px;">
@@ -310,7 +303,7 @@
               <div class="admin-field"><label>Price</label><input id="menuPrice" type="number" min="0" step="0.01" placeholder="14.00" required /></div>
             </div>
             <div class="admin-two">
-              <div class="admin-field"><label>Category</label><select id="menuCategory"><option value="breakfast">Breakfast</option><option value="lunch">Lunch</option><option value="catering">Catering</option><option value="drink">Drinks</option><option value="dessert">Dessert</option><option value="coffee">Coffee</option><option value="kids">Kids Menu</option><option value="sides">Sides</option></select></div>
+              <div class="admin-field"><label>Category</label><select id="menuCategory"><option value="Specialty Coffee">☕ Specialty Coffee</option><option value="Smoothies & Juices">🥤 Smoothies & Juices</option><option value="Starters">🥟 Starters</option><option value="Classic Favorites">🍳 Classic Favorites</option><option value="From the Griddle">🥞 From the Griddle</option><option value="Egg-Sclusives">🥚 Egg-Sclusives</option><option value="Sandwiches & Burgers">🍔 Sandwiches & Burgers</option><option value="Salads">🥗 Salads</option><option value="Desserts">🍰 Desserts</option><option value="Baked Goods">🥐 Baked Goods</option><option value="Kids Menu">🍗 Kids Menu</option><option value="Sides & Plates">🍟 Sides & Plates</option></select></div>
               <div class="admin-field"><label>Availability</label><select id="menuAvailable"><option value="true">Available</option><option value="false">Unavailable</option></select></div>
             </div>
             <div class="admin-field"><label>Description</label><textarea id="menuDesc" placeholder="Short customer-facing description"></textarea></div>
@@ -338,7 +331,7 @@
       </div>
     </div>
     <div id="adminTabImages" style="display:none;margin-top:20px;"><div class="admin-card-panel"><h3>🖼️ Menu Item Images</h3><p class="small" style="margin-bottom:16px;">Upload, change, or remove photos for any menu item.</p><div class="img-mgr-stats" id="imgMgrStats"></div><input class="img-mgr-search" id="imgMgrSearch" placeholder="🔍  Search items…" oninput="renderImgMgr()"/><div class="img-mgr-filter" id="imgMgrFilter"></div><div class="img-mgr-grid" id="imgMgrGrid"></div></div></div>
-    <div id="adminTabOrders" style="display:none;margin-top:20px;"><div class="admin-card-panel"><h3>📦 Customer Orders</h3><p class="small">Owner can see customer details, order items, payment status, mark delivered, and remove delivered orders.</p><div id="adminOrders" class="list"></div></div></div>
+    <div id="adminTabOrders" style="display:none;margin-top:20px;"><div class="admin-card-panel"><h3>📦 Review Customer Orders</h3><p class="small">After admin login, this tab shows all customer orders with full customer details and food items. Admin can keep/review the order, update status, mark delivered, email the customer, or delete delivered/completed orders.</p><div id="adminOrders" class="list"></div></div></div>
   </div>
 </section>
 
@@ -409,6 +402,8 @@ const PAYPAL_FALLBACK_URL = "https://www.paypal.com/ncp/payment/N383Y35W986VU";
 const PAYPAL_URL        = PAYPAL_FALLBACK_URL;
 const CLOVER_URL        = PAYPAL_FALLBACK_URL; // kept as alias so older code still works
 const API_BASE          = window.CKC_API_BASE || "https://cafe-4nv2.onrender.com";
+const CKC_CATEGORIES = ["Specialty Coffee", "Smoothies & Juices", "Starters", "Classic Favorites", "From the Griddle", "Egg-Sclusives", "Sandwiches & Burgers", "Salads", "Desserts", "Baked Goods", "Kids Menu", "Sides & Plates"];
+const CKC_CATEGORY_EMOJIS = {"Specialty Coffee": "\u2615", "Smoothies & Juices": "\ud83e\udd64", "Starters": "\ud83e\udd5f", "Classic Favorites": "\ud83c\udf73", "From the Griddle": "\ud83e\udd5e", "Egg-Sclusives": "\ud83e\udd5a", "Sandwiches & Burgers": "\ud83c\udf54", "Salads": "\ud83e\udd57", "Desserts": "\ud83c\udf70", "Baked Goods": "\ud83e\udd50", "Kids Menu": "\ud83c\udf57", "Sides & Plates": "\ud83c\udf5f"};
 const TOKEN_KEY         = "ckc_token";
 const USER_KEY          = "ckc_user";
 const ADMIN_KEY_STORAGE = "ckc_admin_key";
@@ -602,7 +597,7 @@ function showView(view){
 async function loadMenu(){
   try{
     const json=await fetchJSON(API_BASE+"/api/menu");
-    MENU=Array.isArray(json.items)?json.items:[];
+    MENU=(Array.isArray(json.items)?json.items:[]).map(item=>({...item, category: normalizeCategoryName(item.category)}));
     localStorage.setItem("ckc_menu_cache",JSON.stringify(MENU));
   }catch{
     try{MENU=JSON.parse(localStorage.getItem("ckc_menu_cache")||"[]")}catch{MENU=[]}
@@ -610,11 +605,33 @@ async function loadMenu(){
   renderMenu();
 }
 
+
+function normalizeCategoryName(category){
+  const raw = String(category || "").trim();
+  if(!raw) return "Classic Favorites";
+  const low = raw.toLowerCase();
+  const exact = CKC_CATEGORIES.find(c => c.toLowerCase() === low);
+  if(exact) return exact;
+  if(low.includes("coffee")) return "Specialty Coffee";
+  if(low.includes("smooth") || low.includes("juice") || low.includes("drink") || low.includes("tea")) return "Smoothies & Juices";
+  if(low.includes("starter")) return "Starters";
+  if(low.includes("griddle") || low.includes("pancake") || low.includes("waffle") || low.includes("toast")) return "From the Griddle";
+  if(low.includes("egg") || low.includes("omelet") || low.includes("frittata")) return "Egg-Sclusives";
+  if(low.includes("sandwich") || low.includes("burger")) return "Sandwiches & Burgers";
+  if(low.includes("salad")) return "Salads";
+  if(low.includes("dessert") || low.includes("cake")) return "Desserts";
+  if(low.includes("baked") || low.includes("muffin") || low.includes("croissant") || low.includes("danish")) return "Baked Goods";
+  if(low.includes("kid")) return "Kids Menu";
+  if(low.includes("side") || low.includes("plate") || low.includes("potato") || low.includes("grit")) return "Sides & Plates";
+  return "Classic Favorites";
+}
+function categoryEmoji(category){ return CKC_CATEGORY_EMOJIS[normalizeCategoryName(category)] || "🍽️"; }
+
 function renderMenu(){
   const q=$("searchBox").value.trim().toLowerCase();
   const cat=$("categoryFilter").value;
   let data=[...MENU];
-  if(cat!=="all") data=data.filter(i=>i.category===cat);
+  if(cat!=="all") data=data.filter(i=>normalizeCategoryName(i.category)===cat);
   if(q) data=data.filter(i=>[i.name,i.description,i.category].join(" ").toLowerCase().includes(q));
   $("menuGrid").innerHTML=data.map(item=>`
     <article class="menu-card-v2">
@@ -897,8 +914,17 @@ function renderPayPalPaymentModal(order){
         localStorage.setItem("ckc_last_order_summary",orderSummaryText(order));
         localStorage.removeItem("ckc_pending_order");
 
-        // Optional: send paid order to your backend if you add an endpoint later.
-        fetch(API_BASE+"/api/orders/paypal",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(order)}).catch(()=>{});
+        // Save paid order to Render backend so it appears in Admin Review Orders and emails the owner.
+        fetch(API_BASE+"/api/orders/paid",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(order)})
+          .then(r=>r.json().then(j=>({ok:r.ok,json:j})))
+          .then(({ok,json})=>{
+            if(ok && json.order){
+              const current=JSON.parse(localStorage.getItem("ckc_local_orders")||"[]").filter(x=>x.paypalOrderId!==order.payment.paypalOrderId && x.orderId!==order.orderId);
+              current.unshift({...order, ...json.order, customer:json.order.customer||order.customer, items:json.order.items||order.items});
+              localStorage.setItem("ckc_local_orders", JSON.stringify(current));
+            } else { console.warn("Backend save failed", json); }
+          })
+          .catch(err=>console.warn("Backend save failed", err));
 
         CART=[];
         saveCart();
@@ -997,68 +1023,123 @@ async function testOwnerEmail(){
 }function logoutAdmin(){ clearAdminSession(); showView("shop"); alert("Admin logged out"); }
 
 async function loadAdminOrders(){
-  let orders=[];
+  const key=getAdminKey();
+  const local=JSON.parse(localStorage.getItem("ckc_local_orders")||"[]");
+  let backend=[];
   try{
-    const json=await fetchJSON(API_BASE+"/api/admin/orders",{headers:{"x-admin-key":getAdminKey()}});
-    orders=json.orders||[];
+    const json=await fetchJSON(API_BASE+"/api/admin/orders",{headers:{"x-admin-key":key}});
+    backend=json.orders||[];
   }catch(err){
-    $("adminOrders").innerHTML=`<div class="item">Unable to load orders: ${escapeHtml(err.message)}</div>`;
-    return;
+    console.warn("Backend admin orders failed, showing local orders", err);
   }
+  const seen=new Set();
+  const orders=[...backend,...local].filter(o=>{
+    const k=o._id || o.orderId || o.paypalOrderId || o.payment?.paypalOrderId || JSON.stringify(o);
+    if(seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
   $("adminOrders").innerHTML=orders.length?orders.map(o=>{
-    const customer=o.customer||{};
+    const customer=o.customer||{fullName:o.customerName,phone:o.customerPhone,email:o.customerEmail,pickupTime:o.pickupTime,notes:o.notes};
     const items=o.items||[];
-    const delivered=["delivered","completed"].includes(String(o.status||"").toLowerCase());
-    const paid=String(o.payment?.status||"").toLowerCase()==="paid";
+    const delivered=["delivered","completed"].includes(String(o.status||o.deliveryStatus||"").toLowerCase());
     const paypalId=o.payment?.paypalOrderId||o.payment?.transactionId||o.paypalOrderId||"N/A";
+    const id=o._id||o.orderId||o.paypalOrderId||o.payment?.paypalOrderId;
     return `
     <div class="admin-order-card">
       <div class="admin-order-head">
         <div><b>${escapeHtml(o.orderId||o._id||"Order")}</b><div class="small">${o.createdAt?new Date(o.createdAt).toLocaleString():""}</div></div>
-        <div><b>$${Number(o.total||0).toFixed(2)}</b><div class="small">Payment: ${escapeHtml(o.payment?.status||"pending")}</div></div>
+        <div><b>$${Number(o.total||0).toFixed(2)}</b><div class="small">Payment: ${escapeHtml(o.payment?.status||"paid")}</div></div>
       </div>
       <div class="admin-order-grid">
         <div><div class="admin-order-label">Customer</div><div class="admin-order-value">${escapeHtml(customer.fullName||customer.name||"N/A")}</div></div>
         <div><div class="admin-order-label">Phone</div><div class="admin-order-value">${escapeHtml(customer.phone||"N/A")}</div></div>
         <div><div class="admin-order-label">Email</div><div class="admin-order-value">${escapeHtml(customer.email||"N/A")}</div></div>
-        <div><div class="admin-order-label">Pickup Time</div><div class="admin-order-value">${escapeHtml(o.pickupTime||customer.pickupTime||"ASAP")}</div></div>
+        <div><div class="admin-order-label">Pickup Time</div><div class="admin-order-value">${escapeHtml(customer.pickupTime||o.pickupTime||"ASAP")}</div></div>
         <div><div class="admin-order-label">PayPal ID</div><div class="admin-order-value">${escapeHtml(paypalId)}</div></div>
-        <div><div class="admin-order-label">Notes</div><div class="admin-order-value">${escapeHtml(o.notes||customer.notes||"None")}</div></div>
+        <div><div class="admin-order-label">Notes</div><div class="admin-order-value">${escapeHtml(customer.notes||o.notes||"None")}</div></div>
       </div>
       <table class="admin-items-table"><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Options</th></tr></thead><tbody>
         ${items.map(it=>`<tr><td>${escapeHtml(it.name)}</td><td>${Number(it.qty||1)}</td><td>$${Number(it.price||0).toFixed(2)}</td><td>${(it.selectedOptions||[]).map(g=>`${escapeHtml(g.name)}: ${(g.values||[]).map(escapeHtml).join(", ")}`).join("<br>")||"—"}</td></tr>`).join("")}
       </tbody></table>
       <div class="row" style="margin-top:10px">
-        <select id="status_${o._id}">${["placed","confirmed","preparing","ready","delivered","completed","cancelled"].map(s=>`<option value="${s}" ${o.status===s?"selected":""}>${s}</option>`).join("")}</select>
-        <select id="pay_${o._id}">${["pending","paid","failed","refunded"].map(s=>`<option value="${s}" ${o.payment?.status===s?"selected":""}>${s}</option>`).join("")}</select>
+        <select id="status_${id}">${["placed","confirmed","preparing","ready","delivered","completed","cancelled"].map(s=>`<option value="${s}" ${o.status===s?"selected":""}>${s}</option>`).join("")}</select>
+        <select id="pay_${id}">${["pending","paid","failed"].map(s=>`<option value="${s}" ${o.payment?.status===s?"selected":""}>${s}</option>`).join("")}</select>
       </div>
       <div class="actions" style="margin-top:12px;gap:8px;flex-wrap:wrap">
-        <button class="btn primary" onclick="updateOrder('${o._id}')">Update Order</button>
-        <button class="btn" onclick="markDelivered('${o._id}')">Mark Delivered</button>
-        <button class="btn" onclick="emailCustomer('${o._id}')">Email Customer</button>
-        <button class="btn danger" ${delivered?"":"disabled title='Mark delivered first'"} onclick="removeDeliveredOrder('${o._id}', ${delivered}, ${paid})">Remove Delivered</button>
+        <button class="btn primary" onclick="keepOrder('${id}')">Keep / Reviewed</button>
+        <button class="btn" onclick="markReady('${id}')">Mark Ready</button>
+        <button class="btn" onclick="updateOrder('${id}')">Update Order</button>
+        <button class="btn" onclick="markDelivered('${id}')">Mark Delivered</button>
+        <button class="btn" onclick="emailCustomer('${id}')">Email Customer</button>
+        <button class="btn danger" onclick="removeDeliveredOrder('${id}')">Remove Order</button>
       </div>
-    </div>`}).join(""):'<div class="item">No orders yet.</div>';
+    </div>`}).join(""):'<div class="item">No customer review orders yet.</div>';
 }
+
+async function keepOrder(id){
+  if($("status_"+id)) $("status_"+id).value="confirmed";
+  try{
+    await fetchJSON(API_BASE+"/api/admin/orders/"+encodeURIComponent(id),{
+      method:"PUT",
+      headers:{"Content-Type":"application/json","x-admin-key":getAdminKey()},
+      body:JSON.stringify({status:"confirmed"})
+    });
+  }catch(err){ console.warn("Backend keep failed", err); }
+  showToast("✅ Order kept and marked reviewed");
+  loadAdminOrders();
+}
+
 async function updateOrder(id){
-  await fetchJSON(API_BASE+"/api/admin/orders/"+encodeURIComponent(id),{method:"PUT",headers:{"Content-Type":"application/json","x-admin-key":getAdminKey()},body:JSON.stringify({status:$("status_"+id).value,paymentStatus:$("pay_"+id).value})});
-  alert("Order updated"); loadAdminOrders();
+  try{
+    await fetchJSON(API_BASE+"/api/admin/orders/"+encodeURIComponent(id),{method:"PUT",headers:{"Content-Type":"application/json","x-admin-key":getAdminKey()},body:JSON.stringify({status:$("status_"+id)?.value||"confirmed",paymentStatus:$("pay_"+id)?.value||"paid"})});
+    alert("Order updated");
+  }catch(err){ alert("Update failed: "+err.message); }
+  loadAdminOrders();
 }
+async function markReady(id){
+  if($("status_"+id)) $("status_"+id).value="ready";
+  try{
+    await fetchJSON(API_BASE+"/api/admin/orders/"+encodeURIComponent(id)+"/status",{
+      method:"PATCH",
+      headers:{"Content-Type":"application/json","x-admin-key":getAdminKey()},
+      body:JSON.stringify({status:"ready",paymentStatus:"paid"})
+    });
+  }catch(err){ console.warn("Backend ready failed", err); }
+  const local=JSON.parse(localStorage.getItem("ckc_local_orders")||"[]");
+  local.forEach(o=>{
+    if(o._id===id||o.orderId===id||o.paypalOrderId===id||o.payment?.paypalOrderId===id){
+      o.status="ready";
+      o.deliveryStatus="ready";
+      o.readyAt=new Date().toISOString();
+    }
+  });
+  localStorage.setItem("ckc_local_orders",JSON.stringify(local));
+  showToast("✅ Order marked ready");
+  loadAdminOrders();
+}
+
 async function markDelivered(id){
   if($("status_"+id)) $("status_"+id).value="delivered";
-  await updateOrder(id);
+  try{
+    await fetchJSON(API_BASE+"/api/admin/orders/"+encodeURIComponent(id)+"/status",{method:"PATCH",headers:{"Content-Type":"application/json","x-admin-key":getAdminKey()},body:JSON.stringify({status:"delivered",paymentStatus:"paid"})});
+  }catch(err){ console.warn("Backend delivered failed", err); }
+  const local=JSON.parse(localStorage.getItem("ckc_local_orders")||"[]");
+  local.forEach(o=>{ if(o._id===id||o.orderId===id||o.paypalOrderId===id||o.payment?.paypalOrderId===id){ o.status="delivered"; o.deliveryStatus="delivered"; }});
+  localStorage.setItem("ckc_local_orders",JSON.stringify(local));
+  loadAdminOrders();
 }
-async function removeDeliveredOrder(id, delivered, paid){
-  if(!delivered){ alert("Please mark the order delivered first."); return; }
-  if(!confirm("Remove this delivered order from the admin list?")) return;
+async function removeDeliveredOrder(id){
+  if(!confirm("Remove this customer order from the admin review list?")) return;
   try{
     await fetchJSON(API_BASE+"/api/admin/orders/"+encodeURIComponent(id),{method:"DELETE",headers:{"x-admin-key":getAdminKey()}});
-    showToast("🗑️ Delivered order removed");
-    loadAdminOrders();
-  }catch(err){
-    alert("Delete route not available yet on backend: "+err.message);
-  }
+  }catch(err){ console.warn("Backend remove failed; removing local copy if present", err); }
+  const local=JSON.parse(localStorage.getItem("ckc_local_orders")||"[]").filter(x=>x._id!==id && x.orderId!==id && x.paypalOrderId!==id && x.payment?.paypalOrderId!==id);
+  localStorage.setItem("ckc_local_orders",JSON.stringify(local));
+  showToast("🗑️ Order removed from review list");
+  loadAdminOrders();
 }
+
 async function emailCustomer(id){
   const subject=prompt("Email subject","Community Kitchen Café — Order Update"); if(subject===null) return;
   const message=prompt("Email message","Your order has been updated."); if(message===null) return;
@@ -1094,7 +1175,7 @@ function previewAdminImage(input){
 }
 function editMenuItem(item){
   showView("admin"); switchAdminTab("menu");
-  $("menuId").value=item._id; $("menuName").value=item.name||""; $("menuDesc").value=item.description||""; $("menuCategory").value=item.category||"breakfast"; $("menuPrice").value=item.price||""; $("menuAvailable").value=String(item.available!==false); $("menuIngredients").value=Array.isArray(item.ingredients)?item.ingredients.join(", "):(item.ingredients||""); $("menuCalories").value=item.calories||item.nutrition?.calories||""; $("menuAllergens").value=Array.isArray(item.allergens)?item.allergens.join(", "):(item.allergens||""); $("menuProtein").value=item.nutrition?.protein||""; $("menuCarbs").value=item.nutrition?.carbs||""; $("menuFat").value=item.nutrition?.fat||""; $("menuSodium").value=item.nutrition?.sodium||""; $("menuOptionGroups").value=item.optionGroups?JSON.stringify(item.optionGroups,null,2):"";
+  $("menuId").value=item._id; $("menuName").value=item.name||""; $("menuDesc").value=item.description||""; $("menuCategory").value=normalizeCategoryName(item.category)||"Classic Favorites"; $("menuPrice").value=item.price||""; $("menuAvailable").value=String(item.available!==false); $("menuIngredients").value=Array.isArray(item.ingredients)?item.ingredients.join(", "):(item.ingredients||""); $("menuCalories").value=item.calories||item.nutrition?.calories||""; $("menuAllergens").value=Array.isArray(item.allergens)?item.allergens.join(", "):(item.allergens||""); $("menuProtein").value=item.nutrition?.protein||""; $("menuCarbs").value=item.nutrition?.carbs||""; $("menuFat").value=item.nutrition?.fat||""; $("menuSodium").value=item.nutrition?.sodium||""; $("menuOptionGroups").value=item.optionGroups?JSON.stringify(item.optionGroups,null,2):"";
   const p=$("adminImagePreview"); if(p) p.src=getImageUrl(item.image);
   window.scrollTo({top:0,behavior:"smooth"});
 }

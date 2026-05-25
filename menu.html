@@ -320,7 +320,7 @@
 <!-- ══ NAV ══ -->
 <nav class="topbar">
   <div class="topbar-inner">
-    <a href="index.html" class="brand">
+    <a href="#" class="brand" onclick="handleMenuLogoSecretClick(event)" title="Click 5 times to open admin access">
       <img src="images/Community Kitchen Cafe logo design (1).png" alt="Logo" onerror="this.style.display='none'">
       <div>
         <span class="brand-name">Community Kitchen Café</span>
@@ -332,7 +332,7 @@
 
       <!-- Admin login button — visible when NOT authed -->
       <button class="nbtn" id="adminLoginBtn" onclick="openAdminLogin()"
-        style="background:linear-gradient(135deg,#7c3d12,#c17a36);color:#fff;box-shadow:0 3px 14px rgba(124,61,18,.25);">
+        style="display:none;background:linear-gradient(135deg,#7c3d12,#c17a36);color:#fff;box-shadow:0 3px 14px rgba(124,61,18,.25);">
         🔐 Admin
       </button>
 
@@ -610,6 +610,34 @@ function resolveImg(item) {
 
 /* ══ ADMIN AUTH ══ */
 const ADMIN_KEY_LOCAL = "ckc_menu_admin_key";
+let logoSecretClicks = 0;
+let logoSecretTimer = null;
+
+function handleMenuLogoSecretClick(event) {
+  event.preventDefault();
+  event.stopPropagation();
+
+  logoSecretClicks += 1;
+  clearTimeout(logoSecretTimer);
+
+  if (logoSecretClicks >= 5) {
+    logoSecretClicks = 0;
+    clearTimeout(logoSecretTimer);
+
+    if (isAdminAuthed()) {
+      applyAdminUI();
+      toggleAdminDropdown(event);
+      showToast("⚙️ Admin menu opened");
+    } else {
+      openAdminLogin();
+    }
+    return;
+  }
+
+  logoSecretTimer = setTimeout(() => {
+    logoSecretClicks = 0;
+  }, 2500);
+}
 
 function getAdminKey()  { return localStorage.getItem(ADMIN_KEY_LOCAL) || ""; }
 function isAdminAuthed(){ return !!getAdminKey(); }
@@ -622,7 +650,7 @@ function applyAdminUI() {
   } else {
     document.body.classList.remove("admin-authed");
     const loginBtn = document.getElementById("adminLoginBtn");
-    if (loginBtn) loginBtn.style.display = "";
+    if (loginBtn) loginBtn.style.display = "none";
     closeAdminDropdown();
     // If edit mode was on, turn it off
     if (editMode) { editMode = false; updateEditBanner(); render(); }
@@ -650,7 +678,7 @@ function openAdminLogin() {
     <div class="admin-modal-bd" id="adminLoginBd" onclick="if(event.target===this)closeAdminLogin()">
       <div class="admin-modal-box">
         <h3>🔐 Admin Access</h3>
-        <p>Enter your admin key to manage menu images — upload, change, or remove photos for any item.</p>
+        <p>Enter your admin key to manage the menu. Admin access is opened by clicking the logo 5 times.</p>
         <input class="admin-key-input" type="password" id="adminKeyInput"
           placeholder="Enter admin key…"
           onkeydown="if(event.key==='Enter')submitAdminKey()"/>

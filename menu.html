@@ -39,6 +39,30 @@
     /* Admin controls: hidden until authenticated */
     .admin-only{display:none!important}
     body.admin-authed .admin-only{display:inline-flex!important}
+
+    /* Admin dropdown menu — works on desktop, tablet, and mobile */
+    .admin-menu{position:relative;align-items:center}
+    .admin-menu-toggle{background:linear-gradient(135deg,#7c3d12,#c17a36);color:#fff;box-shadow:0 3px 14px rgba(124,61,18,.25)}
+    .admin-menu-toggle .chev{font-size:.72rem;transition:transform .18s}
+    .admin-menu.open .admin-menu-toggle .chev{transform:rotate(180deg)}
+    .admin-dropdown{
+      position:absolute;right:0;top:calc(100% + 10px);z-index:220;
+      width:min(92vw,260px);padding:8px;background:#fff;border:1px solid var(--border);
+      border-radius:18px;box-shadow:0 18px 45px rgba(31,19,11,.18);
+      display:none;flex-direction:column;gap:6px;animation:fadeIn .16s ease;
+    }
+    .admin-menu.open .admin-dropdown{display:flex}
+    .admin-dropdown::before{content:"";position:absolute;right:20px;top:-7px;width:14px;height:14px;background:#fff;border-left:1px solid var(--border);border-top:1px solid var(--border);transform:rotate(45deg)}
+    .admin-dd-btn{
+      width:100%;display:flex;align-items:center;gap:10px;text-align:left;
+      padding:11px 13px;border-radius:13px;border:1px solid transparent;background:transparent;
+      color:#2b2119;font-size:.86rem;font-weight:800;font-family:'DM Sans',sans-serif;
+      cursor:pointer;transition:background .15s,border-color .15s,transform .12s;text-decoration:none;
+    }
+    .admin-dd-btn:hover{background:#fff7ed;border-color:#fed7aa;transform:translateX(2px)}
+    .admin-dd-btn.danger{color:#b91c1c}
+    .admin-dd-btn.danger:hover{background:#fee2e2;border-color:#fecaca}
+    .admin-dd-sep{height:1px;background:var(--border);margin:4px 2px}
     /* Admin key modal */
     .admin-modal-bd{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s ease}
     .admin-modal-box{background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 24px 60px rgba(0,0,0,.3)}
@@ -270,7 +294,13 @@
     @media(max-width:600px){.checkout-form,.edit-form{grid-template-columns:1fr}.cart-row{grid-template-columns:1fr}.qty-box{justify-content:flex-start}.order-bar{padding-bottom:calc(12px + env(safe-area-inset-bottom))}}
 
     @media(max-width:600px){
+      .topbar-inner{height:auto;min-height:64px;padding:10px 12px;gap:10px}
       .brand-sub,.nbtn.outline{display:none}
+      .brand-name{font-size:.88rem}
+      .nav-btns{gap:6px;justify-content:flex-end;flex:1}
+      .admin-dropdown{position:fixed;top:70px;right:10px;left:10px;width:auto;max-height:calc(100vh - 95px);overflow:auto}
+      .admin-dropdown::before{display:none}
+      .admin-dd-btn{padding:13px 14px;font-size:.9rem}
       .mgrid{grid-template-columns:1fr 1fr;gap:12px}
       .mcard-name{font-size:.88rem}
       .mcard-body{padding:9px 11px 7px}
@@ -299,21 +329,29 @@
     </a>
     <div class="nav-btns">
       <a href="index.html" class="nbtn outline">← Home</a>
+
       <!-- Admin login button — visible when NOT authed -->
       <button class="nbtn" id="adminLoginBtn" onclick="openAdminLogin()"
         style="background:linear-gradient(135deg,#7c3d12,#c17a36);color:#fff;box-shadow:0 3px 14px rgba(124,61,18,.25);">
         🔐 Admin
       </button>
-      <!-- These only show when admin is authenticated (admin-only class) -->
-      <button class="nbtn edit-mode-btn admin-only" id="editModeBtn" onclick="toggleEditMode()">✏️ Edit Images</button>
-      <button class="nbtn admin-only add-menu-btn" onclick="openAddMenuItem()">➕ Add Menu</button>
-      <button class="nbtn admin-only" onclick="restoreDeletedMenuItems()" style="background:#fff;color:#166534;border:1.5px solid #bbf7d0;">↩️ Restore Deleted</button>
-      <button class="nbtn admin-only" onclick="openAdminOrders()" style="background:#fff7ed;color:#7c2d12;border:1.5px solid #fed7aa;">📦 Owner Orders</button>
-      <button class="nbtn admin-only" onclick="testOwnerEmail()" style="background:#eef6ff;color:#003087;border:1.5px solid #bfdbfe;">📧 Test Email</button>
-      <button class="nbtn admin-only" id="adminLogoutBtn" onclick="adminLogout()"
-        style="background:linear-gradient(135deg,#b91c1c,#ef4444);color:#fff;">
-        🔓 Logout
-      </button>
+
+      <!-- After admin login, all owner tools are inside this dropdown on every device -->
+      <div class="admin-menu admin-only" id="adminMenu">
+        <button class="nbtn admin-menu-toggle" id="adminMenuToggle" onclick="toggleAdminDropdown(event)" aria-haspopup="true" aria-expanded="false">
+          ⚙️ Admin Menu <span class="chev">▼</span>
+        </button>
+        <div class="admin-dropdown" id="adminDropdown">
+          <button class="admin-dd-btn edit-mode-btn" id="editModeBtn" onclick="toggleEditMode();closeAdminDropdown();">✏️ Edit Images</button>
+          <button class="admin-dd-btn" onclick="openAddMenuItem();closeAdminDropdown();">➕ Add Menu Item</button>
+          <button class="admin-dd-btn" onclick="restoreDeletedMenuItems();closeAdminDropdown();">↩️ Restore Deleted Items</button>
+          <button class="admin-dd-btn" onclick="openAdminOrders();closeAdminDropdown();">📦 Owner Orders</button>
+          <button class="admin-dd-btn" onclick="testOwnerEmail();closeAdminDropdown();">📧 Test Owner Email</button>
+          <div class="admin-dd-sep"></div>
+          <button class="admin-dd-btn danger" id="adminLogoutBtn" onclick="adminLogout();closeAdminDropdown();">🔓 Logout Admin</button>
+        </div>
+      </div>
+
       <button class="nbtn outline" onclick="openCustomerOrders()">📋 My Orders</button>
       <button class="nbtn green cart-pill" onclick="openCart()">💳 Checkout <span class="cart-count" id="cartBadge">0</span></button>
     </div>
@@ -585,9 +623,26 @@ function applyAdminUI() {
     document.body.classList.remove("admin-authed");
     const loginBtn = document.getElementById("adminLoginBtn");
     if (loginBtn) loginBtn.style.display = "";
+    closeAdminDropdown();
     // If edit mode was on, turn it off
     if (editMode) { editMode = false; updateEditBanner(); render(); }
   }
+}
+
+function toggleAdminDropdown(e) {
+  if (e) e.stopPropagation();
+  if (!isAdminAuthed()) { openAdminLogin(); return; }
+  const menu = document.getElementById("adminMenu");
+  const toggle = document.getElementById("adminMenuToggle");
+  const isOpen = menu?.classList.toggle("open");
+  if (toggle) toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+}
+
+function closeAdminDropdown() {
+  const menu = document.getElementById("adminMenu");
+  const toggle = document.getElementById("adminMenuToggle");
+  if (menu) menu.classList.remove("open");
+  if (toggle) toggle.setAttribute("aria-expanded", "false");
 }
 
 function openAdminLogin() {
@@ -1451,8 +1506,13 @@ function saveItemDetails(id){
 }
 function resetItemDetails(id){ const edits=getMenuEdits(); delete edits[id]; saveMenuEdits(edits); closeItem(); buildTabs(); render(); showToast("↩️ Item reset"); }
 
+document.addEventListener("click",e=>{
+  const menu = document.getElementById("adminMenu");
+  if (menu && !menu.contains(e.target)) closeAdminDropdown();
+});
+
 document.addEventListener("keydown",e=>{
-  if(e.key==="Escape"){ closeItem(); closeMgr(); closeAdminLogin(); }
+  if(e.key==="Escape"){ closeItem(); closeMgr(); closeAdminLogin(); closeAdminDropdown(); }
 });
 
 /* ══ TOAST ══ */

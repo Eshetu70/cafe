@@ -233,6 +233,8 @@
     .mcard-admin-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:10px 12px;background:#fff7ed;border-top:1px solid var(--border)}
     .mcard-admin-row button{border:none;border-radius:999px;padding:8px 12px;font-weight:900;cursor:pointer;background:#7c2d12;color:#fff;font-size:.78rem}
     .mcard-admin-row button.secondary{background:#fff;color:#7c2d12;border:1px solid #fed7aa}
+    .mcard-admin-row button.danger{background:#b91c1c;color:#fff;border:1px solid #fecaca}
+    .add-menu-btn{background:linear-gradient(135deg,#166534,#22c55e)!important;color:#fff!important;border:1.5px solid #bbf7d0!important}
     .edit-image-preview{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:16px;border:1px solid var(--border);background:#f3e6d7;margin:14px 0 10px}
     .edit-image-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 
@@ -304,6 +306,8 @@
       </button>
       <!-- These only show when admin is authenticated (admin-only class) -->
       <button class="nbtn edit-mode-btn admin-only" id="editModeBtn" onclick="toggleEditMode()">✏️ Edit Images</button>
+      <button class="nbtn admin-only add-menu-btn" onclick="openAddMenuItem()">➕ Add Menu</button>
+      <button class="nbtn admin-only" onclick="restoreDeletedMenuItems()" style="background:#fff;color:#166534;border:1.5px solid #bbf7d0;">↩️ Restore Deleted</button>
       <button class="nbtn admin-only" onclick="openAdminOrders()" style="background:#fff7ed;color:#7c2d12;border:1.5px solid #fed7aa;">📦 Owner Orders</button>
       <button class="nbtn admin-only" onclick="testOwnerEmail()" style="background:#eef6ff;color:#003087;border:1.5px solid #bfdbfe;">📧 Test Email</button>
       <button class="nbtn admin-only" id="adminLogoutBtn" onclick="adminLogout()"
@@ -369,6 +373,8 @@ const API = window.CKC_API_BASE || "https://cafe-4nv2.onrender.com";
 const CART_KEY = "ckc_paypal_cart";
 const ORDER_KEY = "ckc_customer_orders";
 const MENU_EDIT_KEY = "ckc_menu_item_edits";
+const MENU_CUSTOM_KEY = "ckc_custom_menu_items";
+const MENU_DELETED_KEY = "ckc_deleted_menu_items";
 const PAYPAL_CLIENT_ID = "ARyqZnmkozCfqLh13N7pKvwmkhtrEYFsP3nu87sMcLBBeO_liUzdVjLOs_reT3oxLle4G2g_Le4vjEQH";
 const CLOVER = PAYPAL_MANUAL_LINK;
 const FALL   = "https://images.unsplash.com/photo-1543353071-10c8ba85a904?auto=format&fit=crop&w=900&q=70";
@@ -700,13 +706,15 @@ function normalizeCategoryFromUrl(){
 
 
 function buildTabs() {
-  const cats = CAT_ORDER.filter(c => MENU.some(i=>i.cat===c));
+  const menuNow = getEditableMenu();
+  const allCats = [...CAT_ORDER, ...menuNow.map(i=>i.cat)].filter(Boolean);
+  const cats = [...new Set(allCats)].filter(c => menuNow.some(i=>i.cat===c));
   const bar  = document.getElementById("tabBar");
   bar.innerHTML = [
-    `<button class="tab ${activeCat==='all'?'active':''}" data-c="all" onclick="setcat('all')">🍴 All <span class="cnt">${MENU.length}</span></button>`,
+    `<button class="tab ${activeCat==='all'?'active':''}" data-c="all" onclick="setcat('all')">🍴 All <span class="cnt">${menuNow.length}</span></button>`,
     ...cats.map(c => {
-      const cnt   = MENU.filter(i=>i.cat===c).length;
-      const emoji = MENU.find(i=>i.cat===c)?.emoji||"🍽️";
+      const cnt   = menuNow.filter(i=>i.cat===c).length;
+      const emoji = menuNow.find(i=>i.cat===c)?.emoji||"🍽️";
       return `<button class="tab ${activeCat===c?'active':''}" data-c="${esc(c)}" onclick="setcat('${esc(c)}')">${emoji} ${esc(c)} <span class="cnt">${cnt}</span></button>`;
     })
   ].join("");
@@ -775,6 +783,7 @@ function cardHtml(item) {
     <div class="mcard-admin-row">
       <button onclick='openEditItem(${safe})'>✏️ Edit all details</button>
       <button class="secondary" onclick="triggerUpload('${real.id}')">📷 Image</button>
+      <button class="danger" onclick="deleteMenuItem('${real.id}')">🗑️ Delete</button>
     </div>` : "";
 
   return `
@@ -972,8 +981,17 @@ function closeMgr() {
 /* ══ MENU EDITS, CART, CHECKOUT, ORDERS ══ */
 function getMenuEdits(){ try{return JSON.parse(localStorage.getItem(MENU_EDIT_KEY)||"{}")}catch{return{}} }
 function saveMenuEdits(edits){ localStorage.setItem(MENU_EDIT_KEY, JSON.stringify(edits)); }
+function getCustomMenuItems(){ try{return JSON.parse(localStorage.getItem(MENU_CUSTOM_KEY)||"[]")}catch{return[]} }
+function saveCustomMenuItems(items){ localStorage.setItem(MENU_CUSTOM_KEY, JSON.stringify(items||[])); }
+function getDeletedMenuIds(){ try{return JSON.parse(localStorage.getItem(MENU_DELETED_KEY)||"[]")}catch{return[]} }
+function saveDeletedMenuIds(ids){ localStorage.setItem(MENU_DELETED_KEY, JSON.stringify([...new Set(ids||[])])); }
 function applyEdit(item){ return {...item, ...(getMenuEdits()[item.id]||{})}; }
-function getEditableMenu(){ return MENU.map(applyEdit); }
+function getEditableMenu(){
+  const deleted = new Set(getDeletedMenuIds());
+  return [...MENU, ...getCustomMenuItems()]
+    .filter(item => item && item.id && !deleted.has(item.id))
+    .map(applyEdit);
+}
 function getEditableItem(id){ return getEditableMenu().find(i=>i.id===id); }
 function cart(){ try{return JSON.parse(localStorage.getItem(CART_KEY)||"[]")}catch{return[]} }
 function saveCart(c){ localStorage.setItem(CART_KEY, JSON.stringify(c)); updateCartBadge(); }
@@ -1303,6 +1321,84 @@ async function testOwnerEmail(){
     );
   }
 }
+function openAddMenuItem(){
+  if(!isAdminAuthed()) return openAdminLogin();
+  const catOptions = [...new Set([...CAT_ORDER, "Specialty Coffee","Smoothies & Juices","Starters","Classic Favorites","From the Griddle","Egg-Sclusives","Sandwiches & Burgers","Salads","Desserts","Baked Goods","Kids Menu","Sides & Small Plates"].filter(Boolean))]
+    .map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
+  document.getElementById("modalRoot").innerHTML=`<div class="modal-bd" onclick="if(event.target===this)closeItem()"><div class="modal-sheet"><div class="modal-body">
+    <h2 style="font-family:'Playfair Display',serif;color:var(--brown)">➕ Add New Menu Item</h2>
+    <p style="color:var(--muted);font-size:.88rem;margin-top:6px">Add a new food item directly from this menu page. It will show under the selected category.</p>
+    <div class="edit-form">
+      <input id="newName" placeholder="Food name, example: Market Harvest Hash">
+      <input id="newPrice" type="number" step="0.01" placeholder="Price, example: 14.00">
+      <select id="newCat">${catOptions}</select>
+      <input id="newEmoji" placeholder="Emoji, example: 🍳" value="🍽️">
+      <input id="newImageUrl" placeholder="Image URL optional">
+      <textarea id="newDesc" placeholder="Description"></textarea>
+      <textarea id="newIngredients" placeholder="Ingredients, example: potatoes, peppers, onions, eggs"></textarea>
+      <input id="newCalories" placeholder="Calories, example: 520">
+      <input id="newProtein" placeholder="Protein, example: 20g">
+      <input id="newCarbs" placeholder="Carbs, example: 45g">
+      <input id="newFat" placeholder="Fat, example: 18g">
+      <input id="newSodium" placeholder="Sodium, example: 780mg">
+      <textarea id="newAllergens" placeholder="Allergy info, example: contains eggs, dairy"></textarea>
+    </div>
+    <button class="modal-pay" onclick="saveNewMenuItem()">➕ Save New Menu Item</button>
+    <button class="manual-pay-link" onclick="closeItem()">Cancel</button>
+  </div></div></div>`;
+  document.body.style.overflow="hidden";
+}
+
+function saveNewMenuItem(){
+  const name=document.getElementById("newName").value.trim();
+  const price=Number(document.getElementById("newPrice").value||0);
+  const cat=document.getElementById("newCat").value.trim();
+  if(!name){ alert("Please enter food name."); return; }
+  if(!price || price<0){ alert("Please enter a valid price."); return; }
+  const item={
+    id:"custom-"+Date.now()+"-"+Math.random().toString(16).slice(2,6),
+    name, price, cat,
+    emoji:document.getElementById("newEmoji").value.trim()||"🍽️",
+    def:document.getElementById("newImageUrl").value.trim()||FALL,
+    description:document.getElementById("newDesc").value.trim(),
+    ingredients:document.getElementById("newIngredients").value.trim(),
+    calories:document.getElementById("newCalories").value.trim(),
+    protein:document.getElementById("newProtein").value.trim(),
+    carbs:document.getElementById("newCarbs").value.trim(),
+    fat:document.getElementById("newFat").value.trim(),
+    sodium:document.getElementById("newSodium").value.trim(),
+    allergens:document.getElementById("newAllergens").value.trim(),
+    custom:true
+  };
+  const list=getCustomMenuItems();
+  list.unshift(item);
+  saveCustomMenuItems(list);
+  activeCat=cat;
+  closeItem(); buildTabs(); render(); showToast("✅ New menu item added");
+}
+
+function deleteMenuItem(id){
+  if(!isAdminAuthed()) return openAdminLogin();
+  const item=getEditableItem(id) || getCustomMenuItems().find(x=>x.id===id) || MENU.find(x=>x.id===id);
+  const name=item?.name || "this item";
+  if(!confirm(`Delete ${name} from the menu?`)) return;
+  if(String(id).startsWith("custom-")){
+    saveCustomMenuItems(getCustomMenuItems().filter(x=>x.id!==id));
+  }else{
+    const ids=getDeletedMenuIds(); ids.push(id); saveDeletedMenuIds(ids);
+  }
+  const edits=getMenuEdits(); delete edits[id]; saveMenuEdits(edits);
+  deleteItemImg(id);
+  buildTabs(); render(); showToast("🗑️ Menu item deleted");
+}
+
+function restoreDeletedMenuItems(){
+  if(!isAdminAuthed()) return openAdminLogin();
+  if(!confirm("Restore all deleted default menu items on this browser?")) return;
+  localStorage.removeItem(MENU_DELETED_KEY);
+  buildTabs(); render(); showToast("↩️ Deleted menu items restored");
+}
+
 function openEditItem(item){
   if(!isAdminAuthed()) return openAdminLogin();
   const real=applyEdit(item);

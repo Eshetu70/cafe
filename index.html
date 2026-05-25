@@ -21,14 +21,6 @@
       --paypal:#003087;    --paypal2:#0070ba;
     }
 
-    /* ── PayPal Banner ── */
-    .paypal-banner{background:linear-gradient(135deg,var(--paypal) 0%,var(--paypal2) 60%,#1e6b42 100%);color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;border-radius:18px;margin-bottom:24px;box-shadow:0 6px 24px rgba(26,92,56,.22)}
-    .paypal-banner-left{display:flex;align-items:center;gap:14px}
-    .paypal-icon{width:44px;height:44px;background:rgba(255,255,255,.18);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-    .paypal-banner h3{margin:0 0 2px;font-size:1.05rem;font-weight:800}
-    .paypal-banner p{margin:0;font-size:.88rem;opacity:.88}
-    .paypal-top-btn{display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--paypal);font-weight:800;font-size:.92rem;padding:10px 20px;border-radius:999px;text-decoration:none;white-space:nowrap;transition:transform .15s,box-shadow .15s;box-shadow:0 2px 12px rgba(0,0,0,.12);flex-shrink:0}
-    .paypal-top-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,.18)}
 
     /* ── Category strip ── */
     .cat-strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin:32px 0 8px}
@@ -195,18 +187,7 @@
 
 <!-- ═══ SHOP VIEW ═══ -->
 <section class="container hero" id="shopView">
-  <div class="paypal-banner">
-    <div class="paypal-banner-left">
-      <div class="paypal-icon">💳</div>
-      <div>
-        <h3>Order Online — Pay Securely with PayPal</h3>
-        <p>Browse our menu, add food to your cart, review the exact total, then pay safely with PayPal.</p>
-      </div>
-    </div>
-    <a href="#" onclick="openCart();return false;" class="paypal-top-btn">🛒 View Cart &amp; Pay</a>
-  </div>
-
-  <div class="hero-box pro-restaurant-hero">
+<div class="hero-box pro-restaurant-hero">
     <div class="hero-copy">
       <div class="hero-eyebrow">🍽️ Fresh • Local • Made with Purpose</div>
       <h1 class="hero-title">Community food that feels like <span>home.</span></h1>

@@ -21,21 +21,39 @@
     html{scroll-behavior:smooth}
     body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);min-height:100vh}
 
-    /* ── NAV ── */
-    .topbar{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(92,46,14,.07)}
-    .topbar-inner{max-width:1200px;margin:0 auto;padding:0 20px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px}
-    .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--brown)}
-    .brand img{height:42px;width:42px;object-fit:contain}
-    .brand-name{display:block;font-family:'Playfair Display',serif;font-size:1rem;font-weight:700}
-    .brand-sub{display:block;font-size:.72rem;color:var(--muted)}
-    .nav-btns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .nbtn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:999px;font-size:.85rem;font-weight:700;text-decoration:none;border:none;cursor:pointer;transition:transform .15s,box-shadow .15s;white-space:nowrap}
-    .nbtn.outline{background:transparent;border:1.5px solid var(--border);color:var(--brown)}
-    .nbtn.outline:hover{background:var(--warm)}
-    .nbtn.green{background:linear-gradient(135deg,var(--clover),var(--clover2));color:#fff;box-shadow:0 3px 14px rgba(26,92,56,.25)}
-    .nbtn.green:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(26,92,56,.35)}
+    /* ── HEADER / NAV (matches index style + mobile dropdown) ── */
+    .topbar{
+      background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;
+      box-shadow:0 2px 14px rgba(92,46,14,.08);
+    }
+    .topbar-inner{
+      max-width:1200px;margin:0 auto;padding:0 20px;min-height:74px;
+      display:flex;align-items:center;justify-content:space-between;gap:18px;
+    }
+    .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--brown);cursor:pointer;min-width:0}
+    .brand img{height:48px;width:48px;object-fit:contain;border-radius:14px;background:#fff8f0;padding:3px;box-shadow:0 3px 12px rgba(92,46,14,.08)}
+    .brand-name{display:block;font-family:'Playfair Display',serif;font-size:1.08rem;font-weight:900;line-height:1.05;color:var(--brown);white-space:nowrap}
+    .brand-sub{display:block;font-size:.74rem;color:var(--muted);margin-top:3px;white-space:nowrap}
+    .nav-btns{display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+    .nbtn{
+      display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 16px;
+      border-radius:999px;font-size:.88rem;font-weight:900;text-decoration:none;border:none;cursor:pointer;
+      transition:transform .15s,box-shadow .15s,background .15s;white-space:nowrap;font-family:'DM Sans',sans-serif;
+    }
+    .nbtn.outline{background:#fff;border:1.5px solid var(--border);color:var(--brown)}
+    .nbtn.outline:hover{background:var(--warm);transform:translateY(-1px)}
+    .nbtn.green{background:linear-gradient(135deg,var(--clover),var(--clover2));color:#fff;box-shadow:0 3px 14px rgba(0,48,135,.20)}
+    .nbtn.green:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,48,135,.30)}
     .nbtn.edit-mode-btn{background:linear-gradient(135deg,#7c3d12,#c17a36);color:#fff;box-shadow:0 3px 14px rgba(124,61,18,.25)}
     .nbtn.edit-mode-btn.active{background:linear-gradient(135deg,#b91c1c,#ef4444)}
+    .mobile-menu-btn{
+      display:none;width:44px;height:44px;border-radius:14px;border:1.5px solid var(--border);background:#fff8f0;
+      color:var(--brown);font-size:1.35rem;font-weight:900;cursor:pointer;align-items:center;justify-content:center;
+      box-shadow:0 4px 14px rgba(92,46,14,.08);transition:background .15s,transform .15s;
+    }
+    .mobile-menu-btn:hover{background:#fff0dc;transform:translateY(-1px)}
+    .mobile-menu-btn.active{background:var(--brown);color:#fff;border-color:var(--brown)}
+
     /* Admin controls: hidden until authenticated */
     .admin-only{display:none!important}
     body.admin-authed .admin-only{display:inline-flex!important}
@@ -47,7 +65,7 @@
     .admin-menu.open .admin-menu-toggle .chev{transform:rotate(180deg)}
     .admin-dropdown{
       position:absolute;right:0;top:calc(100% + 10px);z-index:220;
-      width:min(92vw,260px);padding:8px;background:#fff;border:1px solid var(--border);
+      width:min(92vw,270px);padding:8px;background:#fff;border:1px solid var(--border);
       border-radius:18px;box-shadow:0 18px 45px rgba(31,19,11,.18);
       display:none;flex-direction:column;gap:6px;animation:fadeIn .16s ease;
     }
@@ -63,6 +81,7 @@
     .admin-dd-btn.danger{color:#b91c1c}
     .admin-dd-btn.danger:hover{background:#fee2e2;border-color:#fecaca}
     .admin-dd-sep{height:1px;background:var(--border);margin:4px 2px}
+
     /* Admin key modal */
     .admin-modal-bd{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s ease}
     .admin-modal-box{background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 24px 60px rgba(0,0,0,.3)}
@@ -293,20 +312,36 @@
     .manual-pay-link{display:inline-flex;justify-content:center;align-items:center;width:100%;margin-top:10px;text-decoration:none;border-radius:999px;padding:12px;font-weight:900;background:#f3f4f6;color:#003087;border:1px solid #d1d5db}
     @media(max-width:600px){.checkout-form,.edit-form{grid-template-columns:1fr}.cart-row{grid-template-columns:1fr}.qty-box{justify-content:flex-start}.order-bar{padding-bottom:calc(12px + env(safe-area-inset-bottom))}}
 
-    @media(max-width:600px){
-      .topbar-inner{height:auto;min-height:64px;padding:10px 12px;gap:10px}
-      .brand-sub,.nbtn.outline{display:none}
-      .brand-name{font-size:.88rem}
-      .nav-btns{gap:6px;justify-content:flex-end;flex:1}
-      .admin-dropdown{position:fixed;top:70px;right:10px;left:10px;width:auto;max-height:calc(100vh - 95px);overflow:auto}
+    @media(max-width:760px){
+      .topbar-inner{min-height:70px;padding:10px 14px;gap:10px;position:relative}
+      .brand img{height:44px;width:44px}
+      .brand-name{font-size:.95rem;max-width:190px;overflow:hidden;text-overflow:ellipsis}
+      .brand-sub{font-size:.68rem;max-width:190px;overflow:hidden;text-overflow:ellipsis}
+      .mobile-menu-btn{display:inline-flex;flex-shrink:0}
+      .nav-btns{
+        position:absolute;left:14px;right:14px;top:calc(100% + 10px);z-index:210;
+        display:none;flex-direction:column;align-items:stretch;gap:8px;padding:12px;
+        background:#fff;border:1px solid var(--border);border-radius:22px;
+        box-shadow:0 22px 50px rgba(31,19,11,.18);
+      }
+      .nav-btns.mobile-open{display:flex}
+      .nav-btns .nbtn,.nav-btns a.nbtn,.nav-btns button.nbtn{width:100%;justify-content:flex-start;padding:13px 15px;font-size:.92rem}
+      .admin-menu{width:100%;display:none!important;flex-direction:column;align-items:stretch}
+      body.admin-authed .admin-menu.admin-only{display:flex!important}
+      .admin-menu-toggle{width:100%;justify-content:space-between!important}
+      .admin-dropdown{position:static;width:100%;margin-top:8px;max-height:calc(100vh - 210px);overflow:auto;box-shadow:none;border-radius:16px;background:#fffaf4}
       .admin-dropdown::before{display:none}
-      .admin-dd-btn{padding:13px 14px;font-size:.9rem}
+      .admin-dd-btn{padding:13px 14px;font-size:.9rem;background:#fff}
       .mgrid{grid-template-columns:1fr 1fr;gap:12px}
       .mcard-name{font-size:.88rem}
       .mcard-body{padding:9px 11px 7px}
       .mcard-btn{font-size:.7rem;padding:9px 5px}
       .hero{padding:38px 16px 34px}
-      .nbtn{padding:7px 12px;font-size:.78rem}
+    }
+    @media(max-width:420px){
+      .brand-name{font-size:.88rem;max-width:150px}
+      .brand-sub{display:none}
+      .mgrid{grid-template-columns:1fr 1fr}
     }
     @media(max-width:380px){.mgrid{grid-template-columns:1fr}}
   </style>
@@ -327,8 +362,9 @@
         <span class="brand-sub">Food with a Purpose · Monroe, NC</span>
       </div>
     </a>
-    <div class="nav-btns">
-      <a href="index.html" class="nbtn outline">← Home</a>
+    <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu(event)" aria-label="Open menu" aria-expanded="false">☰</button>
+    <div class="nav-btns" id="siteNav">
+      <a href="index.html" class="nbtn outline" onclick="closeMobileMenu()">← Home</a>
 
       <!-- Admin login button — visible when NOT authed -->
       <button class="nbtn" id="adminLoginBtn" onclick="openAdminLogin()"
@@ -342,18 +378,18 @@
           ⚙️ Admin Menu <span class="chev">▼</span>
         </button>
         <div class="admin-dropdown" id="adminDropdown">
-          <button class="admin-dd-btn edit-mode-btn" id="editModeBtn" onclick="toggleEditMode();closeAdminDropdown();">✏️ Edit Images</button>
-          <button class="admin-dd-btn" onclick="openAddMenuItem();closeAdminDropdown();">➕ Add Menu Item</button>
-          <button class="admin-dd-btn" onclick="restoreDeletedMenuItems();closeAdminDropdown();">↩️ Restore Deleted Items</button>
-          <button class="admin-dd-btn" onclick="openAdminOrders();closeAdminDropdown();">📦 Owner Orders</button>
-          <button class="admin-dd-btn" onclick="testOwnerEmail();closeAdminDropdown();">📧 Test Owner Email</button>
+          <button class="admin-dd-btn edit-mode-btn" id="editModeBtn" onclick="toggleEditMode();closeAdminDropdown();closeMobileMenu();">✏️ Edit Images</button>
+          <button class="admin-dd-btn" onclick="openAddMenuItem();closeAdminDropdown();closeMobileMenu();">➕ Add Menu Item</button>
+          <button class="admin-dd-btn" onclick="restoreDeletedMenuItems();closeAdminDropdown();closeMobileMenu();">↩️ Restore Deleted Items</button>
+          <button class="admin-dd-btn" onclick="openAdminOrders();closeAdminDropdown();closeMobileMenu();">📦 Owner Orders</button>
+          <button class="admin-dd-btn" onclick="testOwnerEmail();closeAdminDropdown();closeMobileMenu();">📧 Test Owner Email</button>
           <div class="admin-dd-sep"></div>
-          <button class="admin-dd-btn danger" id="adminLogoutBtn" onclick="adminLogout();closeAdminDropdown();">🔓 Logout Admin</button>
+          <button class="admin-dd-btn danger" id="adminLogoutBtn" onclick="adminLogout();closeAdminDropdown();closeMobileMenu();">🔓 Logout Admin</button>
         </div>
       </div>
 
-      <button class="nbtn outline" onclick="openCustomerOrders()">📋 My Orders</button>
-      <button class="nbtn green cart-pill" onclick="openCart()">💳 Checkout <span class="cart-count" id="cartBadge">0</span></button>
+      <button class="nbtn outline" onclick="openCustomerOrders();closeMobileMenu();">📋 My Orders</button>
+      <button class="nbtn green cart-pill" onclick="openCart();closeMobileMenu();">💳 Checkout <span class="cart-count" id="cartBadge">0</span></button>
     </div>
   </div>
 </nav>
@@ -671,6 +707,30 @@ function closeAdminDropdown() {
   const toggle = document.getElementById("adminMenuToggle");
   if (menu) menu.classList.remove("open");
   if (toggle) toggle.setAttribute("aria-expanded", "false");
+}
+
+function toggleMobileMenu(e) {
+  if (e) e.stopPropagation();
+  const nav = document.getElementById("siteNav");
+  const btn = document.getElementById("mobileMenuBtn");
+  const isOpen = nav?.classList.toggle("mobile-open");
+  if (btn) {
+    btn.classList.toggle("active", !!isOpen);
+    btn.textContent = isOpen ? "✕" : "☰";
+    btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  }
+  if (!isOpen) closeAdminDropdown();
+}
+
+function closeMobileMenu() {
+  const nav = document.getElementById("siteNav");
+  const btn = document.getElementById("mobileMenuBtn");
+  if (nav) nav.classList.remove("mobile-open");
+  if (btn) {
+    btn.classList.remove("active");
+    btn.textContent = "☰";
+    btn.setAttribute("aria-expanded", "false");
+  }
 }
 
 function openAdminLogin() {
@@ -1536,11 +1596,14 @@ function resetItemDetails(id){ const edits=getMenuEdits(); delete edits[id]; sav
 
 document.addEventListener("click",e=>{
   const menu = document.getElementById("adminMenu");
+  const nav = document.getElementById("siteNav");
+  const mobileBtn = document.getElementById("mobileMenuBtn");
   if (menu && !menu.contains(e.target)) closeAdminDropdown();
+  if (nav && mobileBtn && !nav.contains(e.target) && !mobileBtn.contains(e.target)) closeMobileMenu();
 });
 
 document.addEventListener("keydown",e=>{
-  if(e.key==="Escape"){ closeItem(); closeMgr(); closeAdminLogin(); closeAdminDropdown(); }
+  if(e.key==="Escape"){ closeItem(); closeMgr(); closeAdminLogin(); closeAdminDropdown(); closeMobileMenu(); }
 });
 
 /* ══ TOAST ══ */

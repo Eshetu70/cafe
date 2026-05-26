@@ -1078,7 +1078,12 @@ async function uploadMenuImageToServer(itemId, dataUrl, closeAfter=false){
     cache:"no-store"
   });
   const data = await res.json().catch(()=>({}));
-  if(!res.ok) throw new Error(data.error || data.details || "Image upload failed");
+  if(!res.ok) {
+    if(res.status === 404) throw new Error("Menu image upload route is missing on Render. Replace server.js with the updated one and redeploy Render.");
+    if(res.status === 401) throw new Error("Admin key is not accepted by the server. Login again with the correct ADMIN_API_KEY.");
+    if(res.status === 413) throw new Error("Image is still too large for the server. Try a smaller photo or redeploy the updated server with 60MB upload support.");
+    throw new Error(data.details || data.error || "Image upload failed");
+  }
   const imageUrl = data.image || data.imageUrl;
   if(!imageUrl) throw new Error("Server did not return image URL");
   setItemImg(itemId, imageUrl);

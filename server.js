@@ -233,6 +233,20 @@ const MenuItem = mongoose.model("CafeMenuItem", menuItemSchema, "cafe_menu_items
 const Order = mongoose.model("CafeOrder", orderSchema, "cafe_orders");
 const Announcement = mongoose.model("CafeAnnouncement", announcementSchema, "cafe_announcements");
 
+const menuGlobalSchema = new mongoose.Schema(
+  {
+    itemId: { type: String, required: true, unique: true, index: true },
+    image: { type: String, default: "" },
+    deleted: { type: Boolean, default: false },
+    isCustom: { type: Boolean, default: false },
+    data: { type: mongoose.Schema.Types.Mixed, default: {} },
+  },
+  { timestamps: true }
+);
+
+const MenuGlobal = mongoose.model("CafeMenuGlobal", menuGlobalSchema, "cafe_menu_global");
+
+
 function baseUrlFromReq(req) {
   if (PUBLIC_BASE_URL) return String(PUBLIC_BASE_URL).replace(/\/+$/, "");
   const proto = (req.headers["x-forwarded-proto"] || req.protocol || "http").toString().split(",")[0].trim();
@@ -285,10 +299,14 @@ function requireAuth(req, res, next) {
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 6 * 1024 * 1024 },
+  limits: { fileSize: 25 * 1024 * 1024 },
   fileFilter: (_, file, cb) => {
-    const ok = ["image/png", "image/jpeg", "image/jpg", "image/webp"].includes(file.mimetype);
-    cb(ok ? null : new Error("Only image files allowed (png/jpg/webp)"), ok);
+    const type = String(file.mimetype || "").toLowerCase();
+    const name = String(file.originalname || "").toLowerCase();
+    const ok =
+      type.startsWith("image/") ||
+      /\.(jpe?g|png|webp|gif|bmp|avif|heic|heif|tiff?)$/i.test(name);
+    cb(ok ? null : new Error("Only image files allowed"), ok);
   },
 });
 
@@ -1206,6 +1224,158 @@ app.post("/api/admin/orders/:id/email", requireAdmin, async (req, res) => {
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: "Email failed", details: e.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Global Menu Page State
+// Saves menu image edits, item edits, custom items, and deleted items in MongoDB
+// so an admin upload/edit from phone is visible on PC and every customer device.
+// ─────────────────────────────────────────────────────────────────────────────
+function safeMenuClientData(doc) {
+  const data = doc?.data && typeof doc.data === "object" ? doc.data : {};
+  return {
+    ...(data || {}),
+    id: String(doc.itemId || data.id || ""),
+    image: doc.image || data.image || data.def || "",
+  };
+}
+
+app.get("/api/menu-global", async (req, res) => {
+  try {
+    const docs = await MenuGlobal.find({}).lean();
+    const images = {};
+    const edits = {};
+    const customItems = [];
+    const deletedIds = [];
+
+    for (const doc of docs) {
+      const id = String(doc.itemId || "");
+      if (!id) continue;
+      if (doc.image) images[id] = doc.image;
+      if (doc.deleted) deletedIds.push(id);
+      if (doc.isCustom) {
+        if (!doc.deleted) customItems.push(safeMenuClientData(doc));
+      } else if (doc.data && Object.keys(doc.data || {}).length) {
+        edits[id] = doc.data;
+      }
+    }
+
+    res.json({ ok: true, images, edits, customItems, deletedIds });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: "Failed to load global menu state", details: e.message });
+  }
+});
+
+app.put("/api/admin/menu-global/item/:id", requireAdmin, async (req, res) => {
+  try {
+    const itemId = String(req.params.id || "").trim();
+    if (!itemId) return res.status(400).json({ error: "item id required" });
+    const data = req.body?.data && typeof req.body.data === "object" ? req.body.data : req.body || {};
+    const update = {
+      itemId,
+      isCustom: String(itemId).startsWith("custom-"),
+      deleted: false,
+      data: { ...data, id: itemId },
+    };
+    const doc = await MenuGlobal.findOneAndUpdate({ itemId }, { $set: update }, { upsert: true, new: true });
+    res.json({ ok: true, item: safeMenuClientData(doc), doc });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: "Save menu item failed", details: e.message });
+  }
+});
+
+app.post("/api/admin/menu-global/custom", requireAdmin, async (req, res) => {
+  try {
+    const body = req.body || {};
+    const itemId = String(body.id || `custom-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`).trim();
+    const data = { ...body, id: itemId, custom: true };
+    const doc = await MenuGlobal.findOneAndUpdate(
+      { itemId },
+      { $set: { itemId, isCustom: true, deleted: false, data, image: body.image || body.def || "" } },
+      { upsert: true, new: true }
+    );
+    res.json({ ok: true, item: safeMenuClientData(doc) });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: "Create custom menu item failed", details: e.message });
+  }
+});
+
+app.delete("/api/admin/menu-global/item/:id/details", requireAdmin, async (req, res) => {
+  try {
+    const itemId = String(req.params.id || "").trim();
+    if (!itemId) return res.status(400).json({ error: "item id required" });
+    const doc = await MenuGlobal.findOneAndUpdate(
+      { itemId },
+      { $set: { itemId }, $unset: { data: "" } },
+      { upsert: true, new: true }
+    );
+    res.json({ ok: true, itemId, doc });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: "Reset menu details failed", details: e.message });
+  }
+});
+
+app.delete("/api/admin/menu-global/item/:id", requireAdmin, async (req, res) => {
+  try {
+    const itemId = String(req.params.id || "").trim();
+    if (!itemId) return res.status(400).json({ error: "item id required" });
+    if (itemId.startsWith("custom-")) {
+      const old = await MenuGlobal.findOne({ itemId });
+      if (old?.image) await deleteImageFromMongoByUrl(old.image);
+      await MenuGlobal.deleteOne({ itemId });
+    } else {
+      await MenuGlobal.findOneAndUpdate(
+        { itemId },
+        { $set: { itemId, deleted: true }, $unset: { data: "" } },
+        { upsert: true, new: true }
+      );
+    }
+    res.json({ ok: true, deleted: true, itemId });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: "Delete menu item failed", details: e.message });
+  }
+});
+
+app.post("/api/admin/menu-global/restore", requireAdmin, async (req, res) => {
+  try {
+    await MenuGlobal.updateMany({ deleted: true, isCustom: { $ne: true } }, { $set: { deleted: false } });
+    res.json({ ok: true, restored: true });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: "Restore menu items failed", details: e.message });
+  }
+});
+
+app.post("/api/admin/menu-global/image/:id", requireAdmin, upload.single("image"), async (req, res) => {
+  try {
+    const itemId = String(req.params.id || "").trim();
+    if (!itemId) return res.status(400).json({ error: "item id required" });
+    if (!req.file) return res.status(400).json({ error: "image file required" });
+
+    const old = await MenuGlobal.findOne({ itemId });
+    const image = await saveImageToMongo(req, req.file);
+    await MenuGlobal.findOneAndUpdate(
+      { itemId },
+      { $set: { itemId, image, deleted: false } },
+      { upsert: true, new: true }
+    );
+    if (old?.image && old.image !== image) await deleteImageFromMongoByUrl(old.image);
+    res.json({ ok: true, itemId, image, imageUrl: image });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: "Upload menu image failed", details: e.message });
+  }
+});
+
+app.delete("/api/admin/menu-global/image/:id", requireAdmin, async (req, res) => {
+  try {
+    const itemId = String(req.params.id || "").trim();
+    if (!itemId) return res.status(400).json({ error: "item id required" });
+    const old = await MenuGlobal.findOne({ itemId });
+    if (old?.image) await deleteImageFromMongoByUrl(old.image);
+    await MenuGlobal.findOneAndUpdate({ itemId }, { $set: { itemId }, $unset: { image: "" } }, { upsert: true });
+    res.json({ ok: true, removed: true, itemId });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: "Remove menu image failed", details: e.message });
   }
 });
 

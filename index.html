@@ -49,7 +49,7 @@
     .hero-trust-card strong{display:block;font-size:1.28rem;margin-bottom:3px}
     .hero-trust-card small{color:rgba(255,255,255,.78);line-height:1.35}
     .hero-feature-card{justify-self:end;width:min(100%,390px);border-radius:30px;background:rgba(255,248,238,.96);color:var(--ckc-dark);padding:16px;box-shadow:0 26px 70px rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.5)}
-    .hero-feature-card img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:22px;display:block;background:#f3e6d7}
+    .hero-feature-card img{width:100%;aspect-ratio:4/3;object-fit:contain;border-radius:22px;display:block;background:#f3e6d7}
     .hero-feature-body{padding:16px 8px 8px}
     .hero-feature-body h3{margin:0 0 6px;font-size:1.35rem}
     .hero-feature-body p{margin:0 0 14px;color:var(--ckc-muted);line-height:1.55}
@@ -148,6 +148,99 @@
     .admin-items-table th{color:#6f3f1f;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}
     @media(max-width:900px){.admin-layout{grid-template-columns:1fr}.admin-image-box{grid-template-columns:1fr}.admin-image-preview{width:100%;height:190px}.admin-three,.admin-two,.admin-order-grid{grid-template-columns:1fr}.admin-menu-card{grid-template-columns:64px 1fr}.admin-menu-actions{grid-column:1/-1;justify-content:flex-start}}
 
+
+
+    /* ── Owner advertisement / announcement posts ── */
+    .promo-section{
+      margin:42px 0 18px;
+      padding:26px clamp(16px,3vw,34px) 30px;
+      border-radius:32px;
+      background:
+        radial-gradient(circle at top left,rgba(255,217,155,.55),transparent 34%),
+        linear-gradient(135deg,#fffaf3 0%,#fff3df 48%,#f7dfbd 100%);
+      border:1px solid rgba(193,122,54,.24);
+      box-shadow:0 22px 60px rgba(92,46,14,.13);
+      position:relative;
+      overflow:hidden;
+    }
+    .promo-section::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(90deg,rgba(111,63,31,.06),transparent 45%,rgba(193,122,54,.10));
+      pointer-events:none;
+    }
+    .promo-head{
+      position:relative;
+      z-index:1;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+      gap:14px;
+      flex-wrap:wrap;
+      margin-bottom:24px;
+    }
+    .promo-head > div{max-width:860px;margin:0 auto}
+    .promo-head h2{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+      margin:0;
+      color:#3b210f;
+      font-size:clamp(2.05rem,5vw,4.25rem);
+      line-height:1.02;
+      font-weight:1000;
+      letter-spacing:-.055em;
+      text-shadow:0 3px 0 rgba(255,255,255,.85),0 12px 26px rgba(111,63,31,.18);
+    }
+    .promo-head h2::before,
+    .promo-head h2::after{
+      content:"✦";
+      color:#c17a36;
+      font-size:clamp(1.2rem,2.5vw,2rem);
+      text-shadow:none;
+    }
+    .promo-head p{
+      display:inline-block;
+      margin:13px auto 0;
+      padding:10px 18px;
+      border-radius:999px;
+      background:rgba(255,255,255,.72);
+      border:1px solid rgba(193,122,54,.20);
+      color:#6f3f1f;
+      line-height:1.45;
+      font-size:clamp(.98rem,2vw,1.12rem);
+      font-weight:800;
+      box-shadow:0 8px 22px rgba(92,46,14,.08);
+    }
+    .promo-grid{position:relative;z-index:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+    .promo-card{background:#fff;border:1px solid #ede0d4;border-radius:24px;overflow:hidden;box-shadow:0 10px 30px rgba(92,46,14,.10);display:flex;flex-direction:column}
+    .promo-card.featured{grid-column:span 2}
+    .promo-media-frame{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#fff7ed,#f3e6d7);border-radius:22px;overflow:hidden;border:1px solid #f0e4d0}
+    /* Owner post media: show the FULL uploaded image/video without cropping corners */
+    .promo-media{width:100%;aspect-ratio:16/9;max-height:430px;object-fit:contain;background:linear-gradient(135deg,#fff7ed,#f3e6d7);display:block;border-radius:22px}
+    .promo-img{width:100%;aspect-ratio:16/9;max-height:430px;object-fit:contain;background:linear-gradient(135deg,#fff7ed,#f3e6d7);display:block;border-radius:22px}
+    .promo-video{width:100%;aspect-ratio:16/9;max-height:430px;object-fit:contain;background:#111;display:block;border-radius:22px}
+    .post-media-preview{width:100%;max-height:300px;object-fit:contain;border-radius:16px;background:#f3e6d7;border:1px solid #ede0d4;display:none;margin-top:10px}
+    .promo-body{padding:17px 18px 18px;display:flex;flex-direction:column;gap:9px;flex:1}
+    .promo-tag{display:inline-flex;width:max-content;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;background:#fff0dc;color:#794719;font-size:.75rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+    .promo-title{margin:0;color:#1f130b;font-size:1.25rem;line-height:1.2;font-weight:900}
+    .promo-text{margin:0;color:#6b5b4c;line-height:1.58;font-size:.94rem}
+    .promo-date{margin-top:auto;font-size:.78rem;color:#8c6e58;font-weight:800}
+    .promo-empty{padding:18px;border:1px dashed #e6b15c;border-radius:18px;background:#fff8f0;color:#6b5b4c;text-align:center}
+    .admin-post-card{border:1px solid #ede0d4;border-radius:18px;padding:14px;background:#fff;margin-bottom:12px;box-shadow:0 6px 18px rgba(92,46,14,.05)}
+    .admin-post-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    @media(max-width:760px){
+      .promo-card.featured{grid-column:span 1}
+      .promo-media,.promo-img,.promo-video{aspect-ratio:16/10}
+      .promo-section{margin:28px 0 12px;padding:22px 14px 24px;border-radius:24px}
+      .promo-head{margin-bottom:18px}
+      .promo-head h2{font-size:clamp(1.85rem,8vw,2.6rem);gap:7px}
+      .promo-head p{font-size:.92rem;border-radius:18px;padding:9px 13px}
+    }
+
     /* ── Responsive ── */
     @media(max-width:860px){
       .hero-box.pro-restaurant-hero{grid-template-columns:1fr;padding:30px 22px;min-height:auto;border-radius:26px}
@@ -227,13 +320,26 @@
     <a href="menu.html?cat=Sides%20%26%20Plates" class="cat-card"><span class="cat-emoji">🍟</span><span class="cat-label">Sides &amp; Plates</span></a>
   </div>
 
-  <div class="filters">
+  <div class="filters" style="display:none;">
     <div class="filters-row">
       <input id="searchBox" placeholder="Search menu item…" oninput="renderMenu()" />
       <select id="categoryFilter" onchange="renderMenu()"><option value="all">All Categories</option><option value="Specialty Coffee">☕ Specialty Coffee</option><option value="Smoothies & Juices">🥤 Smoothies & Juices</option><option value="Starters">🥟 Starters</option><option value="Classic Favorites">🍳 Classic Favorites</option><option value="From the Griddle">🥞 From the Griddle</option><option value="Egg-Sclusives">🥚 Egg-Sclusives</option><option value="Sandwiches & Burgers">🍔 Sandwiches & Burgers</option><option value="Salads">🥗 Salads</option><option value="Desserts">🍰 Desserts</option><option value="Baked Goods">🥐 Baked Goods</option><option value="Kids Menu">🍗 Kids Menu</option><option value="Sides & Plates">🍟 Sides & Plates</option></select>
     </div>
   </div>
-  <div class="grid" id="menuGrid"></div>
+  <!-- ═══ OWNER POSTS / ADVERTISEMENTS ═══ -->
+  <section class="promo-section" id="promoSection" style="display:none;">
+    <div class="promo-head">
+      <div>
+        <h2>Latest Specials & Café Updates</h2>
+        <p>Grand opening posts, discounts, events, and owner announcements.</p>
+      </div>
+    </div>
+    <div class="promo-grid" id="promoGrid"></div>
+  </section>
+
+  <!-- Hidden: removed the old front-page menu item cards from this area. Full ordering stays on menu.html. -->
+  <div class="grid" id="menuGrid" style="display:none;"></div>
+
 </section>
 
 <!-- ═══ ORDERS VIEW ═══ -->
@@ -262,6 +368,7 @@
     <div class="admin-tab-row">
       <button class="admin-tab-pro active" id="tab-menu" onclick="switchAdminTab('menu')">📋 Menu Items</button>
       <button class="admin-tab-pro" id="tab-images" onclick="switchAdminTab('images')">🖼️ Manage Images</button>
+      <button class="admin-tab-pro" id="tab-posts" onclick="switchAdminTab('posts')">📢 Owner Posts</button>
       <button class="admin-tab-pro" id="tab-orders" onclick="switchAdminTab('orders')">📦 Review Customer Orders</button>
     </div>
 
@@ -311,6 +418,39 @@
         </div>
       </div>
     </div>
+
+    <div id="adminTabPosts" style="display:none;margin-top:20px;">
+      <div class="admin-layout">
+        <div class="admin-card-panel">
+          <h3>📢 Add / Edit Owner Advertisement Post</h3>
+          <form id="postForm" class="admin-form-grid" onsubmit="saveOwnerPost(event)">
+            <input type="hidden" id="postId" />
+            <div class="admin-field"><label>Post title</label><input id="postTitle" placeholder="Grand Opening Special" required /></div>
+            <div class="admin-two">
+              <div class="admin-field"><label>Post type</label><select id="postType"><option>Grand Opening</option><option>Discount</option><option>Special Offer</option><option>Event</option><option>Announcement</option></select></div>
+              <div class="admin-field"><label>Status</label><select id="postActive"><option value="true">Show on website</option><option value="false">Hide for now</option></select></div>
+            </div>
+            <div class="admin-field"><label>Message</label><textarea id="postText" placeholder="Example: 10% off this week for first responders and government employees." required></textarea></div>
+            <div class="admin-two">
+              <div class="admin-field"><label>Start date</label><input id="postStart" type="date" /></div>
+              <div class="admin-field"><label>End date</label><input id="postEnd" type="date" /></div>
+            </div>
+            <div class="admin-field"><label>Upload image or video from device</label><input id="postMediaFile" type="file" accept="image/*,video/*" onchange="handlePostMediaFile(this)" /><div class="admin-help">Upload any image or video. Images auto-resize/compress after upload. Videos are saved as files in browser storage and displayed scaled nicely. For every customer phone, connect backend media upload.</div><img id="postMediaPreviewImg" class="post-media-preview" alt="Post media preview"><video id="postMediaPreviewVideo" class="post-media-preview" controls muted></video></div>
+            <input id="postMediaType" type="hidden" value="image" />
+            <div class="admin-field"><label>Image/video URL or uploaded file data</label><input id="postImage" placeholder="Upload file above, or paste https://..." oninput="previewPostMediaFromUrl()" /></div>
+            <div class="admin-field"><label>Button link (optional)</label><input id="postLink" placeholder="menu.html or https://..." /></div>
+            <div class="actions" style="gap:10px;flex-wrap:wrap;"><button type="submit" class="btn primary">💾 Save Post</button><button type="button" class="btn" onclick="resetOwnerPostForm()">Reset</button><button type="button" class="btn" onclick="loadOwnerPosts(true)">Refresh</button></div>
+            <div id="postMsg" class="small"></div>
+          </form>
+        </div>
+        <div class="admin-card-panel">
+          <h3>📋 Existing Owner Posts</h3>
+          <p class="small">Owner can edit, hide/show, or delete any advertisement post anytime.</p>
+          <div id="adminPostList"></div>
+        </div>
+      </div>
+    </div>
+
     <div id="adminTabImages" style="display:none;margin-top:20px;"><div class="admin-card-panel"><h3>🖼️ Menu Item Images</h3><p class="small" style="margin-bottom:16px;">Upload, change, or remove photos for any menu item.</p><div class="img-mgr-stats" id="imgMgrStats"></div><input class="img-mgr-search" id="imgMgrSearch" placeholder="🔍  Search items…" oninput="renderImgMgr()"/><div class="img-mgr-filter" id="imgMgrFilter"></div><div class="img-mgr-grid" id="imgMgrGrid"></div></div></div>
     <div id="adminTabOrders" style="display:none;margin-top:20px;"><div class="admin-card-panel"><h3>📦 Review Customer Orders</h3><p class="small">After admin login, this tab shows all customer orders with full customer details and food items. Admin can keep/review the order, update status, mark delivered, email the customer, or delete delivered/completed orders.</p><div id="adminOrders" class="list"></div></div></div>
   </div>
@@ -515,7 +655,7 @@ function removeItemImg(itemId){
 
 /* ══ ADMIN TABS ══ */
 function switchAdminTab(tab){
-  ["menu","images","orders"].forEach(t=>{
+  ["menu","posts","images","orders"].forEach(t=>{
     const panel = $("adminTab"+t.charAt(0).toUpperCase()+t.slice(1));
     const btn   = $("tab-"+t);
     if(!panel||!btn) return;
@@ -525,6 +665,7 @@ function switchAdminTab(tab){
   });
   if(tab==="images") renderImgMgr();
   if(tab==="orders") loadAdminOrders();
+  if(tab==="posts") loadOwnerPosts(true);
   if(tab==="menu") renderAdminMenuHelpers();
 }
 
@@ -1190,6 +1331,353 @@ async function renderAdminMenuHelpers(){
   wrap.appendChild(helper);
 }
 
+
+
+/* ══ OWNER POSTS / ADVERTISEMENTS ══
+   Large-file friendly version:
+   - Images are automatically resized/compressed before saving.
+   - Images/videos are stored as Blobs in IndexedDB instead of giant base64 text.
+   - Videos are displayed scaled nicely on the page. Browser cannot truly compress/transcode video without a server.
+══════════════════════════════════════ */
+const OWNER_POSTS_KEY = "ckc_owner_posts";
+const OWNER_POSTS_DB = "ckc_owner_posts_db";
+const OWNER_POSTS_STORE = "posts_store";
+const OWNER_POSTS_MEDIA_STORE = "media_store";
+let OWNER_POSTS = [];
+let OWNER_POST_MEDIA_URLS = {};
+
+function loadLocalOwnerPosts(){ try{return JSON.parse(localStorage.getItem(OWNER_POSTS_KEY)||"[]")}catch{return[]} }
+function saveLocalOwnerPosts(posts){ localStorage.setItem(OWNER_POSTS_KEY, JSON.stringify(posts)); }
+
+function openOwnerPostsDB(){
+  return new Promise((resolve,reject)=>{
+    if(!window.indexedDB) return reject(new Error("IndexedDB is not available"));
+    const request = indexedDB.open(OWNER_POSTS_DB, 2);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if(!db.objectStoreNames.contains(OWNER_POSTS_STORE)) db.createObjectStore(OWNER_POSTS_STORE);
+      if(!db.objectStoreNames.contains(OWNER_POSTS_MEDIA_STORE)) db.createObjectStore(OWNER_POSTS_MEDIA_STORE);
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error || new Error("Could not open post storage"));
+  });
+}
+function idbGetOwnerPosts(){
+  return openOwnerPostsDB().then(db => new Promise((resolve,reject)=>{
+    const tx = db.transaction(OWNER_POSTS_STORE, "readonly");
+    const req = tx.objectStore(OWNER_POSTS_STORE).get("posts");
+    req.onsuccess = () => { db.close(); resolve(Array.isArray(req.result) ? req.result : []); };
+    req.onerror = () => { db.close(); reject(req.error || new Error("Could not read posts")); };
+  }));
+}
+function idbSetOwnerPosts(posts){
+  return openOwnerPostsDB().then(db => new Promise((resolve,reject)=>{
+    const tx = db.transaction(OWNER_POSTS_STORE, "readwrite");
+    tx.objectStore(OWNER_POSTS_STORE).put(posts, "posts");
+    tx.oncomplete = () => { db.close(); resolve(true); };
+    tx.onerror = () => { db.close(); reject(tx.error || new Error("Could not save posts")); };
+  }));
+}
+function idbSetPostMedia(mediaId, blob){
+  return openOwnerPostsDB().then(db => new Promise((resolve,reject)=>{
+    const tx = db.transaction(OWNER_POSTS_MEDIA_STORE, "readwrite");
+    tx.objectStore(OWNER_POSTS_MEDIA_STORE).put(blob, mediaId);
+    tx.oncomplete = () => { db.close(); resolve(true); };
+    tx.onerror = () => { db.close(); reject(tx.error || new Error("Could not save media file")); };
+  }));
+}
+function idbGetPostMedia(mediaId){
+  return openOwnerPostsDB().then(db => new Promise((resolve,reject)=>{
+    const tx = db.transaction(OWNER_POSTS_MEDIA_STORE, "readonly");
+    const req = tx.objectStore(OWNER_POSTS_MEDIA_STORE).get(mediaId);
+    req.onsuccess = () => { db.close(); resolve(req.result || null); };
+    req.onerror = () => { db.close(); reject(req.error || new Error("Could not read media file")); };
+  }));
+}
+function idbDeletePostMedia(mediaId){
+  return openOwnerPostsDB().then(db => new Promise((resolve,reject)=>{
+    const tx = db.transaction(OWNER_POSTS_MEDIA_STORE, "readwrite");
+    tx.objectStore(OWNER_POSTS_MEDIA_STORE).delete(mediaId);
+    tx.oncomplete = () => { db.close(); resolve(true); };
+    tx.onerror = () => { db.close(); reject(tx.error || new Error("Could not delete media file")); };
+  }));
+}
+function makeMediaRef(mediaId){ return "idb-media:" + mediaId; }
+function parseMediaRef(src){ return String(src||"").startsWith("idb-media:") ? String(src).slice(10) : ""; }
+function revokeOwnerPostUrls(){
+  Object.values(OWNER_POST_MEDIA_URLS).forEach(url=>{ try{ URL.revokeObjectURL(url); }catch{} });
+  OWNER_POST_MEDIA_URLS = {};
+}
+async function hydrateOwnerPostMediaUrls(posts){
+  revokeOwnerPostUrls();
+  for(const p of posts){
+    const mediaId = parseMediaRef(p.image);
+    if(!mediaId) continue;
+    try{
+      const blob = await idbGetPostMedia(mediaId);
+      if(blob){
+        const url = URL.createObjectURL(blob);
+        OWNER_POST_MEDIA_URLS[mediaId] = url;
+        p._mediaDisplayUrl = url;
+      }
+    }catch(err){ console.warn("Could not load saved media", err); }
+  }
+}
+async function readStoredOwnerPosts(){
+  try{
+    const idbPosts = await idbGetOwnerPosts();
+    if(idbPosts && idbPosts.length) return idbPosts;
+  }catch(err){ console.warn("IndexedDB read failed", err); }
+  return loadLocalOwnerPosts();
+}
+async function writeStoredOwnerPosts(posts){
+  try{ await idbSetOwnerPosts(posts); }
+  catch(err){
+    console.warn("IndexedDB save failed, trying localStorage", err);
+    saveLocalOwnerPosts(posts.map(p => ({...p, image: parseMediaRef(p.image) || String(p.image||"").startsWith("data:") ? "" : p.image})));
+  }
+  try{
+    // Keep small text-only backup. Media stays in IndexedDB.
+    const backup = posts.map(p => ({...p, image: parseMediaRef(p.image) || String(p.image||"").startsWith("data:") ? "" : p.image}));
+    saveLocalOwnerPosts(backup);
+  }catch(err){ console.warn("localStorage backup failed", err); }
+}
+function normalizePost(post){
+  return {
+    _id: post._id || post.id || ("post_" + Date.now() + "_" + Math.random().toString(16).slice(2)),
+    title: post.title || "Announcement",
+    type: post.type || "Announcement",
+    message: post.message || post.text || "",
+    image: post.image || post.mediaUrl || "",
+    mediaType: post.mediaType || (String(post.image||post.mediaUrl||"").startsWith("data:video") ? "video" : "image"),
+    link: post.link || "",
+    active: post.active !== false,
+    startDate: post.startDate || "",
+    endDate: post.endDate || "",
+    createdAt: post.createdAt || new Date().toISOString(),
+    _mediaDisplayUrl: post._mediaDisplayUrl || ""
+  };
+}
+function postIsVisible(post){
+  if(post.active === false) return false;
+  const today = new Date(); today.setHours(0,0,0,0);
+  if(post.startDate && new Date(post.startDate) > today) return false;
+  if(post.endDate && new Date(post.endDate) < today) return false;
+  return true;
+}
+function isPostVideo(p){
+  const src = String(p.image || p._mediaDisplayUrl || "");
+  return p.mediaType === "video" || src.startsWith("data:video") || /\.(mp4|webm|ogg|mov)(\?|#|$)/i.test(src);
+}
+function getPostDisplaySrc(p){
+  if(p._mediaDisplayUrl) return p._mediaDisplayUrl;
+  const src = String(p.image||"");
+  if(!src) return "";
+  if(src.startsWith("data:") || src.startsWith("blob:") || /^https?:\/\//i.test(src)) return src;
+  if(parseMediaRef(src)) return "";
+  return getImageUrl(src);
+}
+function getPostMediaHtml(p){
+  const src = getPostDisplaySrc(p);
+  if(!src) return "";
+  if(isPostVideo(p)){
+    return `<video class="promo-video promo-media" src="${src}" controls playsinline preload="metadata"></video>`;
+  }
+  return `<img class="promo-img promo-media" src="${src}" alt="${escapeHtml(p.title)}" loading="lazy" onerror="handleImageError(this)">`;
+}
+function showPostMediaPreview(src, type){
+  const img = $("postMediaPreviewImg"), vid = $("postMediaPreviewVideo"), typeEl = $("postMediaType");
+  if(typeEl) typeEl.value = type || (String(src).startsWith("data:video") ? "video" : "image");
+  if(img){ img.style.display = "none"; img.removeAttribute("src"); }
+  if(vid){ vid.style.display = "none"; vid.removeAttribute("src"); }
+  if(!src) return;
+  const isVideo = (type === "video") || String(src).startsWith("data:video") || String(src).startsWith("blob:") && type === "video" || /\.(mp4|webm|ogg|mov)(\?|#|$)/i.test(String(src));
+  if(isVideo && vid){ vid.src = src; vid.style.display = "block"; }
+  if(!isVideo && img){ img.src = src; img.style.display = "block"; }
+}
+function canvasToBlob(canvas, type="image/jpeg", quality=0.82){
+  return new Promise(resolve => canvas.toBlob(resolve, type, quality));
+}
+async function resizeImageFile(file, maxWidth=1600, maxHeight=1100, quality=0.82){
+  const bitmap = await createImageBitmap(file);
+  let {width, height} = bitmap;
+  const scale = Math.min(1, maxWidth / width, maxHeight / height);
+  const targetW = Math.max(1, Math.round(width * scale));
+  const targetH = Math.max(1, Math.round(height * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = targetW; canvas.height = targetH;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(bitmap, 0, 0, targetW, targetH);
+  if(bitmap.close) bitmap.close();
+  const out = await canvasToBlob(canvas, "image/jpeg", quality);
+  return out || file;
+}
+async function handlePostMediaFile(input){
+  const file = input.files && input.files[0];
+  if(!file) return;
+  const isImage = file.type.startsWith("image/");
+  const isVideo = file.type.startsWith("video/");
+  if(!isImage && !isVideo){ alert("Please upload an image or video file."); input.value=""; return; }
+
+  const msg = $("postMsg");
+  if(msg){ msg.style.color="#6b5b4c"; msg.textContent = isImage ? "Resizing image and saving preview..." : "Saving video preview..."; }
+
+  try{
+    const mediaId = "media_" + Date.now() + "_" + Math.random().toString(16).slice(2);
+    const blob = isImage ? await resizeImageFile(file, 1600, 1100, 0.82) : file;
+    await idbSetPostMedia(mediaId, blob);
+    const ref = makeMediaRef(mediaId);
+    const previewUrl = URL.createObjectURL(blob);
+    OWNER_POST_MEDIA_URLS[mediaId] = previewUrl;
+    if($("postImage")) $("postImage").value = ref;
+    showPostMediaPreview(previewUrl, isVideo ? "video" : "image");
+    if($("postMediaType")) $("postMediaType").value = isVideo ? "video" : "image";
+    if(msg){
+      msg.style.color="#166534";
+      msg.textContent = isImage
+        ? "Image resized and ready to save. Click Save Post."
+        : "Video ready to save. Click Save Post. Large videos are saved in this browser for testing.";
+    }
+  }catch(err){
+    console.error("Media upload failed", err);
+    alert("Upload failed. This file may be too large for browser storage. For very large videos, use backend upload or YouTube/Vimeo link.");
+    if(msg){ msg.style.color="#b91c1c"; msg.textContent="Upload failed: file may be too large for browser storage."; }
+  }
+}
+function previewPostMediaFromUrl(){
+  const val = ($("postImage")?.value || "").trim();
+  if(parseMediaRef(val)) return; // saved local media ref previews through upload handler / edit loader
+  showPostMediaPreview(val, /\.(mp4|webm|ogg|mov)(\?|#|$)/i.test(val) || val.startsWith("data:video") ? "video" : "image");
+}
+async function loadOwnerPosts(forAdmin=false){
+  try{
+    const json = await fetchJSON(API_BASE + "/api/announcements");
+    OWNER_POSTS = (json.posts || json.announcements || []).map(normalizePost);
+  }catch(err){
+    OWNER_POSTS = (await readStoredOwnerPosts()).map(normalizePost);
+  }
+  await hydrateOwnerPostMediaUrls(OWNER_POSTS);
+  renderOwnerPosts();
+  if(forAdmin) renderAdminOwnerPosts();
+}
+function renderOwnerPosts(){
+  const box = $("promoGrid"), section = $("promoSection");
+  if(!box || !section) return;
+  const posts = OWNER_POSTS.filter(postIsVisible).sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+  section.style.display = posts.length ? "block" : "none";
+  box.innerHTML = posts.map((p,idx)=>{
+    const img = getPostMediaHtml(p);
+    const link = p.link ? `<a href="${escapeHtml(p.link)}" class="btn primary" style="border-radius:999px;width:max-content;margin-top:6px;text-decoration:none;">Learn More</a>` : "";
+    const dates = [p.startDate, p.endDate].filter(Boolean).join(" — ");
+    return `<article class="promo-card ${idx===0?'featured':''}">${img}<div class="promo-body"><span class="promo-tag">📢 ${escapeHtml(p.type)}</span><h3 class="promo-title">${escapeHtml(p.title)}</h3><p class="promo-text">${escapeHtml(p.message)}</p>${link}<div class="promo-date">${dates ? escapeHtml(dates) : 'Posted '+new Date(p.createdAt||Date.now()).toLocaleDateString()}</div></div></article>`;
+  }).join("");
+}
+function resetOwnerPostForm(){
+  ["postId","postTitle","postText","postImage","postLink","postStart","postEnd"].forEach(id=>{ if($(id)) $(id).value=""; });
+  if($("postMediaFile")) $("postMediaFile").value="";
+  showPostMediaPreview("", "image");
+  if($("postType")) $("postType").value="Announcement";
+  if($("postActive")) $("postActive").value="true";
+  if($("postMsg")) $("postMsg").textContent="";
+}
+async function saveOwnerPost(e){
+  if(e) e.preventDefault();
+  const btn = document.querySelector('#postForm button[type="submit"]');
+  const msg = $("postMsg");
+  if(msg){ msg.style.color = "#6b5b4c"; msg.textContent = "Saving post..."; }
+  if(btn){ btn.disabled = true; btn.textContent = "Saving..."; }
+  try{
+    const title = ($("postTitle")?.value || "").trim();
+    const message = ($("postText")?.value || "").trim();
+    if(!title || !message){
+      alert("Please add both post title and message before saving.");
+      if(msg) msg.textContent = "Please add title and message.";
+      return;
+    }
+    const post = normalizePost({
+      _id: ($("postId")?.value || "").trim(),
+      title,
+      type: $("postType")?.value || "Announcement",
+      message,
+      image: ($("postImage")?.value || "").trim(),
+      mediaType: $("postMediaType")?.value || "image",
+      link: ($("postLink")?.value || "").trim(),
+      active: ($("postActive")?.value || "true") === "true",
+      startDate: $("postStart")?.value || "",
+      endDate: $("postEnd")?.value || ""
+    });
+
+    const isEdit = !!($("postId")?.value || "").trim();
+    let savedToBackend = false;
+
+    // Only send normal URLs/text to backend. Local browser Blob references cannot work for all customers.
+    const canSendToBackend = post.image && !parseMediaRef(post.image) && !String(post.image).startsWith("data:");
+    try{
+      await fetchJSON(API_BASE + "/api/admin/announcements" + (isEdit ? "/" + encodeURIComponent(post._id) : ""), {
+        method: isEdit ? "PUT" : "POST",
+        headers: {"Content-Type":"application/json", "x-admin-key": getAdminKey()},
+        body: JSON.stringify(post)
+      });
+      savedToBackend = true;
+    }catch(apiErr){
+      console.warn("Announcement backend not available; saving in browser storage only", apiErr);
+    }
+
+    if(!savedToBackend){
+      const posts = (await readStoredOwnerPosts()).map(normalizePost);
+      const i = posts.findIndex(x => x._id === post._id);
+      if(i >= 0) posts[i] = {...posts[i], ...post}; else posts.unshift(post);
+      await writeStoredOwnerPosts(posts);
+    }
+
+    resetOwnerPostForm();
+    await loadOwnerPosts(true);
+    showToast(savedToBackend ? "✅ Owner post saved to website" : "✅ Owner post saved on this browser");
+    if(msg){
+      msg.style.color = savedToBackend ? "#166534" : "#92400e";
+      msg.textContent = savedToBackend ? "Saved successfully." : "Saved for testing on this browser. For every customer phone, add backend media upload endpoints.";
+    }
+  }catch(err){
+    console.error("Save post failed", err);
+    alert("Save failed: " + (err.message || err));
+    if(msg){ msg.style.color = "#b91c1c"; msg.textContent = "Save failed: " + (err.message || err); }
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = "💾 Save Post"; }
+  }
+}
+async function editOwnerPost(id){
+  const p = OWNER_POSTS.find(x => x._id === id); if(!p) return;
+  $("postId").value=p._id; $("postTitle").value=p.title; $("postType").value=p.type; $("postText").value=p.message;
+  $("postImage").value=p.image||""; $("postLink").value=p.link||""; $("postStart").value=p.startDate||""; $("postEnd").value=p.endDate||""; $("postActive").value=String(p.active!==false);
+  if($("postMediaType")) $("postMediaType").value=p.mediaType||"image";
+  showPostMediaPreview(getPostDisplaySrc(p), p.mediaType||"image");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+async function deleteOwnerPost(id){
+  if(!confirm("Delete this owner advertisement post?")) return;
+  const p = OWNER_POSTS.find(x => x._id === id);
+  try{
+    await fetchJSON(API_BASE + "/api/admin/announcements/" + encodeURIComponent(id), {method:"DELETE", headers:{"x-admin-key":getAdminKey()}});
+  }catch(err){
+    const stored = await readStoredOwnerPosts();
+    await writeStoredOwnerPosts(stored.filter(p => (p._id||p.id) !== id));
+    const mediaId = parseMediaRef(p?.image);
+    if(mediaId){ try{ await idbDeletePostMedia(mediaId); }catch{} }
+  }
+  await loadOwnerPosts(true);
+  showToast("🗑️ Owner post deleted");
+}
+function renderAdminOwnerPosts(){
+  const list = $("adminPostList"); if(!list) return;
+  list.innerHTML = OWNER_POSTS.length ? OWNER_POSTS.map(p=>`
+    <div class="admin-post-card">
+      <b>${escapeHtml(p.title)}</b>
+      <div class="small">${escapeHtml(p.type)} • ${p.mediaType === 'video' ? 'Video' : 'Image/Text'} • ${p.active!==false?'Showing':'Hidden'} ${p.startDate||p.endDate?' • '+escapeHtml([p.startDate,p.endDate].filter(Boolean).join(' — ')):''}</div>
+      <div class="small" style="margin-top:6px;line-height:1.45">${escapeHtml(p.message)}</div>
+      <div class="admin-post-actions"><button class="btn primary" onclick="editOwnerPost('${p._id}')">Edit</button><button class="btn danger" onclick="deleteOwnerPost('${p._id}')">Delete</button></div>
+    </div>`).join("") : `<div class="promo-empty">No owner posts yet. Add grand opening, discount, event, or announcement posts here.</div>`;
+}
+
 /* ══ SECRET ADMIN + MOBILE MENU ══ */
 let secretAdminClicks=0,secretAdminTimer=null;
 function handleSecretAdminClick(){ secretAdminClicks++; clearTimeout(secretAdminTimer); secretAdminTimer=setTimeout(()=>{secretAdminClicks=0},1500); if(secretAdminClicks>=5){secretAdminClicks=0;openAdmin()} }
@@ -1212,10 +1700,20 @@ document.addEventListener("click",function(e){
   if(nav.classList.contains("open")&&!nav.contains(e.target)&&!btn.contains(e.target)) closeMobileMenu();
 });
 
+
+window.addEventListener("DOMContentLoaded", () => {
+  const form = $("postForm");
+  if(form && !form.dataset.boundSave){
+    form.dataset.boundSave = "true";
+    form.addEventListener("submit", saveOwnerPost);
+  }
+});
+
 /* ══ BOOT ══ */
 saveCart();
 updateAuthUI();
 loadMenu();
+loadOwnerPosts(false);
 </script>
 </body>
 </html>

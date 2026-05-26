@@ -143,7 +143,7 @@
     .mcard{background:var(--card);border-radius:20px;border:1px solid var(--border);overflow:hidden;display:flex;flex-direction:column;transition:transform .2s,box-shadow .2s}
     .mcard:not(.edit-active):hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(92,46,14,.13)}
     .mcard-img{position:relative;aspect-ratio:4/3;overflow:hidden;background:#f3e6d7}
-    .mcard-img img{width:100%;height:100%;object-fit:cover;transition:transform .35s;display:block}
+    .mcard-img img{width:100%;height:100%;object-fit:contain;transition:transform .35s;display:block;background:#fff8f0;padding:6px}
     .mcard:not(.edit-active):hover .mcard-img img{transform:scale(1.05)}
     .mcard-cat{position:absolute;top:9px;left:9px;background:rgba(255,255,255,.93);color:var(--brown);font-size:.68rem;font-weight:800;padding:3px 9px;border-radius:999px;backdrop-filter:blur(4px);text-transform:capitalize;z-index:2}
     .mcard-unavail{position:absolute;top:9px;right:9px;background:rgba(160,0,0,.85);color:#fff;font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:999px;z-index:2}
@@ -193,7 +193,7 @@
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
     .modal-sheet{background:#fff;border-radius:28px 28px 0 0;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;animation:slideUp .28s cubic-bezier(.22,1,.36,1)}
     @keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
-    .modal-hero{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:28px 28px 0 0;display:block;background:#f3e6d7}
+    .modal-hero{width:100%;aspect-ratio:16/9;object-fit:contain;background:#fff8f0;border-radius:28px 28px 0 0;display:block;background:#f3e6d7}
     .modal-close-btn{position:absolute;top:13px;right:13px;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.42);color:#fff;border:none;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center}
     .modal-body{padding:18px 22px 30px}
     .modal-cat-pill{display:inline-block;padding:3px 11px;border-radius:999px;background:#fff0dc;color:#794719;font-size:.72rem;font-weight:800;text-transform:capitalize;margin-bottom:8px}
@@ -208,7 +208,7 @@
     .img-mgr h3{font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:4px}
     .img-mgr .sub{font-size:.82rem;color:var(--muted);margin-bottom:18px}
     .img-mgr-preview{
-      width:100%;aspect-ratio:16/9;border-radius:16px;object-fit:cover;
+      width:100%;aspect-ratio:16/9;border-radius:16px;object-fit:contain;
       background:#f3e6d7;display:block;margin-bottom:16px;border:2px dashed var(--border);
     }
     .img-mgr-preview.has-img{border-style:solid;border-color:var(--caramel)}
@@ -350,7 +350,7 @@
 <body>
 
 <!-- Hidden file input for image uploads -->
-<input type="file" id="imgFileInput" accept="image/*"/>
+<input type="file" id="imgFileInput" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp,.avif,.heic,.heif,.tif,.tiff"/>
 
 <!-- ══ NAV ══ -->
 <nav class="topbar">
@@ -966,30 +966,100 @@ function triggerUpload(itemId) {
   fi.click();
 }
 
+/* ══ UNIVERSAL IMAGE UPLOAD + AUTO RESIZE ══
+   This accepts normal phone/camera photos and screenshots, then compresses them
+   before saving so large images do not fail in browser storage. */
+const IMAGE_EXT_OK = /\.(jpe?g|png|webp|gif|bmp|avif|heic|heif|tiff?)$/i;
+function isSupportedImageFile(file){
+  return !!file && ((file.type || "").startsWith("image/") || IMAGE_EXT_OK.test(file.name || ""));
+}
+function readFileAsDataURL(file){
+  return new Promise((resolve,reject)=>{
+    const r = new FileReader();
+    r.onload = e => resolve(e.target.result);
+    r.onerror = () => reject(new Error("Could not read image."));
+    r.readAsDataURL(file);
+  });
+}
+function loadImageFromDataURL(dataUrl){
+  return new Promise((resolve,reject)=>{
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("This image type is not supported by this browser."));
+    img.src = dataUrl;
+  });
+}
+async function resizeImageFile(file, maxSize=1600, quality=.78){
+  if (!isSupportedImageFile(file)) throw new Error("Please choose an image file.");
+  const rawDataUrl = await readFileAsDataURL(file);
+
+  // Some browsers cannot decode HEIC/HEIF. If browser cannot decode it, we keep the
+  // original data as fallback, but display may depend on browser support.
+  let img;
+  try { img = await loadImageFromDataURL(rawDataUrl); }
+  catch(err) {
+    if (/\.(heic|heif)$/i.test(file.name || "")) {
+      alert("This looks like HEIC/HEIF. Some browsers cannot display it. On iPhone, choose Most Compatible/JPG or upload PNG/JPG for best results.");
+    }
+    return rawDataUrl;
+  }
+
+  const w = img.naturalWidth || img.width;
+  const h = img.naturalHeight || img.height;
+  if (!w || !h) return rawDataUrl;
+
+  const scale = Math.min(1, maxSize / Math.max(w, h));
+  const nw = Math.max(1, Math.round(w * scale));
+  const nh = Math.max(1, Math.round(h * scale));
+
+  const canvas = document.createElement("canvas");
+  canvas.width = nw;
+  canvas.height = nh;
+  const ctx = canvas.getContext("2d", { alpha:false });
+  ctx.fillStyle = "#fff8f0";
+  ctx.fillRect(0,0,nw,nh);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(img, 0, 0, nw, nh);
+
+  let out = canvas.toDataURL("image/webp", quality);
+  // Safari fallback if webp output is not supported
+  if (!out || !out.startsWith("data:image/webp")) out = canvas.toDataURL("image/jpeg", quality);
+  return out;
+}
+function saveUploadedImageToItem(itemId, dataUrl, closeAfter=false){
+  try { setItemImg(itemId, dataUrl); }
+  catch(err) {
+    alert("Image is still too large for browser storage. Try a smaller photo or use backend/server upload for large media.");
+    return;
+  }
+  const imgEl = document.getElementById("img-"+itemId);
+  if (imgEl) imgEl.src = dataUrl;
+  const prev = document.getElementById("mgrPreview");
+  if (prev) { prev.src = dataUrl; prev.classList.add("has-img"); }
+  const cardEl = document.getElementById("card-"+itemId);
+  if (cardEl) {
+    const item = MENU.find(i=>i.id===itemId);
+    if (item) cardEl.outerHTML = cardHtml(item);
+  }
+  showToast("✅ Photo uploaded, resized, and saved!");
+  if (closeAfter) closeMgr();
+}
+async function processAndSaveImage(file, itemId, closeAfter=false){
+  try {
+    showToast("⏳ Optimizing image…");
+    const dataUrl = await resizeImageFile(file);
+    saveUploadedImageToItem(itemId, dataUrl, closeAfter);
+  } catch(err) {
+    alert(err.message || "Could not upload this image.");
+  }
+}
+
 function handleFileChosen(input) {
   if (!input.files || !input.files[0] || !pendingUploadId) return;
-  const file = input.files[0];
-  // Validate
-  if (!file.type.startsWith("image/")) { alert("Please choose an image file."); return; }
-  if (file.size > 5 * 1024 * 1024) { alert("Image must be under 5MB."); return; }
-
-  const reader = new FileReader();
-  reader.onload = e => {
-    const dataUrl = e.target.result;
-    setItemImg(pendingUploadId, dataUrl);
-    // Live-update the card image without full re-render
-    const imgEl = document.getElementById("img-"+pendingUploadId);
-    if (imgEl) imgEl.src = dataUrl;
-    // Re-render just that card
-    const cardEl = document.getElementById("card-"+pendingUploadId);
-    if (cardEl) {
-      const item = MENU.find(i=>i.id===pendingUploadId);
-      if (item) cardEl.outerHTML = cardHtml(item);
-    }
-    pendingUploadId = null;
-    showToast("✅ Photo saved!");
-  };
-  reader.readAsDataURL(file);
+  const itemId = pendingUploadId;
+  pendingUploadId = null;
+  processAndSaveImage(input.files[0], itemId, false);
 }
 
 function confirmDelete(itemId) {
@@ -1034,7 +1104,7 @@ function openMgr(itemId) {
             ondrop="handleDrop(event,'${itemId}')">
             <div class="uz-icon">📷</div>
             <p><strong>Click to upload</strong> or drag &amp; drop a photo here</p>
-            <p>JPG, PNG, WEBP · Max 5MB</p>
+            <p>Upload phone photos, camera photos, screenshots, PNG, JPG, WEBP, AVIF, GIF, BMP, HEIC/HEIF*</p>
           </div>
 
           <div class="img-action-row">
@@ -1065,23 +1135,7 @@ function triggerMgrUpload(itemId) {
 
 function handleMgrFileChosen(input, itemId) {
   if (!input.files || !input.files[0]) return;
-  const file = input.files[0];
-  if (!file.type.startsWith("image/")) { alert("Please choose an image file."); return; }
-  if (file.size > 5 * 1024 * 1024) { alert("Image must be under 5MB."); return; }
-  const reader = new FileReader();
-  reader.onload = e => {
-    const dataUrl = e.target.result;
-    setItemImg(itemId, dataUrl);
-    // Update modal preview
-    const prev = document.getElementById("mgrPreview");
-    if (prev) { prev.src = dataUrl; prev.classList.add("has-img"); }
-    // Update card
-    const cardEl = document.getElementById("card-"+itemId);
-    if (cardEl) { const it=MENU.find(i=>i.id===itemId); if(it) cardEl.outerHTML=cardHtml(it); }
-    showToast("✅ Photo saved!");
-    closeMgr();
-  };
-  reader.readAsDataURL(file);
+  processAndSaveImage(input.files[0], itemId, true);
 }
 
 function handleDrop(event, itemId) {
@@ -1089,20 +1143,7 @@ function handleDrop(event, itemId) {
   document.getElementById("dropZone")?.classList.remove("drag");
   const file = event.dataTransfer.files[0];
   if (!file) return;
-  if (!file.type.startsWith("image/")) { alert("Please drop an image file."); return; }
-  if (file.size > 5 * 1024 * 1024) { alert("Image must be under 5MB."); return; }
-  const reader = new FileReader();
-  reader.onload = e => {
-    const dataUrl = e.target.result;
-    setItemImg(itemId, dataUrl);
-    const prev = document.getElementById("mgrPreview");
-    if (prev) { prev.src=dataUrl; prev.classList.add("has-img"); }
-    const cardEl = document.getElementById("card-"+itemId);
-    if (cardEl){ const it=MENU.find(i=>i.id===itemId); if(it) cardEl.outerHTML=cardHtml(it); }
-    showToast("✅ Photo saved!");
-    closeMgr();
-  };
-  reader.readAsDataURL(file);
+  processAndSaveImage(file, itemId, true);
 }
 
 function deleteMgr(itemId) {

@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -452,7 +453,37 @@ const MENU_DELETED_KEY = "ckc_deleted_menu_items";
 const PAYPAL_CLIENT_ID = "ARyqZnmkozCfqLh13N7pKvwmkhtrEYFsP3nu87sMcLBBeO_liUzdVjLOs_reT3oxLle4G2g_Le4vjEQH";
 const CLOVER = PAYPAL_MANUAL_LINK;
 const FALL   = "https://images.unsplash.com/photo-1543353071-10c8ba85a904?auto=format&fit=crop&w=900&q=70";
-const IMG_STORE_KEY = "ckc_item_images"; // localStorage key for custom images
+const IMG_STORE_KEY = "ckc_item_images"; // legacy key kept only for old browsers
+let SERVER_MENU_IMAGES = {};
+let SERVER_MENU_EDITS = {};
+let SERVER_CUSTOM_ITEMS = [];
+let SERVER_DELETED_IDS = [];
+
+async function loadGlobalMenuState(){
+  try{
+    const res = await fetch(API + "/api/menu-global?ts=" + Date.now(), { cache:"no-store" });
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(data.error || data.details || "Could not load menu state");
+    SERVER_MENU_IMAGES = data.images || {};
+    SERVER_MENU_EDITS = data.edits || {};
+    SERVER_CUSTOM_ITEMS = Array.isArray(data.customItems) ? data.customItems : [];
+    SERVER_DELETED_IDS = Array.isArray(data.deletedIds) ? data.deletedIds : [];
+  }catch(err){
+    console.warn("Menu global state failed, using defaults:", err.message);
+    SERVER_MENU_IMAGES = {};
+    SERVER_MENU_EDITS = {};
+    SERVER_CUSTOM_ITEMS = [];
+    SERVER_DELETED_IDS = [];
+  }
+}
+
+async function adminJson(url, options={}){
+  const headers = { "Content-Type":"application/json", "x-admin-key": getAdminKey(), ...(options.headers || {}) };
+  const res = await fetch(url, { ...options, headers, cache:"no-store" });
+  const data = await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(data.error || data.details || "Request failed");
+  return data;
+}
 
 /* ── Default category images ── */
 const CAT_IMGS = {
@@ -618,30 +649,29 @@ const CAT_ORDER = [
   "Sandwiches & Burgers","Sides & Small Plates","Kids Menu","Desserts","Baked Goods"
 ];
 
-/* ══ IMAGE STORAGE ══ */
-function loadImgStore() {
-  try { return JSON.parse(localStorage.getItem(IMG_STORE_KEY) || "{}"); }
-  catch { return {}; }
-}
-function saveImgStore(store) {
-  localStorage.setItem(IMG_STORE_KEY, JSON.stringify(store));
-}
+/* ══ IMAGE STORAGE — GLOBAL SERVER, NOT LOCAL STORAGE ══ */
+function loadImgStore() { return SERVER_MENU_IMAGES || {}; }
+function saveImgStore(store) { SERVER_MENU_IMAGES = store || {}; }
 function getItemImg(id) {
-  const store = loadImgStore();
-  return store[id] || null; // null = use default
+  return (SERVER_MENU_IMAGES || {})[id] || null;
 }
-function setItemImg(id, dataUrl) {
-  const store = loadImgStore();
-  store[id] = dataUrl;
-  saveImgStore(store);
+function setItemImg(id, imageUrl) {
+  SERVER_MENU_IMAGES[id] = imageUrl;
 }
-function deleteItemImg(id) {
-  const store = loadImgStore();
-  delete store[id];
-  saveImgStore(store);
+async function deleteItemImg(id) {
+  delete SERVER_MENU_IMAGES[id];
+  if (isAdminAuthed()) {
+    await fetch(API + "/api/admin/menu-global/image/" + encodeURIComponent(id), {
+      method:"DELETE",
+      headers:{ "x-admin-key": getAdminKey() },
+      cache:"no-store"
+    });
+  }
 }
 function resolveImg(item) {
-  return getItemImg(item.id) || item.def || FALL;
+  const custom = getItemImg(item.id);
+  const edited = applyEdit ? applyEdit(item) : item;
+  return custom || edited.image || edited.def || item.def || FALL;
 }
 
 /* ══ ADMIN AUTH ══ */
@@ -1027,29 +1057,51 @@ async function resizeImageFile(file, maxSize=1600, quality=.78){
   if (!out || !out.startsWith("data:image/webp")) out = canvas.toDataURL("image/jpeg", quality);
   return out;
 }
-function saveUploadedImageToItem(itemId, dataUrl, closeAfter=false){
-  try { setItemImg(itemId, dataUrl); }
-  catch(err) {
-    alert("Image is still too large for browser storage. Try a smaller photo or use backend/server upload for large media.");
-    return;
-  }
+function dataURLToBlob(dataUrl){
+  const parts = String(dataUrl).split(",");
+  const meta = parts[0] || "";
+  const mime = (meta.match(/data:([^;]+)/)||[])[1] || "image/jpeg";
+  const bin = atob(parts[1] || "");
+  const arr = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+  return new Blob([arr], { type:mime });
+}
+
+async function uploadMenuImageToServer(itemId, dataUrl, closeAfter=false){
+  const blob = dataURLToBlob(dataUrl);
+  const fd = new FormData();
+  fd.append("image", blob, "menu-image.webp");
+  const res = await fetch(API + "/api/admin/menu-global/image/" + encodeURIComponent(itemId), {
+    method:"POST",
+    headers:{ "x-admin-key": getAdminKey() },
+    body: fd,
+    cache:"no-store"
+  });
+  const data = await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(data.error || data.details || "Image upload failed");
+  const imageUrl = data.image || data.imageUrl;
+  if(!imageUrl) throw new Error("Server did not return image URL");
+  setItemImg(itemId, imageUrl);
+
   const imgEl = document.getElementById("img-"+itemId);
-  if (imgEl) imgEl.src = dataUrl;
+  if (imgEl) imgEl.src = imageUrl;
   const prev = document.getElementById("mgrPreview");
-  if (prev) { prev.src = dataUrl; prev.classList.add("has-img"); }
+  if (prev) { prev.src = imageUrl; prev.classList.add("has-img"); }
   const cardEl = document.getElementById("card-"+itemId);
   if (cardEl) {
-    const item = MENU.find(i=>i.id===itemId);
+    const item = getEditableItem(itemId) || MENU.find(i=>i.id===itemId);
     if (item) cardEl.outerHTML = cardHtml(item);
   }
-  showToast("✅ Photo uploaded, resized, and saved!");
+  showToast("✅ Photo uploaded to server and visible on all devices!");
   if (closeAfter) closeMgr();
 }
+
 async function processAndSaveImage(file, itemId, closeAfter=false){
   try {
-    showToast("⏳ Optimizing image…");
+    if(!isAdminAuthed()) return openAdminLogin();
+    showToast("⏳ Optimizing and uploading image…");
     const dataUrl = await resizeImageFile(file);
-    saveUploadedImageToItem(itemId, dataUrl, closeAfter);
+    await uploadMenuImageToServer(itemId, dataUrl, closeAfter);
   } catch(err) {
     alert(err.message || "Could not upload this image.");
   }
@@ -1062,11 +1114,11 @@ function handleFileChosen(input) {
   processAndSaveImage(input.files[0], itemId, false);
 }
 
-function confirmDelete(itemId) {
+async function confirmDelete(itemId) {
   if (!isAdminAuthed()) { openAdminLogin(); return; }
   const item = MENU.find(i=>i.id===itemId);
   if (!confirm(`Remove the custom photo for "${item?.name||itemId}" and revert to the default image?`)) return;
-  deleteItemImg(itemId);
+  await deleteItemImg(itemId);
   const cardEl = document.getElementById("card-"+itemId);
   if (cardEl) {
     const it = MENU.find(i=>i.id===itemId);
@@ -1116,8 +1168,7 @@ function openMgr(itemId) {
           </div>
 
           <div class="img-note">
-            💡 <strong>Photos are saved in your browser.</strong> They stay saved across visits on this device.
-            To update photos on a different device, upload the image again on that device.
+            💡 <strong>Photos are saved on the server.</strong> Once admin uploads, the image shows on phones, tablets, and computers.
           </div>
         </div>
       </div>
@@ -1146,10 +1197,10 @@ function handleDrop(event, itemId) {
   processAndSaveImage(file, itemId, true);
 }
 
-function deleteMgr(itemId) {
+async function deleteMgr(itemId) {
   const item = MENU.find(i=>i.id===itemId);
   if (!confirm(`Reset photo for "${item?.name||itemId}" to the default?`)) return;
-  deleteItemImg(itemId);
+  await deleteItemImg(itemId);
   const cardEl = document.getElementById("card-"+itemId);
   if (cardEl){ const it=MENU.find(i=>i.id===itemId); if(it) cardEl.outerHTML=cardHtml(it); }
   showToast("🗑️ Photo reset to default");
@@ -1163,12 +1214,12 @@ function closeMgr() {
 
 
 /* ══ MENU EDITS, CART, CHECKOUT, ORDERS ══ */
-function getMenuEdits(){ try{return JSON.parse(localStorage.getItem(MENU_EDIT_KEY)||"{}")}catch{return{}} }
-function saveMenuEdits(edits){ localStorage.setItem(MENU_EDIT_KEY, JSON.stringify(edits)); }
-function getCustomMenuItems(){ try{return JSON.parse(localStorage.getItem(MENU_CUSTOM_KEY)||"[]")}catch{return[]} }
-function saveCustomMenuItems(items){ localStorage.setItem(MENU_CUSTOM_KEY, JSON.stringify(items||[])); }
-function getDeletedMenuIds(){ try{return JSON.parse(localStorage.getItem(MENU_DELETED_KEY)||"[]")}catch{return[]} }
-function saveDeletedMenuIds(ids){ localStorage.setItem(MENU_DELETED_KEY, JSON.stringify([...new Set(ids||[])])); }
+function getMenuEdits(){ return SERVER_MENU_EDITS || {}; }
+function saveMenuEdits(edits){ SERVER_MENU_EDITS = edits || {}; }
+function getCustomMenuItems(){ return SERVER_CUSTOM_ITEMS || []; }
+function saveCustomMenuItems(items){ SERVER_CUSTOM_ITEMS = items || []; }
+function getDeletedMenuIds(){ return SERVER_DELETED_IDS || []; }
+function saveDeletedMenuIds(ids){ SERVER_DELETED_IDS = [...new Set(ids||[])]; }
 function applyEdit(item){ return {...item, ...(getMenuEdits()[item.id]||{})}; }
 function getEditableMenu(){
   const deleted = new Set(getDeletedMenuIds());
@@ -1533,7 +1584,7 @@ function openAddMenuItem(){
   document.body.style.overflow="hidden";
 }
 
-function saveNewMenuItem(){
+async function saveNewMenuItem(){
   const name=document.getElementById("newName").value.trim();
   const price=Number(document.getElementById("newPrice").value||0);
   const cat=document.getElementById("newCat").value.trim();
@@ -1554,33 +1605,60 @@ function saveNewMenuItem(){
     allergens:document.getElementById("newAllergens").value.trim(),
     custom:true
   };
-  const list=getCustomMenuItems();
-  list.unshift(item);
-  saveCustomMenuItems(list);
-  activeCat=cat;
-  closeItem(); buildTabs(); render(); showToast("✅ New menu item added");
+  try{
+    const data = await adminJson(API + "/api/admin/menu-global/custom", {
+      method:"POST",
+      body: JSON.stringify(item)
+    });
+    const saved = data.item || item;
+    const list=getCustomMenuItems().filter(x=>x.id!==saved.id);
+    list.unshift(saved);
+    saveCustomMenuItems(list);
+    activeCat=saved.cat || cat;
+    closeItem(); buildTabs(); render(); showToast("✅ New menu item saved to server");
+  }catch(err){
+    alert("Could not save new item to server: " + err.message);
+  }
 }
 
-function deleteMenuItem(id){
+async function deleteMenuItem(id){
   if(!isAdminAuthed()) return openAdminLogin();
   const item=getEditableItem(id) || getCustomMenuItems().find(x=>x.id===id) || MENU.find(x=>x.id===id);
   const name=item?.name || "this item";
-  if(!confirm(`Delete ${name} from the menu?`)) return;
-  if(String(id).startsWith("custom-")){
-    saveCustomMenuItems(getCustomMenuItems().filter(x=>x.id!==id));
-  }else{
-    const ids=getDeletedMenuIds(); ids.push(id); saveDeletedMenuIds(ids);
+  if(!confirm(`Delete ${name} from the menu for all devices?`)) return;
+  try{
+    await fetch(API + "/api/admin/menu-global/item/" + encodeURIComponent(id), {
+      method:"DELETE",
+      headers:{ "x-admin-key": getAdminKey() },
+      cache:"no-store"
+    }).then(async res=>{
+      const data=await res.json().catch(()=>({}));
+      if(!res.ok) throw new Error(data.error||data.details||"Delete failed");
+    });
+
+    if(String(id).startsWith("custom-")){
+      saveCustomMenuItems(getCustomMenuItems().filter(x=>x.id!==id));
+    }else{
+      const ids=getDeletedMenuIds(); ids.push(id); saveDeletedMenuIds(ids);
+    }
+    const edits=getMenuEdits(); delete edits[id]; saveMenuEdits(edits);
+    delete SERVER_MENU_IMAGES[id];
+    buildTabs(); render(); showToast("🗑️ Menu item deleted on all devices");
+  }catch(err){
+    alert("Could not delete item: " + err.message);
   }
-  const edits=getMenuEdits(); delete edits[id]; saveMenuEdits(edits);
-  deleteItemImg(id);
-  buildTabs(); render(); showToast("🗑️ Menu item deleted");
 }
 
-function restoreDeletedMenuItems(){
+async function restoreDeletedMenuItems(){
   if(!isAdminAuthed()) return openAdminLogin();
-  if(!confirm("Restore all deleted default menu items on this browser?")) return;
-  localStorage.removeItem(MENU_DELETED_KEY);
-  buildTabs(); render(); showToast("↩️ Deleted menu items restored");
+  if(!confirm("Restore all deleted default menu items for all devices?")) return;
+  try{
+    await adminJson(API + "/api/admin/menu-global/restore", { method:"POST", body: JSON.stringify({}) });
+    SERVER_DELETED_IDS = [];
+    buildTabs(); render(); showToast("↩️ Deleted menu items restored on all devices");
+  }catch(err){
+    alert("Could not restore items: " + err.message);
+  }
 }
 
 function openEditItem(item){
@@ -1614,7 +1692,7 @@ function openEditItem(item){
   </div></div></div>`;
   document.body.style.overflow="hidden";
 }
-function saveItemDetails(id){
+async function saveItemDetails(id){
   const edits=getMenuEdits();
   edits[id]={
     name:document.getElementById("editName").value.trim(),
@@ -1630,10 +1708,30 @@ function saveItemDetails(id){
     sodium:document.getElementById("editSodium").value.trim(),
     allergens:document.getElementById("editAllergens").value.trim()
   };
-  saveMenuEdits(edits);
-  closeItem(); buildTabs(); render(); showToast("✅ Menu details updated");
+  try{
+    const data = await adminJson(API + "/api/admin/menu-global/item/" + encodeURIComponent(id), {
+      method:"PUT",
+      body: JSON.stringify({ data: edits[id] })
+    });
+    saveMenuEdits(edits);
+    closeItem(); buildTabs(); render(); showToast("✅ Menu details saved to server");
+  }catch(err){
+    alert("Could not save item details: " + err.message);
+  }
 }
-function resetItemDetails(id){ const edits=getMenuEdits(); delete edits[id]; saveMenuEdits(edits); closeItem(); buildTabs(); render(); showToast("↩️ Item reset"); }
+async function resetItemDetails(id){
+  try{
+    const edits=getMenuEdits(); delete edits[id]; saveMenuEdits(edits);
+    await fetch(API + "/api/admin/menu-global/item/" + encodeURIComponent(id) + "/details", {
+      method:"DELETE",
+      headers:{ "x-admin-key": getAdminKey() },
+      cache:"no-store"
+    });
+    closeItem(); buildTabs(); render(); showToast("↩️ Item reset on all devices");
+  }catch(err){
+    alert("Could not reset item: " + err.message);
+  }
+}
 
 document.addEventListener("click",e=>{
   const menu = document.getElementById("adminMenu");
@@ -1664,11 +1762,14 @@ function showToast(msg) {
 }
 
 /* ══ BOOT ══ */
-activeCat = normalizeCategoryFromUrl();
-buildTabs();
-render();
-applyAdminUI(); // show/hide admin controls based on saved session
-updateCartBadge();
+(async function bootMenu(){
+  activeCat = normalizeCategoryFromUrl();
+  await loadGlobalMenuState();
+  buildTabs();
+  render();
+  applyAdminUI(); // show/hide admin controls based on saved session
+  updateCartBadge();
+})();
 </script>
 </body>
 </html>

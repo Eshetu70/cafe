@@ -108,7 +108,8 @@ const corsOptions = {
     return cb(new Error("CORS blocked: " + origin));
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "x-admin-key"],
+  allowedHeaders: ["Content-Type", "Authorization", "x-admin-key", "Range"],
+  exposedHeaders: ["Content-Range", "Accept-Ranges", "Content-Length", "Content-Type"],
   credentials: true,
   optionsSuccessStatus: 204,
 };
@@ -210,9 +211,27 @@ const orderSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+
+const announcementSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true, trim: true },
+    type: { type: String, default: "Announcement", trim: true },
+    message: { type: String, required: true, default: "" },
+    mediaUrl: { type: String, default: "" },
+    mediaType: { type: String, enum: ["image", "video", "none"], default: "none" },
+    link: { type: String, default: "" },
+    active: { type: Boolean, default: true },
+    startDate: { type: String, default: "" },
+    endDate: { type: String, default: "" },
+    sortOrder: { type: Number, default: 0 },
+  },
+  { timestamps: true }
+);
+
 const User = mongoose.model("CafeUser", userSchema, "cafe_users");
 const MenuItem = mongoose.model("CafeMenuItem", menuItemSchema, "cafe_menu_items");
 const Order = mongoose.model("CafeOrder", orderSchema, "cafe_orders");
+const Announcement = mongoose.model("CafeAnnouncement", announcementSchema, "cafe_announcements");
 
 function baseUrlFromReq(req) {
   if (PUBLIC_BASE_URL) return String(PUBLIC_BASE_URL).replace(/\/+$/, "");
@@ -273,6 +292,18 @@ const upload = multer({
   },
 });
 
+// Separate upload handler for owner announcements.
+// This supports larger images and videos so one admin upload shows on every device.
+const mediaUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 100 * 1024 * 1024 },
+  fileFilter: (_, file, cb) => {
+    const type = String(file.mimetype || "").toLowerCase();
+    const ok = type.startsWith("image/") || type.startsWith("video/");
+    cb(ok ? null : new Error("Only image or video files allowed"), ok);
+  },
+});
+
 function getSafeImageExt(file) {
   const original = String(file?.originalname || "").toLowerCase();
   if (original.endsWith(".png")) return ".png";
@@ -295,6 +326,38 @@ async function saveImageToMongo(req, file) {
     uploadStream.end(file.buffer);
   });
   return toAbsoluteUrl(req, `/api/images/${fileId.toString()}`);
+}
+
+
+function getSafeMediaExt(file) {
+  const original = String(file?.originalname || "").toLowerCase();
+  const mime = String(file?.mimetype || "").toLowerCase();
+  if (original.endsWith(".png") || mime === "image/png") return ".png";
+  if (original.endsWith(".webp") || mime === "image/webp") return ".webp";
+  if (original.endsWith(".gif") || mime === "image/gif") return ".gif";
+  if (original.endsWith(".avif") || mime === "image/avif") return ".avif";
+  if (original.endsWith(".mp4") || mime === "video/mp4") return ".mp4";
+  if (original.endsWith(".webm") || mime === "video/webm") return ".webm";
+  if (original.endsWith(".ogg") || mime === "video/ogg") return ".ogg";
+  if (original.endsWith(".mov") || mime === "video/quicktime") return ".mov";
+  if (original.endsWith(".jpeg")) return ".jpeg";
+  return ".jpg";
+}
+
+async function saveMediaToMongo(req, file) {
+  if (!file) return "";
+  if (!imageBucket) throw new Error("Media storage is not ready yet");
+  const filename = `${Date.now()}-${Math.random().toString(16).slice(2)}${getSafeMediaExt(file)}`;
+  const fileId = await new Promise((resolve, reject) => {
+    const uploadStream = imageBucket.openUploadStream(filename, {
+      contentType: file.mimetype || "application/octet-stream",
+      metadata: { originalName: file.originalname || filename, uploadedAt: new Date(), kind: "owner-post-media" },
+    });
+    uploadStream.on("error", reject);
+    uploadStream.on("finish", () => resolve(uploadStream.id));
+    uploadStream.end(file.buffer);
+  });
+  return toAbsoluteUrl(req, `/api/media/${fileId.toString()}`);
 }
 
 async function deleteImageFromMongoByUrl(imageUrl) {
@@ -649,6 +712,48 @@ app.get("/api/images/:id", async (req, res) => {
   }
 });
 
+// Public media endpoint for announcement images and videos, with Range support for videos.
+app.get("/api/media/:id", async (req, res) => {
+  try {
+    if (!imageBucket) return res.status(503).json({ error: "Media storage not ready" });
+    if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ error: "Invalid media id" });
+
+    const fileId = new ObjectId(req.params.id);
+    const files = await mongoose.connection.db.collection("cafe_images.files").find({ _id: fileId }).limit(1).toArray();
+    if (!files.length) return res.status(404).json({ error: "Media not found" });
+
+    const file = files[0];
+    const contentType = file.contentType || "application/octet-stream";
+    const fileSize = Number(file.length || 0);
+
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+    res.setHeader("Accept-Ranges", "bytes");
+    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+    res.setHeader("Content-Type", contentType);
+
+    const range = req.headers.range;
+    if (range && fileSize > 0) {
+      const parts = String(range).replace(/bytes=/, "").split("-");
+      const start = Math.max(0, parseInt(parts[0], 10) || 0);
+      const end = parts[1] ? Math.min(fileSize - 1, parseInt(parts[1], 10)) : fileSize - 1;
+      if (start >= fileSize || end >= fileSize || start > end) {
+        res.status(416).setHeader("Content-Range", `bytes */${fileSize}`);
+        return res.end();
+      }
+      res.status(206);
+      res.setHeader("Content-Range", `bytes ${start}-${end}/${fileSize}`);
+      res.setHeader("Content-Length", String(end - start + 1));
+      return imageBucket.openDownloadStream(fileId, { start, end: end + 1 }).pipe(res);
+    }
+
+    res.setHeader("Content-Length", String(fileSize));
+    imageBucket.openDownloadStream(fileId).pipe(res);
+  } catch (e) {
+    res.status(500).json({ error: "Failed to load media", details: e.message });
+  }
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Auth
 // ─────────────────────────────────────────────────────────────────────────────
@@ -751,6 +856,162 @@ app.delete("/api/menu/:id", requireAdmin, async (req, res) => {
     res.json({ ok: true, deleted: true });
   } catch (e) {
     res.status(500).json({ error: "Delete menu item failed", details: e.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Owner Posts / Announcements
+// ─────────────────────────────────────────────────────────────────────────────
+function cleanAnnouncementPayload(req) {
+  const body = req.body || {};
+  const uploadedUrl = req.file ? null : "";
+  const mediaUrl = String(body.mediaUrl || body.image || uploadedUrl || "").trim();
+  const fileType = req.file?.mimetype?.startsWith("video/") ? "video" : req.file?.mimetype?.startsWith("image/") ? "image" : "";
+  const guessedType = String(body.mediaType || "").toLowerCase() === "video" || /\.(mp4|webm|ogg|mov)(\?|#|$)/i.test(mediaUrl) ? "video" : mediaUrl ? "image" : "none";
+  return {
+    title: String(body.title || "").trim(),
+    type: String(body.type || body.category || "Announcement").trim(),
+    message: String(body.message || body.text || "").trim(),
+    mediaUrl,
+    mediaType: fileType || guessedType,
+    link: String(body.link || body.buttonLink || "").trim(),
+    active: String(body.active ?? "true") !== "false",
+    startDate: String(body.startDate || "").slice(0, 10),
+    endDate: String(body.endDate || "").slice(0, 10),
+    sortOrder: Number(body.sortOrder || 0),
+  };
+}
+
+function announcementToClient(post) {
+  const p = post.toObject ? post.toObject() : post;
+  return {
+    _id: String(p._id),
+    id: String(p._id),
+    title: p.title || "Announcement",
+    type: p.type || "Announcement",
+    message: p.message || "",
+    image: p.mediaUrl || "",
+    mediaUrl: p.mediaUrl || "",
+    mediaType: p.mediaType || (p.mediaUrl ? "image" : "none"),
+    link: p.link || "",
+    active: p.active !== false,
+    startDate: p.startDate || "",
+    endDate: p.endDate || "",
+    sortOrder: Number(p.sortOrder || 0),
+    createdAt: p.createdAt,
+    updatedAt: p.updatedAt,
+  };
+}
+
+function publicAnnouncementFilter() {
+  const today = new Date().toISOString().slice(0, 10);
+  return {
+    active: true,
+    $and: [
+      { $or: [{ startDate: "" }, { startDate: { $exists: false } }, { startDate: { $lte: today } }] },
+      { $or: [{ endDate: "" }, { endDate: { $exists: false } }, { endDate: { $gte: today } }] },
+    ],
+  };
+}
+
+async function handleCreateAnnouncement(req, res) {
+  try {
+    const payload = cleanAnnouncementPayload(req);
+    if (!payload.title || !payload.message) return res.status(400).json({ error: "title and message required" });
+    if (req.file) {
+      payload.mediaUrl = await saveMediaToMongo(req, req.file);
+      payload.mediaType = req.file.mimetype.startsWith("video/") ? "video" : "image";
+    }
+    const post = await Announcement.create(payload);
+    res.json({ ok: true, post: announcementToClient(post), announcement: announcementToClient(post) });
+  } catch (e) {
+    console.error("❌ Create announcement failed:", e.message);
+    res.status(500).json({ ok: false, error: "Create announcement failed", details: e.message });
+  }
+}
+
+async function handleUpdateAnnouncement(req, res) {
+  try {
+    const post = await Announcement.findById(req.params.id);
+    if (!post) return res.status(404).json({ error: "Announcement not found" });
+    const oldMediaUrl = post.mediaUrl;
+    const payload = cleanAnnouncementPayload(req);
+    if (!payload.title || !payload.message) return res.status(400).json({ error: "title and message required" });
+    if (req.file) {
+      payload.mediaUrl = await saveMediaToMongo(req, req.file);
+      payload.mediaType = req.file.mimetype.startsWith("video/") ? "video" : "image";
+    }
+    Object.assign(post, payload);
+    await post.save();
+    if (req.file && oldMediaUrl && oldMediaUrl !== post.mediaUrl) await deleteImageFromMongoByUrl(oldMediaUrl);
+    res.json({ ok: true, post: announcementToClient(post), announcement: announcementToClient(post) });
+  } catch (e) {
+    console.error("❌ Update announcement failed:", e.message);
+    res.status(500).json({ ok: false, error: "Update announcement failed", details: e.message });
+  }
+}
+
+app.get("/api/announcements", async (req, res) => {
+  try {
+    const posts = await Announcement.find(publicAnnouncementFilter()).sort({ sortOrder: -1, createdAt: -1 }).lean();
+    res.json({ ok: true, posts: posts.map(announcementToClient), announcements: posts.map(announcementToClient) });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: "Failed to load announcements", details: e.message });
+  }
+});
+
+// Alias used by some frontend versions.
+app.get("/api/posts", async (req, res) => {
+  try {
+    const posts = await Announcement.find(publicAnnouncementFilter()).sort({ sortOrder: -1, createdAt: -1 }).lean();
+    res.json({ ok: true, posts: posts.map(announcementToClient) });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: "Failed to load posts", details: e.message });
+  }
+});
+
+app.get("/api/admin/announcements", requireAdmin, async (req, res) => {
+  try {
+    const posts = await Announcement.find({}).sort({ createdAt: -1 }).lean();
+    res.json({ ok: true, posts: posts.map(announcementToClient), announcements: posts.map(announcementToClient) });
+  } catch (e) {
+    res.status(500).json({ error: "Failed to load admin announcements", details: e.message });
+  }
+});
+
+app.get("/api/admin/posts", requireAdmin, async (req, res) => {
+  try {
+    const posts = await Announcement.find({}).sort({ createdAt: -1 }).lean();
+    res.json({ ok: true, posts: posts.map(announcementToClient) });
+  } catch (e) {
+    res.status(500).json({ error: "Failed to load admin posts", details: e.message });
+  }
+});
+
+app.post("/api/admin/announcements", requireAdmin, mediaUpload.single("media"), handleCreateAnnouncement);
+app.post("/api/admin/posts", requireAdmin, mediaUpload.single("media"), handleCreateAnnouncement);
+
+app.put("/api/admin/announcements/:id", requireAdmin, mediaUpload.single("media"), handleUpdateAnnouncement);
+app.put("/api/admin/posts/:id", requireAdmin, mediaUpload.single("media"), handleUpdateAnnouncement);
+
+app.delete("/api/admin/announcements/:id", requireAdmin, async (req, res) => {
+  try {
+    const post = await Announcement.findByIdAndDelete(req.params.id);
+    if (!post) return res.status(404).json({ error: "Announcement not found" });
+    await deleteImageFromMongoByUrl(post.mediaUrl);
+    res.json({ ok: true, deleted: true });
+  } catch (e) {
+    res.status(500).json({ error: "Delete announcement failed", details: e.message });
+  }
+});
+app.delete("/api/admin/posts/:id", requireAdmin, async (req, res) => {
+  try {
+    const post = await Announcement.findByIdAndDelete(req.params.id);
+    if (!post) return res.status(404).json({ error: "Post not found" });
+    await deleteImageFromMongoByUrl(post.mediaUrl);
+    res.json({ ok: true, deleted: true });
+  } catch (e) {
+    res.status(500).json({ error: "Delete post failed", details: e.message });
   }
 });
 

@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1345,6 +1346,8 @@ const OWNER_POSTS_STORE = "posts_store";
 const OWNER_POSTS_MEDIA_STORE = "media_store";
 let OWNER_POSTS = [];
 let OWNER_POST_MEDIA_URLS = {};
+let OWNER_POST_PENDING_MEDIA_FILE = null;
+let OWNER_POST_PENDING_PREVIEW_URL = "";
 
 function loadLocalOwnerPosts(){ try{return JSON.parse(localStorage.getItem(OWNER_POSTS_KEY)||"[]")}catch{return[]} }
 function saveLocalOwnerPosts(posts){ localStorage.setItem(OWNER_POSTS_KEY, JSON.stringify(posts)); }
@@ -1520,28 +1523,33 @@ async function handlePostMediaFile(input){
   if(!isImage && !isVideo){ alert("Please upload an image or video file."); input.value=""; return; }
 
   const msg = $("postMsg");
-  if(msg){ msg.style.color="#6b5b4c"; msg.textContent = isImage ? "Resizing image and saving preview..." : "Saving video preview..."; }
+  if(msg){ msg.style.color="#6b5b4c"; msg.textContent = isImage ? "Resizing image for website upload..." : "Preparing video for website upload..."; }
 
   try{
-    const mediaId = "media_" + Date.now() + "_" + Math.random().toString(16).slice(2);
-    const blob = isImage ? await resizeImageFile(file, 1600, 1100, 0.82) : file;
-    await idbSetPostMedia(mediaId, blob);
-    const ref = makeMediaRef(mediaId);
-    const previewUrl = URL.createObjectURL(blob);
-    OWNER_POST_MEDIA_URLS[mediaId] = previewUrl;
-    if($("postImage")) $("postImage").value = ref;
-    showPostMediaPreview(previewUrl, isVideo ? "video" : "image");
+    let uploadFile = file;
+    if(isImage){
+      const blob = await resizeImageFile(file, 1600, 1100, 0.82);
+      uploadFile = new File([blob], (file.name || "announcement.jpg").replace(/\.[^.]+$/, "") + ".jpg", {type:"image/jpeg"});
+    }
+
+    OWNER_POST_PENDING_MEDIA_FILE = uploadFile;
+    if(OWNER_POST_PENDING_PREVIEW_URL){ try{ URL.revokeObjectURL(OWNER_POST_PENDING_PREVIEW_URL); }catch{} }
+    OWNER_POST_PENDING_PREVIEW_URL = URL.createObjectURL(uploadFile);
+
+    if($("postImage")) $("postImage").value = ""; // backend will create the public URL after Save Post
     if($("postMediaType")) $("postMediaType").value = isVideo ? "video" : "image";
+    showPostMediaPreview(OWNER_POST_PENDING_PREVIEW_URL, isVideo ? "video" : "image");
+
     if(msg){
       msg.style.color="#166534";
       msg.textContent = isImage
-        ? "Image resized and ready to save. Click Save Post."
-        : "Video ready to save. Click Save Post. Large videos are saved in this browser for testing.";
+        ? "Image resized and ready. Click Save Post to publish to all devices."
+        : "Video ready. Click Save Post to publish to all devices.";
     }
   }catch(err){
     console.error("Media upload failed", err);
-    alert("Upload failed. This file may be too large for browser storage. For very large videos, use backend upload or YouTube/Vimeo link.");
-    if(msg){ msg.style.color="#b91c1c"; msg.textContent="Upload failed: file may be too large for browser storage."; }
+    alert("Upload failed. Try a smaller file or a common format like JPG, PNG, MP4, or WEBM.");
+    if(msg){ msg.style.color="#b91c1c"; msg.textContent="Upload failed: " + (err.message || err); }
   }
 }
 function previewPostMediaFromUrl(){
@@ -1551,9 +1559,12 @@ function previewPostMediaFromUrl(){
 }
 async function loadOwnerPosts(forAdmin=false){
   try{
-    const json = await fetchJSON(API_BASE + "/api/announcements");
+    const url = forAdmin ? (API_BASE + "/api/admin/announcements") : (API_BASE + "/api/announcements");
+    const opts = forAdmin ? {headers:{"x-admin-key":getAdminKey()}} : {};
+    const json = await fetchJSON(url, opts);
     OWNER_POSTS = (json.posts || json.announcements || []).map(normalizePost);
   }catch(err){
+    console.warn("Announcement backend not available; using local browser posts", err);
     OWNER_POSTS = (await readStoredOwnerPosts()).map(normalizePost);
   }
   await hydrateOwnerPostMediaUrls(OWNER_POSTS);
@@ -1575,6 +1586,9 @@ function renderOwnerPosts(){
 function resetOwnerPostForm(){
   ["postId","postTitle","postText","postImage","postLink","postStart","postEnd"].forEach(id=>{ if($(id)) $(id).value=""; });
   if($("postMediaFile")) $("postMediaFile").value="";
+  OWNER_POST_PENDING_MEDIA_FILE = null;
+  if(OWNER_POST_PENDING_PREVIEW_URL){ try{ URL.revokeObjectURL(OWNER_POST_PENDING_PREVIEW_URL); }catch{} }
+  OWNER_POST_PENDING_PREVIEW_URL = "";
   showPostMediaPreview("", "image");
   if($("postType")) $("postType").value="Announcement";
   if($("postActive")) $("postActive").value="true";
@@ -1584,7 +1598,7 @@ async function saveOwnerPost(e){
   if(e) e.preventDefault();
   const btn = document.querySelector('#postForm button[type="submit"]');
   const msg = $("postMsg");
-  if(msg){ msg.style.color = "#6b5b4c"; msg.textContent = "Saving post..."; }
+  if(msg){ msg.style.color = "#6b5b4c"; msg.textContent = "Saving post to website..."; }
   if(btn){ btn.disabled = true; btn.textContent = "Saving..."; }
   try{
     const title = ($("postTitle")?.value || "").trim();
@@ -1594,8 +1608,10 @@ async function saveOwnerPost(e){
       if(msg) msg.textContent = "Please add title and message.";
       return;
     }
-    const post = normalizePost({
-      _id: ($("postId")?.value || "").trim(),
+
+    const id = ($("postId")?.value || "").trim();
+    const isEdit = !!id;
+    const payload = {
       title,
       type: $("postType")?.value || "Announcement",
       message,
@@ -1605,25 +1621,31 @@ async function saveOwnerPost(e){
       active: ($("postActive")?.value || "true") === "true",
       startDate: $("postStart")?.value || "",
       endDate: $("postEnd")?.value || ""
-    });
+    };
 
-    const isEdit = !!($("postId")?.value || "").trim();
     let savedToBackend = false;
-
-    // Only send normal URLs/text to backend. Local browser Blob references cannot work for all customers.
-    const canSendToBackend = post.image && !parseMediaRef(post.image) && !String(post.image).startsWith("data:");
     try{
-      await fetchJSON(API_BASE + "/api/admin/announcements" + (isEdit ? "/" + encodeURIComponent(post._id) : ""), {
-        method: isEdit ? "PUT" : "POST",
-        headers: {"Content-Type":"application/json", "x-admin-key": getAdminKey()},
-        body: JSON.stringify(post)
-      });
+      let options;
+      if(OWNER_POST_PENDING_MEDIA_FILE){
+        const fd = new FormData();
+        Object.entries(payload).forEach(([k,v]) => fd.append(k, v));
+        fd.append("media", OWNER_POST_PENDING_MEDIA_FILE);
+        options = { method: isEdit ? "PUT" : "POST", headers: {"x-admin-key": getAdminKey()}, body: fd };
+      }else{
+        options = {
+          method: isEdit ? "PUT" : "POST",
+          headers: {"Content-Type":"application/json", "x-admin-key": getAdminKey()},
+          body: JSON.stringify(payload)
+        };
+      }
+      await fetchJSON(API_BASE + "/api/admin/announcements" + (isEdit ? "/" + encodeURIComponent(id) : ""), options);
       savedToBackend = true;
     }catch(apiErr){
-      console.warn("Announcement backend not available; saving in browser storage only", apiErr);
+      console.warn("Announcement backend save failed; saving in browser only", apiErr);
     }
 
     if(!savedToBackend){
+      const post = normalizePost({_id:id, ...payload});
       const posts = (await readStoredOwnerPosts()).map(normalizePost);
       const i = posts.findIndex(x => x._id === post._id);
       if(i >= 0) posts[i] = {...posts[i], ...post}; else posts.unshift(post);
@@ -1632,10 +1654,10 @@ async function saveOwnerPost(e){
 
     resetOwnerPostForm();
     await loadOwnerPosts(true);
-    showToast(savedToBackend ? "✅ Owner post saved to website" : "✅ Owner post saved on this browser");
+    showToast(savedToBackend ? "✅ Owner post published to all devices" : "⚠️ Saved only on this browser");
     if(msg){
       msg.style.color = savedToBackend ? "#166534" : "#92400e";
-      msg.textContent = savedToBackend ? "Saved successfully." : "Saved for testing on this browser. For every customer phone, add backend media upload endpoints.";
+      msg.textContent = savedToBackend ? "Saved to server. Phone, PC, and all customers can see it." : "Backend save failed, so it saved only in this browser.";
     }
   }catch(err){
     console.error("Save post failed", err);
@@ -1646,6 +1668,9 @@ async function saveOwnerPost(e){
   }
 }
 async function editOwnerPost(id){
+  OWNER_POST_PENDING_MEDIA_FILE = null;
+  if(OWNER_POST_PENDING_PREVIEW_URL){ try{ URL.revokeObjectURL(OWNER_POST_PENDING_PREVIEW_URL); }catch{} }
+  OWNER_POST_PENDING_PREVIEW_URL = "";
   const p = OWNER_POSTS.find(x => x._id === id); if(!p) return;
   $("postId").value=p._id; $("postTitle").value=p.title; $("postType").value=p.type; $("postText").value=p.message;
   $("postImage").value=p.image||""; $("postLink").value=p.link||""; $("postStart").value=p.startDate||""; $("postEnd").value=p.endDate||""; $("postActive").value=String(p.active!==false);

@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -345,6 +346,38 @@
       .mgrid{grid-template-columns:1fr 1fr}
     }
     @media(max-width:380px){.mgrid{grid-template-columns:1fr}}
+
+    /* ── FINAL FIX: keep all uploaded images and make card buttons fully visible ── */
+    .mcard{overflow:visible}
+    .mcard-img{overflow:hidden}
+    .mcard-img img{object-fit:contain!important;width:100%;height:100%;background:#fff8f0}
+    .mcard-foot{
+      min-height:76px!important;
+      height:auto!important;
+      overflow:visible!important;
+      display:grid!important;
+      grid-template-columns:1fr 1fr!important;
+    }
+    .mcard-btn{
+      min-height:76px!important;
+      height:auto!important;
+      padding:14px 8px!important;
+      white-space:normal!important;
+      overflow:visible!important;
+      line-height:1.15!important;
+      flex-direction:column!important;
+      gap:6px!important;
+      text-align:center!important;
+    }
+    .mcard-btn .btn-ico{font-size:1.45rem!important;line-height:1!important}
+    .mcard-btn .btn-txt{display:block!important;font-size:.76rem!important;letter-spacing:.08em!important;line-height:1.2!important;max-width:100%}
+    @media(max-width:420px){
+      .mgrid{grid-template-columns:1fr!important;padding:0 14px!important}
+      .mcard-foot{min-height:72px!important}
+      .mcard-btn{min-height:72px!important;padding:12px 6px!important}
+      .mcard-btn .btn-txt{font-size:.72rem!important;letter-spacing:.06em!important}
+    }
+
   </style>
   <script src="https://www.paypal.com/sdk/js?client-id=ARyqZnmkozCfqLh13N7pKvwmkhtrEYFsP3nu87sMcLBBeO_liUzdVjLOs_reT3oxLle4G2g_Le4vjEQH&currency=USD&intent=capture"></script>
 </head>
@@ -506,50 +539,50 @@ const CAT_IMGS = {
 
 /* ══ FULL MENU DATA ══ */
 const MENU = [
-  {id:"sc01",cat:"Specialty Coffee",emoji:"☕",price:3.50,name:"Doppio",def:CAT_IMGS.coffee},
-  {id:"sc02",cat:"Specialty Coffee",emoji:"☕",price:3.50,name:"Americano",def:CAT_IMGS.coffee},
-  {id:"sc03",cat:"Specialty Coffee",emoji:"☕",price:4.50,name:"Cappuccino",def:CAT_IMGS.coffee},
-  {id:"sc04",cat:"Specialty Coffee",emoji:"☕",price:3.99,name:"Cortado",def:CAT_IMGS.coffee},
-  {id:"sc05",cat:"Specialty Coffee",emoji:"☕",price:4.50,name:"Latte",def:CAT_IMGS.coffee},
-  {id:"sc06",cat:"Specialty Coffee",emoji:"☕",price:5.00,name:"Caramel Latte",def:CAT_IMGS.coffee},
-  {id:"sc07",cat:"Specialty Coffee",emoji:"☕",price:5.00,name:"Vanilla Latte",def:CAT_IMGS.coffee},
-  {id:"sc08",cat:"Specialty Coffee",emoji:"☕",price:3.99,name:"Café au Lait",def:CAT_IMGS.coffee},
-  {id:"sc09",cat:"Specialty Coffee",emoji:"☕",price:4.50,name:"Chai Latte",def:CAT_IMGS.coffee},
-  {id:"sc10",cat:"Specialty Coffee",emoji:"☕",price:4.50,name:"Matcha Latte",def:CAT_IMGS.coffee},
-  {id:"sc11",cat:"Specialty Coffee",emoji:"☕",price:3.50,name:"Macchiato",def:CAT_IMGS.coffee},
-  {id:"sc12",cat:"Specialty Coffee",emoji:"☕",price:5.50,name:"Caramel Macchiato",def:CAT_IMGS.coffee},
-  {id:"sc13",cat:"Specialty Coffee",emoji:"☕",price:4.99,name:"Mocha",def:CAT_IMGS.coffee},
-  {id:"sc14",cat:"Specialty Coffee",emoji:"☕",price:4.50,name:"White Mocha",def:CAT_IMGS.coffee},
-  {id:"sc15",cat:"Specialty Coffee",emoji:"☕",price:4.50,name:"Hot Chocolate",def:CAT_IMGS.coffee},
-  {id:"sc16",cat:"Specialty Coffee",emoji:"☕",price:2.50,name:"Batch Brew (Decaf)",def:CAT_IMGS.coffee},
-  {id:"sc17",cat:"Specialty Coffee",emoji:"☕",price:2.50,name:"Batch Brew (Regular)",def:CAT_IMGS.coffee},
-  {id:"sc18",cat:"Specialty Coffee",emoji:"☕",price:2.50,name:"Black Tea",def:CAT_IMGS.coffee},
-  {id:"sc19",cat:"Specialty Coffee",emoji:"☕",price:2.50,name:"Herbal Tea",def:CAT_IMGS.coffee},
-  {id:"sc20",cat:"Specialty Coffee",emoji:"☕",price:2.50,name:"Green Tea — Medium",def:CAT_IMGS.coffee},
-  {id:"sc21",cat:"Specialty Coffee",emoji:"☕",price:4.50,name:"Iced Latte — Medium",def:CAT_IMGS.coffee},
-  {id:"sc22",cat:"Specialty Coffee",emoji:"☕",price:3.50,name:"Iced Coffee — Medium",def:CAT_IMGS.coffee},
-  {id:"sc23",cat:"Specialty Coffee",emoji:"☕",price:4.50,name:"Spiced Chai Latte — Medium",def:CAT_IMGS.coffee},
-  {id:"cl01",cat:"Coffee — Large",emoji:"☕",price:4.00,name:"Americano — Large",def:CAT_IMGS.coffee},
-  {id:"cl02",cat:"Coffee — Large",emoji:"☕",price:5.50,name:"Cappuccino — Large",def:CAT_IMGS.coffee},
-  {id:"cl03",cat:"Coffee — Large",emoji:"☕",price:5.50,name:"Latte — Large",def:CAT_IMGS.coffee},
-  {id:"cl04",cat:"Coffee — Large",emoji:"☕",price:6.00,name:"Caramel Latte — Large",def:CAT_IMGS.coffee},
-  {id:"cl05",cat:"Coffee — Large",emoji:"☕",price:6.00,name:"Vanilla Latte — Large",def:CAT_IMGS.coffee},
-  {id:"cl06",cat:"Coffee — Large",emoji:"☕",price:4.50,name:"Café au Lait — Large",def:CAT_IMGS.coffee},
-  {id:"cl07",cat:"Coffee — Large",emoji:"☕",price:5.50,name:"Chai Latte — Large",def:CAT_IMGS.coffee},
-  {id:"cl08",cat:"Coffee — Large",emoji:"☕",price:5.50,name:"Matcha Latte — Large",def:CAT_IMGS.coffee},
-  {id:"cl09",cat:"Coffee — Large",emoji:"☕",price:4.50,name:"Macchiato — Large",def:CAT_IMGS.coffee},
-  {id:"cl10",cat:"Coffee — Large",emoji:"☕",price:6.50,name:"Caramel Macchiato — Large",def:CAT_IMGS.coffee},
-  {id:"cl11",cat:"Coffee — Large",emoji:"☕",price:5.99,name:"Mocha — Large",def:CAT_IMGS.coffee},
-  {id:"cl12",cat:"Coffee — Large",emoji:"☕",price:5.99,name:"White Mocha — Large",def:CAT_IMGS.coffee},
-  {id:"cl13",cat:"Coffee — Large",emoji:"☕",price:5.50,name:"Hot Chocolate — Large",def:CAT_IMGS.coffee},
-  {id:"cl14",cat:"Coffee — Large",emoji:"☕",price:3.50,name:"Batch Brew (Decaf) — Large",def:CAT_IMGS.coffee},
-  {id:"cl15",cat:"Coffee — Large",emoji:"☕",price:3.50,name:"Batch Brew (Regular) — Large",def:CAT_IMGS.coffee},
-  {id:"cl16",cat:"Coffee — Large",emoji:"☕",price:3.50,name:"Black Tea — Large",def:CAT_IMGS.coffee},
-  {id:"cl17",cat:"Coffee — Large",emoji:"☕",price:3.50,name:"Herbal Tea — Large",def:CAT_IMGS.coffee},
-  {id:"cl18",cat:"Coffee — Large",emoji:"☕",price:3.50,name:"Green Tea — Large",def:CAT_IMGS.coffee},
-  {id:"cl19",cat:"Coffee — Large",emoji:"☕",price:4.50,name:"Iced Coffee — Large",def:CAT_IMGS.coffee},
-  {id:"cl20",cat:"Coffee — Large",emoji:"☕",price:5.50,name:"Iced Latte — Large",def:CAT_IMGS.coffee},
-  {id:"cl21",cat:"Coffee — Large",emoji:"☕",price:5.50,name:"Spiced Chai Latte — Large",def:CAT_IMGS.coffee},
+  {id:"sc01",cat:"Specialty Coffee Small",emoji:"☕",price:3.50,name:"Doppio",def:CAT_IMGS.coffee},
+  {id:"sc02",cat:"Specialty Coffee Small",emoji:"☕",price:3.50,name:"Americano",def:CAT_IMGS.coffee},
+  {id:"sc03",cat:"Specialty Coffee Small",emoji:"☕",price:4.50,name:"Cappuccino",def:CAT_IMGS.coffee},
+  {id:"sc04",cat:"Specialty Coffee Small",emoji:"☕",price:3.99,name:"Cortado",def:CAT_IMGS.coffee},
+  {id:"sc05",cat:"Specialty Coffee Small",emoji:"☕",price:4.50,name:"Latte",def:CAT_IMGS.coffee},
+  {id:"sc06",cat:"Specialty Coffee Small",emoji:"☕",price:5.00,name:"Caramel Latte",def:CAT_IMGS.coffee},
+  {id:"sc07",cat:"Specialty Coffee Small",emoji:"☕",price:5.00,name:"Vanilla Latte",def:CAT_IMGS.coffee},
+  {id:"sc08",cat:"Specialty Coffee Small",emoji:"☕",price:3.99,name:"Café au Lait",def:CAT_IMGS.coffee},
+  {id:"sc09",cat:"Specialty Coffee Small",emoji:"☕",price:4.50,name:"Chai Latte",def:CAT_IMGS.coffee},
+  {id:"sc10",cat:"Specialty Coffee Small",emoji:"☕",price:4.50,name:"Matcha Latte",def:CAT_IMGS.coffee},
+  {id:"sc11",cat:"Specialty Coffee Small",emoji:"☕",price:3.50,name:"Macchiato",def:CAT_IMGS.coffee},
+  {id:"sc12",cat:"Specialty Coffee Small",emoji:"☕",price:5.50,name:"Caramel Macchiato",def:CAT_IMGS.coffee},
+  {id:"sc13",cat:"Specialty Coffee Small",emoji:"☕",price:4.99,name:"Mocha",def:CAT_IMGS.coffee},
+  {id:"sc14",cat:"Specialty Coffee Small",emoji:"☕",price:4.50,name:"White Mocha",def:CAT_IMGS.coffee},
+  {id:"sc15",cat:"Specialty Coffee Small",emoji:"☕",price:4.50,name:"Hot Chocolate",def:CAT_IMGS.coffee},
+  {id:"sc16",cat:"Specialty Coffee Small",emoji:"☕",price:2.50,name:"Batch Brew (Decaf)",def:CAT_IMGS.coffee},
+  {id:"sc17",cat:"Specialty Coffee Small",emoji:"☕",price:2.50,name:"Batch Brew (Regular)",def:CAT_IMGS.coffee},
+  {id:"sc18",cat:"Specialty Coffee Small",emoji:"☕",price:2.50,name:"Black Tea",def:CAT_IMGS.coffee},
+  {id:"sc19",cat:"Specialty Coffee Small",emoji:"☕",price:2.50,name:"Herbal Tea",def:CAT_IMGS.coffee},
+  {id:"sc20",cat:"Specialty Coffee Medium",emoji:"☕",price:2.50,name:"Green Tea — Medium",def:CAT_IMGS.coffee},
+  {id:"sc21",cat:"Specialty Coffee Medium",emoji:"☕",price:4.50,name:"Iced Latte — Medium",def:CAT_IMGS.coffee},
+  {id:"sc22",cat:"Specialty Coffee Medium",emoji:"☕",price:3.50,name:"Iced Coffee — Medium",def:CAT_IMGS.coffee},
+  {id:"sc23",cat:"Specialty Coffee Medium",emoji:"☕",price:4.50,name:"Spiced Chai Latte — Medium",def:CAT_IMGS.coffee},
+  {id:"cl01",cat:"Specialty Coffee Large",emoji:"☕",price:4.00,name:"Americano — Large",def:CAT_IMGS.coffee},
+  {id:"cl02",cat:"Specialty Coffee Large",emoji:"☕",price:5.50,name:"Cappuccino — Large",def:CAT_IMGS.coffee},
+  {id:"cl03",cat:"Specialty Coffee Large",emoji:"☕",price:5.50,name:"Latte — Large",def:CAT_IMGS.coffee},
+  {id:"cl04",cat:"Specialty Coffee Large",emoji:"☕",price:6.00,name:"Caramel Latte — Large",def:CAT_IMGS.coffee},
+  {id:"cl05",cat:"Specialty Coffee Large",emoji:"☕",price:6.00,name:"Vanilla Latte — Large",def:CAT_IMGS.coffee},
+  {id:"cl06",cat:"Specialty Coffee Large",emoji:"☕",price:4.50,name:"Café au Lait — Large",def:CAT_IMGS.coffee},
+  {id:"cl07",cat:"Specialty Coffee Large",emoji:"☕",price:5.50,name:"Chai Latte — Large",def:CAT_IMGS.coffee},
+  {id:"cl08",cat:"Specialty Coffee Large",emoji:"☕",price:5.50,name:"Matcha Latte — Large",def:CAT_IMGS.coffee},
+  {id:"cl09",cat:"Specialty Coffee Large",emoji:"☕",price:4.50,name:"Macchiato — Large",def:CAT_IMGS.coffee},
+  {id:"cl10",cat:"Specialty Coffee Large",emoji:"☕",price:6.50,name:"Caramel Macchiato — Large",def:CAT_IMGS.coffee},
+  {id:"cl11",cat:"Specialty Coffee Large",emoji:"☕",price:5.99,name:"Mocha — Large",def:CAT_IMGS.coffee},
+  {id:"cl12",cat:"Specialty Coffee Large",emoji:"☕",price:5.99,name:"White Mocha — Large",def:CAT_IMGS.coffee},
+  {id:"cl13",cat:"Specialty Coffee Large",emoji:"☕",price:5.50,name:"Hot Chocolate — Large",def:CAT_IMGS.coffee},
+  {id:"cl14",cat:"Specialty Coffee Large",emoji:"☕",price:3.50,name:"Batch Brew (Decaf) — Large",def:CAT_IMGS.coffee},
+  {id:"cl15",cat:"Specialty Coffee Large",emoji:"☕",price:3.50,name:"Batch Brew (Regular) — Large",def:CAT_IMGS.coffee},
+  {id:"cl16",cat:"Specialty Coffee Large",emoji:"☕",price:3.50,name:"Black Tea — Large",def:CAT_IMGS.coffee},
+  {id:"cl17",cat:"Specialty Coffee Large",emoji:"☕",price:3.50,name:"Herbal Tea — Large",def:CAT_IMGS.coffee},
+  {id:"cl18",cat:"Specialty Coffee Large",emoji:"☕",price:3.50,name:"Green Tea — Large",def:CAT_IMGS.coffee},
+  {id:"cl19",cat:"Specialty Coffee Large",emoji:"☕",price:4.50,name:"Iced Coffee — Large",def:CAT_IMGS.coffee},
+  {id:"cl20",cat:"Specialty Coffee Large",emoji:"☕",price:5.50,name:"Iced Latte — Large",def:CAT_IMGS.coffee},
+  {id:"cl21",cat:"Specialty Coffee Large",emoji:"☕",price:5.50,name:"Spiced Chai Latte — Large",def:CAT_IMGS.coffee},
   {id:"st01",cat:"Starters",emoji:"🥟",price:4.99,name:"Two Pieces of Lentil Sambusa",def:CAT_IMGS.sides},
   {id:"st02",cat:"Starters",emoji:"🥓",price:4.99,name:"Candied Gold Bacon",def:CAT_IMGS.breakfast},
   {id:"st03",cat:"Starters",emoji:"🍩",price:6.99,name:"Sweet Street Donut Bites",def:CAT_IMGS.dessert},
@@ -643,7 +676,8 @@ const MENU = [
 ];
 
 const CAT_ORDER = [
-  "Specialty Coffee","Coffee — Large","Smoothies & Juices","Soft Drinks",
+  "Specialty Coffee Small","Specialty Coffee Medium","Specialty Coffee Large",
+  "Smoothies & Juices","Soft Drinks",
   "Starters","Classic Favorites","The Healthier Side","From the Griddle",
   "Egg-Sclusives","Skillet Hashes","Omelets & Frittatas","Salads",
   "Sandwiches & Burgers","Sides & Small Plates","Kids Menu","Desserts","Baked Goods"
@@ -1226,11 +1260,23 @@ function saveCustomMenuItems(items){ SERVER_CUSTOM_ITEMS = items || []; }
 function getDeletedMenuIds(){ return SERVER_DELETED_IDS || []; }
 function saveDeletedMenuIds(ids){ SERVER_DELETED_IDS = [...new Set(ids||[])]; }
 function applyEdit(item){ return {...item, ...(getMenuEdits()[item.id]||{})}; }
+
+// Keep uploaded images safe: images are saved by item ID.
+// This only adjusts the display tab/category for built-in coffee items; it does NOT change item IDs or image keys.
+function normalizeCoffeeSizeCategory(item){
+  const out = {...item};
+  if (/^sc(0[1-9]|1[0-9])$/.test(out.id)) out.cat = "Specialty Coffee Small";
+  if (/^sc2[0-3]$/.test(out.id)) out.cat = "Specialty Coffee Medium";
+  if (/^cl\d+$/.test(out.id)) out.cat = "Specialty Coffee Large";
+  return out;
+}
+
 function getEditableMenu(){
   const deleted = new Set(getDeletedMenuIds());
   return [...MENU, ...getCustomMenuItems()]
     .filter(item => item && item.id && !deleted.has(item.id))
-    .map(applyEdit);
+    .map(applyEdit)
+    .map(normalizeCoffeeSizeCategory);
 }
 function getEditableItem(id){ return getEditableMenu().find(i=>i.id===id); }
 function cart(){ try{return JSON.parse(localStorage.getItem(CART_KEY)||"[]")}catch{return[]} }
@@ -1563,7 +1609,7 @@ async function testOwnerEmail(){
 }
 function openAddMenuItem(){
   if(!isAdminAuthed()) return openAdminLogin();
-  const catOptions = [...new Set([...CAT_ORDER, "Specialty Coffee","Smoothies & Juices","Starters","Classic Favorites","From the Griddle","Egg-Sclusives","Sandwiches & Burgers","Salads","Desserts","Baked Goods","Kids Menu","Sides & Small Plates"].filter(Boolean))]
+  const catOptions = [...new Set([...CAT_ORDER, "Specialty Coffee Small","Specialty Coffee Medium","Specialty Coffee Large","Smoothies & Juices","Soft Drinks","Starters","Classic Favorites","From the Griddle","Egg-Sclusives","Sandwiches & Burgers","Salads","Desserts","Baked Goods","Kids Menu","Sides & Small Plates"].filter(Boolean))]
     .map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
   document.getElementById("modalRoot").innerHTML=`<div class="modal-bd" onclick="if(event.target===this)closeItem()"><div class="modal-sheet"><div class="modal-body">
     <h2 style="font-family:'Playfair Display',serif;color:var(--brown)">➕ Add New Menu Item</h2>

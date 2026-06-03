@@ -651,6 +651,37 @@ async function createPayPalOrderFromCart(items) {
   return data;
 }
 
+
+// Supports Apple Pay through PayPal SDK.
+// The Apple Pay frontend sends a full PayPal Orders API payload with purchase_units.
+async function createPayPalOrderFromRawPayload(rawBody = {}) {
+  const accessToken = await getPayPalAccessToken();
+  const body = {
+    intent: "CAPTURE",
+    ...rawBody,
+    application_context: {
+      brand_name: "Community Kitchen Cafe",
+      shipping_preference: "NO_SHIPPING",
+      user_action: "PAY_NOW",
+      ...(rawBody.application_context || {}),
+    },
+  };
+
+  if (!Array.isArray(body.purchase_units) || !body.purchase_units.length) {
+    throw new Error("PayPal purchase_units required");
+  }
+
+  const response = await fetch(`${PAYPAL_BASE_URL.replace(/\/+$/, "")}/v2/checkout/orders`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
+    body: JSON.stringify(body),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data?.message || data?.details?.[0]?.description || "PayPal create Apple Pay order failed");
+  return data;
+}
+
 async function capturePayPalOrder(orderID) {
   if (!orderID) throw new Error("PayPal orderID required");
   const accessToken = await getPayPalAccessToken();
@@ -1038,8 +1069,17 @@ app.delete("/api/admin/posts/:id", requireAdmin, async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 app.post("/api/paypal/create-order", async (req, res) => {
   try {
-    const items = req.body?.items || req.body?.cart || [];
-    const data = await createPayPalOrderFromCart(items);
+    let data;
+
+    // Normal PayPal buttons send { items/cart: [...] }.
+    // Apple Pay sends a full PayPal Orders API payload with purchase_units.
+    if (Array.isArray(req.body?.purchase_units) && req.body.purchase_units.length) {
+      data = await createPayPalOrderFromRawPayload(req.body);
+    } else {
+      const items = req.body?.items || req.body?.cart || [];
+      data = await createPayPalOrderFromCart(items);
+    }
+
     res.json(data);
   } catch (e) {
     console.error("❌ PayPal create-order failed:", e.message);
@@ -1059,6 +1099,19 @@ app.post("/api/paypal/capture-order", async (req, res) => {
   } catch (e) {
     console.error("❌ PayPal capture-order failed:", e.message);
     res.status(500).json({ ok: false, error: "PayPal capture-order failed", details: e.message });
+  }
+});
+
+// Apple Pay uses this route after PayPal confirms the Apple Pay token.
+// It captures the order only; /api/orders/paid saves the food order and emails owner/customer.
+app.post("/api/paypal/capture-order/:orderID", async (req, res) => {
+  try {
+    const { orderID } = req.params;
+    const capture = await capturePayPalOrder(orderID);
+    res.json(capture);
+  } catch (e) {
+    console.error("❌ Apple Pay PayPal capture-order failed:", e.message);
+    res.status(500).json({ ok: false, error: "Apple Pay PayPal capture-order failed", details: e.message });
   }
 });
 

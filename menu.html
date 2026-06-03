@@ -378,8 +378,40 @@
       .mcard-btn .btn-txt{font-size:.72rem!important;letter-spacing:.06em!important}
     }
 
+
+    /* ── Apple Pay added only to checkout payment area ── */
+    .apple-pay-wrap{margin:0 0 12px}
+    .apple-pay-button{
+      width:100%;
+      min-height:54px;
+      border-radius:999px;
+      border:none;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      background:#000;
+      color:#fff;
+      font-family:'DM Sans',sans-serif;
+      font-size:1.08rem;
+      font-weight:900;
+      letter-spacing:.02em;
+      box-shadow:0 4px 16px rgba(0,0,0,.16);
+    }
+    .apple-pay-button:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.22)}
+    .apple-pay-logo{font-size:1.35rem;line-height:1}
+    .apple-pay-note{
+      display:none;
+      text-align:center;
+      font-size:.78rem;
+      color:var(--muted);
+      margin:8px 0 4px;
+      line-height:1.35;
+    }
   </style>
-  <script src="https://www.paypal.com/sdk/js?client-id=ARyqZnmkozCfqLh13N7pKvwmkhtrEYFsP3nu87sMcLBBeO_liUzdVjLOs_reT3oxLle4G2g_Le4vjEQH&currency=USD&intent=capture"></script>
+  <script src="https://applepay.cdn-apple.com/jsapi/v1/apple-pay-sdk.js"></script>
+  <script src="https://www.paypal.com/sdk/js?client-id=ARyqZnmkozCfqLh13N7pKvwmkhtrEYFsP3nu87sMcLBBeO_liUzdVjLOs_reT3oxLle4G2g_Le4vjEQH&currency=USD&intent=capture&components=buttons,applepay"></script>
 </head>
 <body>
 
@@ -1350,11 +1382,18 @@ function openCart(){
           <select id="pickupTime"><option>ASAP pickup</option><option>15 minutes</option><option>30 minutes</option><option>45 minutes</option><option>1 hour</option></select>
           <textarea id="orderNotes" placeholder="Special instructions"></textarea>
         </div>
-        <div class="paypal-box"><div id="paypal-button-container"></div><a class="manual-pay-link" href="${PAYPAL_MANUAL_LINK}" target="_blank" rel="noopener noreferrer">Backup: manual PayPal payment link</a></div>`:""}
+        <div class="paypal-box">
+          <div class="apple-pay-wrap">
+            <button id="apple-pay-button" class="apple-pay-button" type="button" aria-label="Apple Pay"><span class="apple-pay-logo"></span><span>Pay</span></button>
+            <div id="apple-pay-note" class="apple-pay-note">Apple Pay checkout works on supported Apple Safari devices. On this device, please use PayPal, PayPal Credit, or Debit/Credit Card below.</div>
+          </div>
+          <div id="paypal-button-container"></div>
+          <a class="manual-pay-link" href="${PAYPAL_MANUAL_LINK}" target="_blank" rel="noopener noreferrer">Backup: manual PayPal payment link</a>
+        </div>`:""}
     </div></div>
   </div>`;
   document.body.style.overflow="hidden";
-  if(c.length) renderPayPalButtons();
+  if(c.length){ renderApplePayButton(); renderPayPalButtons(); }
 }
 
 function getCheckoutPayload(){
@@ -1376,6 +1415,176 @@ function requireCustomerInfo(){
   if(!name?.value.trim() || !phone?.value.trim()){ alert("Please enter customer name and phone number before payment."); return false; }
   return true;
 }
+
+async function createPayPalOrderForApplePay(payload){
+  const amount = Number(payload.total || 0).toFixed(2);
+  const paypalItems = (payload.items || []).map(i => ({
+    name:String(i.name || "Food item").slice(0,127),
+    quantity:String(Math.max(1,parseInt(i.qty || 1,10))),
+    unit_amount:{currency_code:"USD",value:Number(i.price || 0).toFixed(2)}
+  }));
+
+  const res = await fetch(API + "/api/paypal/create-order", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      intent:"CAPTURE",
+      purchase_units:[{
+        description:"Community Kitchen Cafe Online Food Order",
+        amount:{
+          currency_code:"USD",
+          value:amount,
+          breakdown:{item_total:{currency_code:"USD",value:amount}}
+        },
+        items:paypalItems
+      }],
+      application_context:{
+        brand_name:"Community Kitchen Cafe",
+        shipping_preference:"NO_SHIPPING",
+        user_action:"PAY_NOW"
+      }
+    })
+  });
+  const data = await res.json().catch(()=>({}));
+  if(!res.ok || !data.id) throw new Error(data.error || data.details || "Apple Pay order create failed");
+  return data.id;
+}
+
+async function capturePayPalOrderForApplePay(orderID){
+  const res = await fetch(API + "/api/paypal/capture-order/" + encodeURIComponent(orderID), { method:"POST" });
+  const data = await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(data.error || data.details || "Apple Pay capture failed");
+  return data;
+}
+
+async function savePaidOrderAfterApplePay(payload, orderID, captureData){
+  const captureId = captureData?.purchase_units?.[0]?.payments?.captures?.[0]?.id || captureData?.id || "";
+  const order = {
+    ...payload,
+    orderId:"CKC-" + Date.now().toString().slice(-7),
+    paypalOrderId:orderID,
+    payment:{
+      status:"paid",
+      method:"Apple Pay via PayPal",
+      paypalOrderId:orderID,
+      paypalCaptureId:captureId
+    },
+    status:"paid",
+    deliveryStatus:"preparing",
+    createdAt:new Date().toISOString()
+  };
+
+  const orders=orderList(); orders.unshift(order); saveOrders(orders);
+
+  try{
+    const r=await fetch(API+"/api/orders/paid",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(order)});
+    const saved=await r.json().catch(()=>({}));
+    if(!r.ok){ console.warn("Owner email/backend save failed", saved); }
+    if(saved && saved.order){
+      const current=orderList().filter(x=>x.paypalOrderId!==order.paypalOrderId && x.orderId!==order.orderId);
+      current.unshift({...order, ...saved.order, customer:saved.order.customer||order.customer, items:saved.order.items||order.items});
+      saveOrders(current);
+    }
+  }catch(e){ console.warn("Owner email/backend save failed", e); }
+
+  saveCart([]);
+  closeItem();
+  openConfirmation(order);
+}
+
+async function renderApplePayButton(){
+  const btn=document.getElementById("apple-pay-button");
+  const note=document.getElementById("apple-pay-note");
+  if(!btn) return;
+
+  // Always show the Apple Pay button visually. Real Apple Pay only runs on eligible Apple/Safari devices.
+  btn.style.display="flex";
+  if(note) note.style.display="none";
+
+  const hasApplePay = !!(window.ApplePaySession && ApplePaySession.canMakePayments && ApplePaySession.canMakePayments());
+  const hasPayPalApplePay = !!(window.paypal && paypal.Applepay);
+
+  if(!hasApplePay || !hasPayPalApplePay){
+    if(note) note.style.display="block";
+    btn.onclick = function(){
+      alert("Apple Pay checkout works only on supported Apple Safari devices after Apple Pay is enabled for this website. Please use PayPal, PayPal Credit, or Debit/Credit Card below on this device.");
+    };
+    return;
+  }
+
+  let applepay;
+  let config;
+  try{
+    applepay = paypal.Applepay();
+    config = await applepay.config();
+    if(!config || !config.isEligible){
+      if(note) note.style.display="block";
+      btn.onclick = function(){
+        alert("Apple Pay is not enabled/eligible for this PayPal account or website domain yet. Please use PayPal, PayPal Credit, or Debit/Credit Card below.");
+      };
+      return;
+    }
+  }catch(err){
+    console.warn("Apple Pay eligibility/config failed", err);
+    if(note) note.style.display="block";
+    btn.onclick = function(){
+      alert("Apple Pay could not start on this device. Please use PayPal, PayPal Credit, or Debit/Credit Card below.");
+    };
+    return;
+  }
+
+  btn.onclick = async function(){
+    if(!requireCustomerInfo()) return;
+
+    const payload=getCheckoutPayload();
+    const total=Number(payload.total || 0).toFixed(2);
+
+    const paymentRequest={
+      countryCode:config.countryCode || "US",
+      currencyCode:"USD",
+      merchantCapabilities:config.merchantCapabilities,
+      supportedNetworks:config.supportedNetworks,
+      total:{label:"Community Kitchen Café", amount:total, type:"final"}
+    };
+
+    const session=new ApplePaySession(4, paymentRequest);
+
+    session.onvalidatemerchant = async function(event){
+      try{
+        const merchantSession = await applepay.validateMerchant({
+          validationUrl:event.validationURL,
+          displayName:"Community Kitchen Café"
+        });
+        session.completeMerchantValidation(merchantSession.merchantSession);
+      }catch(err){
+        console.error("Apple Pay merchant validation failed", err);
+        session.abort();
+      }
+    };
+
+    session.onpaymentauthorized = async function(event){
+      try{
+        const orderID = await createPayPalOrderForApplePay(payload);
+        await applepay.confirmOrder({
+          orderId:orderID,
+          token:event.payment.token,
+          billingContact:event.payment.billingContact
+        });
+        const captureData = await capturePayPalOrderForApplePay(orderID);
+        session.completePayment(ApplePaySession.STATUS_SUCCESS);
+        await savePaidOrderAfterApplePay(payload, orderID, captureData);
+      }catch(err){
+        console.error("Apple Pay checkout failed", err);
+        session.completePayment(ApplePaySession.STATUS_FAILURE);
+        alert("Apple Pay checkout error. Please try PayPal or card checkout.");
+      }
+    };
+
+    session.oncancel = function(){ console.log("Apple Pay cancelled"); };
+    session.begin();
+  };
+}
+
 function renderPayPalButtons(){
   const box=document.getElementById("paypal-button-container"); if(!box || !window.paypal) return;
   box.innerHTML="";

@@ -242,6 +242,43 @@
       .promo-head p{font-size:.92rem;border-radius:18px;padding:9px 13px}
     }
 
+    /* ── Professional Catering Request Page ── */
+    .catering-page{padding:34px 0 48px}
+    .catering-shell{display:grid;grid-template-columns:minmax(280px,.82fr) minmax(320px,1.18fr);gap:24px;align-items:start}
+    .catering-back{display:inline-flex;align-items:center;gap:8px;margin:0 0 18px;color:var(--ckc-brown);font-weight:900;text-decoration:none}
+    .catering-back .material-arrow{font-size:1.1rem;line-height:1}
+    .catering-hero-card{position:sticky;top:92px;border-radius:30px;padding:28px;background:linear-gradient(145deg,#3b210f,#6f3f1f 55%,#c17a36);color:#fff;box-shadow:0 24px 64px rgba(92,46,14,.22);overflow:hidden}
+    .catering-hero-card::after{content:"";position:absolute;right:-70px;bottom:-80px;width:210px;height:210px;border-radius:50%;background:rgba(255,217,155,.18)}
+    .catering-kicker{display:inline-flex;align-items:center;gap:8px;padding:8px 13px;border-radius:999px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);font-size:.82rem;font-weight:900;margin-bottom:16px}
+    .catering-hero-card h1{font-size:clamp(2.25rem,5vw,4.6rem);line-height:.94;margin:0 0 14px;font-weight:1000;letter-spacing:-.055em}
+    .catering-hero-card p{margin:0;color:rgba(255,255,255,.86);line-height:1.65;font-size:1.02rem}
+    .catering-points{display:grid;gap:10px;margin-top:22px;position:relative;z-index:1}
+    .catering-point{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:18px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16)}
+    .catering-point b{display:block;margin-bottom:2px}
+    .catering-point small{color:rgba(255,255,255,.78);line-height:1.35}
+    .catering-form-card{background:#fff;border:1px solid #eadccd;border-radius:30px;padding:26px;box-shadow:0 18px 54px rgba(92,46,14,.10)}
+    .catering-form-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;border-bottom:1px solid #f0e6da;padding-bottom:16px;margin-bottom:18px}
+    .catering-form-head h2{margin:0;color:var(--ckc-dark);font-size:1.65rem;letter-spacing:-.02em}
+    .catering-form-head p{margin:6px 0 0;color:var(--ckc-muted);line-height:1.5}
+    .catering-pill{padding:8px 12px;border-radius:999px;background:#fff0dc;color:#794719;font-size:.78rem;font-weight:1000;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+    .catering-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .catering-field.full{grid-column:1/-1}
+    .catering-field label{display:block;font-size:.78rem;font-weight:1000;color:var(--ckc-brown);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px}
+    .catering-field input,.catering-field select,.catering-field textarea{width:100%;border:1.7px solid #ead7c3;border-radius:15px;background:#fff;padding:13px 14px;font-family:inherit;font-size:.95rem;color:var(--ckc-dark);outline:none;transition:border-color .15s,box-shadow .15s}
+    .catering-field textarea{min-height:116px;resize:vertical;line-height:1.5}
+    .catering-field input:focus,.catering-field select:focus,.catering-field textarea:focus{border-color:#c17a36;box-shadow:0 0 0 4px rgba(193,122,54,.12)}
+    .catering-consent{grid-column:1/-1;border:1px solid #f0e2d1;background:#fff8f0;border-radius:18px;padding:14px;color:#5e4a39;line-height:1.5;font-size:.86rem}
+    .catering-consent label{display:flex;gap:10px;align-items:flex-start;text-transform:none;letter-spacing:0;font-size:.9rem;color:#3b210f;margin:0 0 8px;font-weight:900}
+    .catering-consent input{width:auto;margin-top:3px}
+    .catering-consent a{color:#6f3f1f;font-weight:900}
+    .catering-submit-row{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:4px}
+    .catering-note{color:#8c6e58;font-size:.82rem;line-height:1.45}
+    .catering-powered{grid-column:1/-1;text-align:center;color:#8c6e58;font-size:.78rem;font-weight:800;margin-top:8px}
+    .catering-powered span{color:#6f3f1f;font-weight:1000}
+    #cateringMsg{grid-column:1/-1;margin-top:8px;font-weight:800}
+    @media(max-width:900px){.catering-shell{grid-template-columns:1fr}.catering-hero-card{position:relative;top:auto}.catering-grid{grid-template-columns:1fr}.catering-submit-row{align-items:flex-start}}
+
+
     /* ── Responsive ── */
     @media(max-width:860px){
       .hero-box.pro-restaurant-hero{grid-template-columns:1fr;padding:30px 22px;min-height:auto;border-radius:26px}
@@ -272,6 +309,7 @@
     <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Open menu">☰</button>
     <div class="nav-actions nav-clean" id="siteNav">
       <a href="menu.html" class="nav-link">Full Menu</a>
+      <a href="#" class="nav-link" onclick="openCatering();closeMobileMenu();return false;">Catering</a>
       <a href="#" class="nav-link" onclick="openOrders();closeMobileMenu();return false;">My Orders</a>
       <a href="#" class="nav-link" onclick="openCart();closeMobileMenu();return false;">Cart (<span id="cartCount">0</span>)</a>
       <a href="#" class="nav-link nav-link-accent" onclick="openAccount();closeMobileMenu();return false;" id="authBtn">Login</a>
@@ -288,6 +326,7 @@
       <p class="hero-subtitle">Order fresh breakfast, lunch, drinks, desserts, and catering from Community Kitchen Café. Simple online ordering, easy pickup, and meals prepared with care.</p>
       <div class="hero-actions">
         <a href="menu.html" class="btn primary" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;">🍽️ View Full Menu</a>
+        <a href="#" class="btn hero-secondary" onclick="openCatering();return false;">Catering Request</a>
         <a class="btn hero-secondary" href="https://www.google.com/maps?q=811+N+Charlotte+Ave+Monroe+NC+28110" target="_blank">Get Directions</a>
       </div>
       <div class="hero-trust-row">
@@ -371,6 +410,7 @@
       <button class="admin-tab-pro" id="tab-images" onclick="switchAdminTab('images')">🖼️ Manage Images</button>
       <button class="admin-tab-pro" id="tab-posts" onclick="switchAdminTab('posts')">📢 Owner Posts</button>
       <button class="admin-tab-pro" id="tab-orders" onclick="switchAdminTab('orders')">📦 Review Customer Orders</button>
+      <button class="admin-tab-pro" id="tab-catering" onclick="switchAdminTab('catering')">🍽️ Catering Requests</button>
     </div>
 
     <div id="adminTabMenu" style="margin-top:20px;">
@@ -454,6 +494,62 @@
 
     <div id="adminTabImages" style="display:none;margin-top:20px;"><div class="admin-card-panel"><h3>🖼️ Menu Item Images</h3><p class="small" style="margin-bottom:16px;">Upload, change, or remove photos for any menu item.</p><div class="img-mgr-stats" id="imgMgrStats"></div><input class="img-mgr-search" id="imgMgrSearch" placeholder="🔍  Search items…" oninput="renderImgMgr()"/><div class="img-mgr-filter" id="imgMgrFilter"></div><div class="img-mgr-grid" id="imgMgrGrid"></div></div></div>
     <div id="adminTabOrders" style="display:none;margin-top:20px;"><div class="admin-card-panel"><h3>📦 Review Customer Orders</h3><p class="small">After admin login, this tab shows all customer orders with full customer details and food items. Admin can keep/review the order, update status, mark delivered, email the customer, or delete delivered/completed orders.</p><div id="adminOrders" class="list"></div></div></div>
+    <div id="adminTabCatering" style="display:none;margin-top:20px;"><div class="admin-card-panel"><h3>🍽️ Catering Requests</h3><p class="small">All catering form submissions are saved to the online server/MongoDB so the owner can review them from any device.</p><div id="adminCatering" class="list"></div></div></div>
+  </div>
+</section>
+
+
+<!-- ═══ PROFESSIONAL CATERING VIEW ═══ -->
+<section class="container catering-page hidden" id="cateringView">
+  <a href="#" class="catering-back" onclick="showView('shop');return false;"><span class="material-arrow">keyboard_arrow_left</span> Back</a>
+  <div class="catering-shell">
+    <aside class="catering-hero-card">
+      <div class="catering-kicker">🍽️ Professional Catering</div>
+      <h1>Catering for every gathering.</h1>
+      <p>Tell us about your event and we’ll do our best to accommodate your desired date, guest count, budget, and special requests to make your party or celebration memorable.</p>
+      <div class="catering-points">
+        <div class="catering-point"><span>✅</span><div><b>Custom event support</b><small>Breakfast, lunch, meetings, celebrations, and community events.</small></div></div>
+        <div class="catering-point"><span>📞</span><div><b>Fast follow-up</b><small>We’ll use your phone or email to confirm details and availability.</small></div></div>
+        <div class="catering-point"><span>💛</span><div><b>Fresh and purposeful</b><small>Prepared by Community Kitchen Café with care.</small></div></div>
+      </div>
+    </aside>
+
+    <div class="catering-form-card">
+      <div class="catering-form-head">
+        <div>
+          <h2>Catering Request</h2>
+          <p>Please fill out the form below and we’ll do our best to accommodate your desired date and requests.</p>
+        </div>
+        <div class="catering-pill">Community Kitchen Café</div>
+      </div>
+
+      <form id="cateringForm" class="catering-grid" onsubmit="submitCateringRequest(event)">
+        <div class="catering-field"><label>Full Name (required)</label><input id="catName" required placeholder="e.g. Nina Simone"></div>
+        <div class="catering-field"><label>Phone (required)</label><input id="catPhone" required placeholder="e.g. (123) 456-7890"></div>
+        <div class="catering-field"><label>Email (required)</label><input id="catEmail" type="email" required placeholder="e.g. cris@example.com"></div>
+        <div class="catering-field"><label>Company (optional)</label><input id="catCompany" placeholder="Name of your business..."></div>
+        <div class="catering-field"><label>Number of People (required)</label><input id="catPeople" type="number" min="1" required value="6" placeholder="6 People"></div>
+        <div class="catering-field"><label>Select Date (required)</label><input id="catDate" type="date" required></div>
+        <div class="catering-field"><label>Select Time (required)</label><input id="catTime" type="time" required value="12:00"></div>
+        <div class="catering-field"><label>Select Occasion (required)</label><select id="catOccasion" required><option value="">Select occasion</option><option>Business Meeting</option><option>Birthday</option><option>Graduation</option><option>Wedding / Engagement</option><option>Church / Community Event</option><option>Family Celebration</option><option>Other</option></select></div>
+        <div class="catering-field"><label>Type Of Catering Service (required)</label><select id="catService" required><option value="">Select service</option><option>Pickup Catering</option><option>Delivery Catering</option><option>Breakfast Catering</option><option>Lunch Catering</option><option>Boxed Meals</option><option>Buffet Style</option><option>Custom Request</option></select></div>
+        <div class="catering-field"><label>Budget per Person</label><input id="catBudget" type="number" min="0" step="1" value="30" placeholder="$30"></div>
+        <div class="catering-field full"><label>Description / Requests (optional)</label><textarea id="catRequests" placeholder="Any special requests, allergies, menu preferences, delivery notes, or event details..."></textarea></div>
+        <div class="catering-field full"><label>How did you hear about us? (optional)</label><select id="catHeard"><option value="">Select one</option><option>Google</option><option>Facebook</option><option>Instagram</option><option>Friend / Family</option><option>Community Event</option><option>Walk-in</option><option>Other</option></select></div>
+
+        <div class="catering-consent">
+          <label><input id="catMarketing" type="checkbox"> I agree to receive marketing text messages from Community Kitchen Café about specials, events, and exclusive offers.</label>
+          <div>Consent is not required to submit a catering request or use our services. <a href="#">Privacy Policy</a> · <a href="#">Terms and Conditions</a>. Message and data rates may apply. Message frequency varies. Reply STOP to cancel, HELP for help.</div>
+        </div>
+
+        <div class="catering-submit-row">
+          <button type="submit" class="btn primary" style="border-radius:999px;padding:14px 28px;font-weight:1000;">Submit Catering Request</button>
+          <div class="catering-note">Questions? Call <b>(240) 606-3319</b> or email <b>communitykitchenclt@gmail.com</b>.</div>
+        </div>
+        <div id="cateringMsg"></div>
+        <div class="catering-powered">Catering powered by <span>Community Kitchen Café</span></div>
+      </form>
+    </div>
   </div>
 </section>
 
@@ -492,13 +588,13 @@
         <a href="index.html">Home</a>
         <a href="menu.html">Full Menu</a>
         <a href="#" onclick="openCart();return false;">Order Online</a>
-        <a href="#">About Us</a>
+        <a href="#" onclick="openCatering();return false;">Catering</a>
       </div>
       <div class="footer-section">
         <h3>Our Services</h3>
         <a href="menu.html?cat=Classic%20Favorites">Breakfast</a>
         <a href="menu.html#sec-Sandwiches-&-Burgers">Lunch</a>
-        <a href="menu.html#sec-Sides-&-Small-Plates">Catering</a>
+        <a href="#" onclick="openCatering();return false;">Catering</a>
         <a href="menu.html?cat=Desserts">Desserts</a>
       </div>
       <div class="footer-section">
@@ -656,7 +752,7 @@ function removeItemImg(itemId){
 
 /* ══ ADMIN TABS ══ */
 function switchAdminTab(tab){
-  ["menu","posts","images","orders"].forEach(t=>{
+  ["menu","posts","images","orders","catering"].forEach(t=>{
     const panel = $("adminTab"+t.charAt(0).toUpperCase()+t.slice(1));
     const btn   = $("tab-"+t);
     if(!panel||!btn) return;
@@ -666,6 +762,7 @@ function switchAdminTab(tab){
   });
   if(tab==="images") renderImgMgr();
   if(tab==="orders") loadAdminOrders();
+  if(tab==="catering") loadAdminCatering();
   if(tab==="posts") loadOwnerPosts(true);
   if(tab==="menu") renderAdminMenuHelpers();
 }
@@ -710,10 +807,62 @@ function updateAuthUI(){
   authEl.onclick=e=>{e.preventDefault(); user?logout():openAccount();};
 }
 function showView(view){
-  ["shopView","ordersView","adminView"].forEach(v=>$(v).classList.add("hidden"));
+  ["shopView","ordersView","adminView","cateringView"].forEach(v=>{ if($(v)) $(v).classList.add("hidden"); });
   if(view==="shop")   $("shopView").classList.remove("hidden");
   if(view==="orders") $("ordersView").classList.remove("hidden");
   if(view==="admin")  $("adminView").classList.remove("hidden");
+  if(view==="catering") $("cateringView").classList.remove("hidden");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function openCatering(){
+  showView("catering");
+}
+
+async function submitCateringRequest(e){
+  e.preventDefault();
+  const data={
+    fullName:$('catName').value.trim(),
+    phone:$('catPhone').value.trim(),
+    email:$('catEmail').value.trim(),
+    company:$('catCompany').value.trim(),
+    people:Number($('catPeople').value || 0),
+    date:$('catDate').value,
+    time:$('catTime').value,
+    occasion:$('catOccasion').value,
+    service:$('catService').value,
+    budget:Number($('catBudget').value || 0),
+    requests:$('catRequests').value.trim(),
+    heard:$('catHeard').value,
+    marketing:$('catMarketing').checked,
+    createdAt:new Date().toISOString()
+  };
+  const msg=$('cateringMsg');
+  msg.style.color='#6b5b4c';
+  msg.textContent='Sending your catering request...';
+
+  try{
+    const json=await fetchJSON(API_BASE+'/api/catering',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(data)
+    });
+    // Keep a backup copy on this browser too, but the official request is saved on the server.
+    const requests=JSON.parse(localStorage.getItem('ckc_catering_requests')||'[]');
+    requests.unshift(json.request || data);
+    localStorage.setItem('ckc_catering_requests',JSON.stringify(requests));
+    msg.style.color='#166534';
+    msg.textContent=`✅ Catering request received and saved online. Request ID: ${(json.request && json.request.requestId) || 'saved'}. We will contact you soon.`;
+    $('cateringForm').reset();
+  }catch(err){
+    console.error('Catering request failed', err);
+    // Backup locally only if server is unavailable.
+    const requests=JSON.parse(localStorage.getItem('ckc_catering_requests')||'[]');
+    requests.unshift({...data, offline:true});
+    localStorage.setItem('ckc_catering_requests',JSON.stringify(requests));
+    msg.style.color='#b91c1c';
+    msg.textContent='❌ Online save failed: '+err.message+'. A backup copy was saved on this device only. Please try again.';
+  }
 }
 
 /* ══ MENU LOAD & RENDER ══ */
@@ -1270,6 +1419,75 @@ async function emailCustomer(id){
   alert("Email sent");
 }
 
+async function loadAdminCatering(){
+  const key=getAdminKey();
+  let requests=[];
+  try{
+    const json=await fetchJSON(API_BASE+'/api/admin/catering',{headers:{'x-admin-key':key}});
+    requests=json.requests||[];
+  }catch(err){
+    console.warn('Backend admin catering failed', err);
+  }
+  const wrap=$('adminCatering');
+  if(!wrap) return;
+  wrap.innerHTML=requests.length?requests.map(r=>{
+    const id=r._id||r.requestId;
+    return `
+    <div class="admin-order-card">
+      <div class="admin-order-head">
+        <div><b>${escapeHtml(r.requestId||id||'Catering Request')}</b><div class="small">${r.createdAt?new Date(r.createdAt).toLocaleString():''}</div></div>
+        <div><b>${escapeHtml(r.status||'new')}</b><div class="small">Budget: ${r.budget?('$'+Number(r.budget).toFixed(2)+' / person'):'N/A'}</div></div>
+      </div>
+      <div class="admin-order-grid">
+        <div><div class="admin-order-label">Customer</div><div class="admin-order-value">${escapeHtml(r.fullName||'N/A')}</div></div>
+        <div><div class="admin-order-label">Phone</div><div class="admin-order-value">${escapeHtml(r.phone||'N/A')}</div></div>
+        <div><div class="admin-order-label">Email</div><div class="admin-order-value">${escapeHtml(r.email||'N/A')}</div></div>
+        <div><div class="admin-order-label">Company</div><div class="admin-order-value">${escapeHtml(r.company||'N/A')}</div></div>
+        <div><div class="admin-order-label">People</div><div class="admin-order-value">${escapeHtml(r.people||'N/A')}</div></div>
+        <div><div class="admin-order-label">Date / Time</div><div class="admin-order-value">${escapeHtml(r.date||'')} ${escapeHtml(r.time||'')}</div></div>
+        <div><div class="admin-order-label">Occasion</div><div class="admin-order-value">${escapeHtml(r.occasion||'N/A')}</div></div>
+        <div><div class="admin-order-label">Service</div><div class="admin-order-value">${escapeHtml(r.service||'N/A')}</div></div>
+        <div><div class="admin-order-label">Marketing Consent</div><div class="admin-order-value">${r.marketing?'Yes':'No'}</div></div>
+        <div><div class="admin-order-label">Heard About Us</div><div class="admin-order-value">${escapeHtml(r.heard||'N/A')}</div></div>
+        <div style="grid-column:1/-1"><div class="admin-order-label">Description / Requests</div><div class="admin-order-value">${escapeHtml(r.requests||'None')}</div></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <select id="cat_status_${id}">${['new','reviewed','contacted','booked','completed','cancelled'].map(s=>`<option value="${s}" ${r.status===s?'selected':''}>${s}</option>`).join('')}</select>
+        <input id="cat_notes_${id}" placeholder="Admin notes" value="${escapeHtml(r.adminNotes||'')}" />
+      </div>
+      <div class="actions" style="margin-top:12px;gap:8px;flex-wrap:wrap">
+        <button class="btn primary" onclick="updateCateringRequest('${id}')">Update</button>
+        <button class="btn" onclick="markCateringContacted('${id}')">Mark Contacted</button>
+        <button class="btn danger" onclick="removeCateringRequest('${id}')">Remove</button>
+      </div>
+    </div>`;
+  }).join(''):'<div class="item">No catering requests yet.</div>';
+}
+
+async function updateCateringRequest(id){
+  try{
+    await fetchJSON(API_BASE+'/api/admin/catering/'+encodeURIComponent(id),{
+      method:'PUT',
+      headers:{'Content-Type':'application/json','x-admin-key':getAdminKey()},
+      body:JSON.stringify({status:$('cat_status_'+id)?.value||'reviewed',adminNotes:$('cat_notes_'+id)?.value||''})
+    });
+    showToast('✅ Catering request updated');
+    loadAdminCatering();
+  }catch(err){ alert('Update failed: '+err.message); }
+}
+async function markCateringContacted(id){
+  if($('cat_status_'+id)) $('cat_status_'+id).value='contacted';
+  await updateCateringRequest(id);
+}
+async function removeCateringRequest(id){
+  if(!confirm('Remove this catering request from admin list?')) return;
+  try{
+    await fetchJSON(API_BASE+'/api/admin/catering/'+encodeURIComponent(id),{method:'DELETE',headers:{'x-admin-key':getAdminKey()}});
+    showToast('🗑️ Catering request removed');
+    loadAdminCatering();
+  }catch(err){ alert('Remove failed: '+err.message); }
+}
+
 $("menuForm").addEventListener("submit",async e=>{
   e.preventDefault();
   const id=$("menuId").value;
@@ -1727,6 +1945,8 @@ document.addEventListener("click",function(e){
 
 
 window.addEventListener("DOMContentLoaded", () => {
+  const catDate = $("catDate");
+  if(catDate && !catDate.value) catDate.min = new Date().toISOString().split("T")[0];
   const form = $("postForm");
   if(form && !form.dataset.boundSave){
     form.dataset.boundSave = "true";

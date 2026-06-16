@@ -212,6 +212,33 @@ const orderSchema = new mongoose.Schema(
 );
 
 
+const cateringRequestSchema = new mongoose.Schema(
+  {
+    requestId: { type: String, required: true, unique: true, index: true },
+    fullName: { type: String, required: true, trim: true },
+    phone: { type: String, required: true, trim: true },
+    email: { type: String, required: true, trim: true, lowercase: true },
+    company: { type: String, default: "", trim: true },
+    people: { type: Number, required: true },
+    date: { type: String, required: true },
+    time: { type: String, required: true },
+    occasion: { type: String, required: true, trim: true },
+    service: { type: String, required: true, trim: true },
+    budget: { type: Number, default: 0 },
+    requests: { type: String, default: "" },
+    heard: { type: String, default: "" },
+    marketing: { type: Boolean, default: false },
+    status: {
+      type: String,
+      enum: ["new", "reviewed", "contacted", "booked", "completed", "cancelled"],
+      default: "new",
+    },
+    adminNotes: { type: String, default: "" },
+  },
+  { timestamps: true }
+);
+
+
 const announcementSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true },
@@ -231,6 +258,7 @@ const announcementSchema = new mongoose.Schema(
 const User = mongoose.model("CafeUser", userSchema, "cafe_users");
 const MenuItem = mongoose.model("CafeMenuItem", menuItemSchema, "cafe_menu_items");
 const Order = mongoose.model("CafeOrder", orderSchema, "cafe_orders");
+const CateringRequest = mongoose.model("CafeCateringRequest", cateringRequestSchema, "cafe_catering_requests");
 const Announcement = mongoose.model("CafeAnnouncement", announcementSchema, "cafe_announcements");
 
 const menuGlobalSchema = new mongoose.Schema(
@@ -264,6 +292,10 @@ function toAbsoluteUrl(req, maybeUrlOrPath) {
 
 function makeOrderId() {
   return `CKC-${Date.now()}-${Math.random().toString(16).slice(2, 8).toUpperCase()}`;
+}
+
+function makeCateringRequestId() {
+  return `CAT-${Date.now()}-${Math.random().toString(16).slice(2, 8).toUpperCase()}`;
 }
 
 function escapeHtml(str) {
@@ -539,6 +571,71 @@ function buildCustomerReceiptHtml(order) {
     <p><b>Status:</b> ${escapeHtml(order.status || "placed")}</p>
     <p>Pickup at Community Kitchen Cafe, 811 N Charlotte Ave, Monroe NC.</p>
   </div>`;
+}
+
+function buildOwnerCateringEmailHtml(reqDoc) {
+  return `
+  <div style="font-family:Arial,Helvetica,sans-serif;line-height:1.5;color:#111;max-width:760px;margin:0 auto;padding:18px;border:1px solid #eee;border-radius:12px;">
+    <h2 style="margin:0 0 10px;color:#5c2e0e;">New Catering Request — Community Kitchen Cafe</h2>
+    <p style="margin:0 0 14px;"><b>Request ID:</b> ${escapeHtml(reqDoc.requestId)}</p>
+    <div style="background:#fff8f0;border:1px solid #ede0d4;border-radius:10px;padding:14px;margin-bottom:14px;">
+      <h3 style="margin:0 0 8px;">Customer Details</h3>
+      <p><b>Name:</b> ${escapeHtml(reqDoc.fullName || "")}</p>
+      <p><b>Phone:</b> ${escapeHtml(reqDoc.phone || "")}</p>
+      <p><b>Email:</b> ${escapeHtml(reqDoc.email || "")}</p>
+      <p><b>Company:</b> ${escapeHtml(reqDoc.company || "N/A")}</p>
+    </div>
+    <div style="background:#fff;border:1px solid #ede0d4;border-radius:10px;padding:14px;margin-bottom:14px;">
+      <h3 style="margin:0 0 8px;">Event Details</h3>
+      <p><b>Number of People:</b> ${escapeHtml(reqDoc.people || "")}</p>
+      <p><b>Date:</b> ${escapeHtml(reqDoc.date || "")}</p>
+      <p><b>Time:</b> ${escapeHtml(reqDoc.time || "")}</p>
+      <p><b>Occasion:</b> ${escapeHtml(reqDoc.occasion || "")}</p>
+      <p><b>Service Type:</b> ${escapeHtml(reqDoc.service || "")}</p>
+      <p><b>Budget per Person:</b> ${reqDoc.budget ? `$${money(reqDoc.budget)}` : "N/A"}</p>
+      <p><b>Marketing Text Consent:</b> ${reqDoc.marketing ? "Yes" : "No"}</p>
+      <p><b>How they heard about us:</b> ${escapeHtml(reqDoc.heard || "N/A")}</p>
+    </div>
+    <div style="background:#fff8f0;border:1px solid #ede0d4;border-radius:10px;padding:14px;">
+      <h3 style="margin:0 0 8px;">Description / Requests</h3>
+      <p>${escapeHtml(reqDoc.requests || "N/A").replace(/\n/g, "<br>")}</p>
+    </div>
+  </div>`;
+}
+
+function buildCustomerCateringReceiptHtml(reqDoc) {
+  return `
+  <div style="font-family:Arial,Helvetica,sans-serif;line-height:1.5;color:#111;max-width:700px;margin:0 auto;padding:18px;border:1px solid #eee;border-radius:12px;">
+    <h2 style="color:#5c2e0e;margin:0 0 10px;">Catering request received</h2>
+    <p>Hi ${escapeHtml(reqDoc.fullName || "Customer")}, thank you for contacting Community Kitchen Cafe.</p>
+    <p>We received your catering request and will review your event details.</p>
+    <p><b>Request ID:</b> ${escapeHtml(reqDoc.requestId)}</p>
+    <p><b>Date:</b> ${escapeHtml(reqDoc.date || "")}</p>
+    <p><b>Time:</b> ${escapeHtml(reqDoc.time || "")}</p>
+    <p><b>Number of People:</b> ${escapeHtml(reqDoc.people || "")}</p>
+    <p><b>Service:</b> ${escapeHtml(reqDoc.service || "")}</p>
+  </div>`;
+}
+
+async function sendOwnerCateringEmail(reqDoc) {
+  if (!OWNER_EMAIL) throw new Error("OWNER_EMAIL is missing in Render.");
+  await sendEmail({
+    to: OWNER_EMAIL,
+    subject: `New Catering Request — ${reqDoc.fullName} — ${reqDoc.date}`,
+    html: buildOwnerCateringEmailHtml(reqDoc),
+    text: `New catering request ${reqDoc.requestId} from ${reqDoc.fullName}. Phone: ${reqDoc.phone}. Date: ${reqDoc.date} ${reqDoc.time}.`,
+    replyTo: reqDoc.email || OWNER_EMAIL || undefined,
+  });
+}
+
+async function sendCustomerCateringReceiptEmail(reqDoc) {
+  if (!reqDoc.email) return { skipped: true, message: "Customer email missing." };
+  return sendEmail({
+    to: reqDoc.email,
+    subject: `Community Kitchen Cafe — Catering Request Received (${reqDoc.requestId})`,
+    html: buildCustomerCateringReceiptHtml(reqDoc),
+    text: `Your catering request ${reqDoc.requestId} has been received.`,
+  });
 }
 
 async function sendOwnerOrderEmail(order) {
@@ -1061,6 +1158,95 @@ app.delete("/api/admin/posts/:id", requireAdmin, async (req, res) => {
     res.json({ ok: true, deleted: true });
   } catch (e) {
     res.status(500).json({ error: "Delete post failed", details: e.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Catering Requests
+// Public form saves to MongoDB so requests work from every device/customer browser.
+// ─────────────────────────────────────────────────────────────────────────────
+function cleanCateringPayload(body = {}) {
+  return {
+    fullName: String(body.fullName || body.name || "").trim(),
+    phone: String(body.phone || "").trim(),
+    email: String(body.email || "").trim().toLowerCase(),
+    company: String(body.company || "").trim(),
+    people: Math.max(1, Number(body.people || body.numberOfPeople || 0)),
+    date: String(body.date || "").slice(0, 20),
+    time: String(body.time || "").slice(0, 20),
+    occasion: String(body.occasion || "").trim(),
+    service: String(body.service || body.serviceType || "").trim(),
+    budget: Math.max(0, Number(body.budget || body.budgetPerPerson || 0)),
+    requests: String(body.requests || body.description || body.notes || "").trim(),
+    heard: String(body.heard || body.heardFrom || "").trim(),
+    marketing: body.marketing === true || String(body.marketing || "").toLowerCase() === "yes" || String(body.marketing || "").toLowerCase() === "true",
+  };
+}
+
+app.post("/api/catering", async (req, res) => {
+  try {
+    const payload = cleanCateringPayload(req.body || {});
+    if (!payload.fullName || !payload.phone || !payload.email || !payload.people || !payload.date || !payload.time || !payload.occasion || !payload.service) {
+      return res.status(400).json({ error: "fullName, phone, email, people, date, time, occasion, and service are required" });
+    }
+
+    const catering = await CateringRequest.create({
+      requestId: makeCateringRequestId(),
+      ...payload,
+      status: "new",
+    });
+
+    sendEmailInBackground(async () => sendOwnerCateringEmail(catering));
+    sendEmailInBackground(async () => sendCustomerCateringReceiptEmail(catering));
+
+    res.json({ ok: true, request: catering, catering });
+  } catch (e) {
+    console.error("❌ Create catering request failed:", e.message);
+    res.status(500).json({ ok: false, error: "Create catering request failed", details: e.message });
+  }
+});
+
+app.get("/api/admin/catering", requireAdmin, async (req, res) => {
+  try {
+    const requests = await CateringRequest.find({}).sort({ createdAt: -1 }).lean();
+    res.json({ ok: true, requests });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: "Failed to load catering requests", details: e.message });
+  }
+});
+
+async function findCateringByAnyId(id) {
+  const clean = String(id || "").trim();
+  if (!clean) return null;
+  if (mongoose.Types.ObjectId.isValid(clean)) {
+    const byMongoId = await CateringRequest.findById(clean);
+    if (byMongoId) return byMongoId;
+  }
+  return CateringRequest.findOne({ requestId: clean });
+}
+
+app.put("/api/admin/catering/:id", requireAdmin, async (req, res) => {
+  try {
+    const catering = await findCateringByAnyId(req.params.id);
+    if (!catering) return res.status(404).json({ error: "Catering request not found" });
+    const allowedStatuses = ["new", "reviewed", "contacted", "booked", "completed", "cancelled"];
+    if (allowedStatuses.includes(String(req.body?.status || ""))) catering.status = String(req.body.status);
+    if (req.body?.adminNotes !== undefined) catering.adminNotes = String(req.body.adminNotes || "");
+    await catering.save();
+    res.json({ ok: true, request: catering });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: "Catering update failed", details: e.message });
+  }
+});
+
+app.delete("/api/admin/catering/:id", requireAdmin, async (req, res) => {
+  try {
+    const catering = await findCateringByAnyId(req.params.id);
+    if (!catering) return res.status(404).json({ error: "Catering request not found" });
+    await CateringRequest.deleteOne({ _id: catering._id });
+    res.json({ ok: true, deleted: true, removedRequestId: catering.requestId, removedMongoId: String(catering._id) });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: "Delete catering request failed", details: e.message });
   }
 });
 

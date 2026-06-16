@@ -638,6 +638,44 @@ async function sendCustomerCateringReceiptEmail(reqDoc) {
   });
 }
 
+
+function customerCateringStatusLabel(status) {
+  const map = {
+    new: "Pending Review",
+    reviewed: "Under Review",
+    contacted: "Cafe Contacted You",
+    booked: "Confirmed / Booked",
+    completed: "Completed",
+    cancelled: "Cancelled",
+  };
+  return map[String(status || "new")] || "Pending Review";
+}
+
+function buildCustomerCateringStatusEmailHtml(reqDoc) {
+  return `
+  <div style="font-family:Arial,Helvetica,sans-serif;line-height:1.5;color:#111;max-width:700px;margin:0 auto;padding:18px;border:1px solid #eee;border-radius:12px;">
+    <h2 style="color:#5c2e0e;margin:0 0 10px;">Catering request update</h2>
+    <p>Hi ${escapeHtml(reqDoc.fullName || "Customer")}, your catering request has been updated.</p>
+    <p><b>Request ID:</b> ${escapeHtml(reqDoc.requestId)}</p>
+    <p><b>Status:</b> ${escapeHtml(customerCateringStatusLabel(reqDoc.status))}</p>
+    <p><b>Event Date/Time:</b> ${escapeHtml(reqDoc.date)} at ${escapeHtml(reqDoc.time)}</p>
+    <p><b>Guests:</b> ${escapeHtml(reqDoc.people)}</p>
+    <p><b>Service:</b> ${escapeHtml(reqDoc.service)}</p>
+    ${reqDoc.adminNotes ? `<div style="background:#fff8f0;border:1px solid #ede0d4;border-radius:10px;padding:12px;margin-top:12px;"><b>Café note:</b><br>${escapeHtml(reqDoc.adminNotes)}</div>` : ""}
+    <p style="margin-top:16px;">Questions? Call Community Kitchen Café at (240) 606-3319.</p>
+  </div>`;
+}
+
+async function sendCustomerCateringStatusEmail(reqDoc) {
+  if (!reqDoc.email) return { skipped: true, message: "Customer email missing." };
+  return sendEmail({
+    to: reqDoc.email,
+    subject: `Community Kitchen Cafe — Catering Status: ${customerCateringStatusLabel(reqDoc.status)} (${reqDoc.requestId})`,
+    html: buildCustomerCateringStatusEmailHtml(reqDoc),
+    text: `Your catering request ${reqDoc.requestId} status is now: ${customerCateringStatusLabel(reqDoc.status)}.`,
+  });
+}
+
 async function sendOwnerOrderEmail(order) {
   if (!OWNER_EMAIL) throw new Error("OWNER_EMAIL is missing in Render.");
   await sendEmail({
@@ -1206,6 +1244,39 @@ app.post("/api/catering", async (req, res) => {
   }
 });
 
+
+// Public customer lookup: customers can check their catering booking/status from any device.
+// Use requestId when available, plus email or phone for safer matching.
+app.get("/api/catering/lookup", async (req, res) => {
+  try {
+    const email = String(req.query.email || "").trim().toLowerCase();
+    const phone = String(req.query.phone || "").trim();
+    const requestId = String(req.query.requestId || "").trim();
+
+    if (!email && !phone && !requestId) {
+      return res.status(400).json({ error: "email, phone, or requestId required" });
+    }
+
+    const filter = requestId
+      ? { requestId, ...(email ? { email } : {}), ...(phone ? { phone } : {}) }
+      : email && phone
+        ? { email, phone }
+        : email
+          ? { email }
+          : { phone };
+
+    const requests = await CateringRequest.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .select("requestId fullName phone email company people date time occasion service budget requests heard status adminNotes createdAt updatedAt")
+      .lean();
+
+    res.json({ ok: true, requests });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: "Failed to lookup catering requests", details: e.message });
+  }
+});
+
 app.get("/api/admin/catering", requireAdmin, async (req, res) => {
   try {
     const requests = await CateringRequest.find({}).sort({ createdAt: -1 }).lean();
@@ -1230,9 +1301,14 @@ app.put("/api/admin/catering/:id", requireAdmin, async (req, res) => {
     const catering = await findCateringByAnyId(req.params.id);
     if (!catering) return res.status(404).json({ error: "Catering request not found" });
     const allowedStatuses = ["new", "reviewed", "contacted", "booked", "completed", "cancelled"];
+    const oldStatus = catering.status;
+    const oldNotes = catering.adminNotes;
     if (allowedStatuses.includes(String(req.body?.status || ""))) catering.status = String(req.body.status);
     if (req.body?.adminNotes !== undefined) catering.adminNotes = String(req.body.adminNotes || "");
     await catering.save();
+    if (String(oldStatus) !== String(catering.status) || String(oldNotes || "") !== String(catering.adminNotes || "")) {
+      sendEmailInBackground(async () => sendCustomerCateringStatusEmail(catering));
+    }
     res.json({ ok: true, request: catering });
   } catch (e) {
     res.status(500).json({ ok: false, error: "Catering update failed", details: e.message });

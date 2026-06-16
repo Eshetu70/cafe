@@ -14,6 +14,10 @@
   <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="images/android-chrome-192x192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="images/android-chrome-512x512.png">
+
+  <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#8B4513">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
   <meta name="theme-color" content="#8B4513">
 
   <style>
@@ -2085,5 +2089,14 @@ updateAuthUI();
 loadMenu();
 loadOwnerPosts(false);
 </script>
+
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("/service-worker.js");
+    });
+  }
+</script>
+
 </body>
 </html>
